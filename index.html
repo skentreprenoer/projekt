@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0042)file:///C:/Users/tj/Downloads/index_6.html -->
+<!-- saved from url=(0059)file:///C:/Users/tj/Downloads/projekt_oversigt_live_13.html -->
 <html lang="da"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="SK Projekter">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="data:application/json,{%0A  %22name%22:%22S%C3%B8ren%20Knudsen%20A/S%22,%0A  %22short_name%22:%22SK%20Projekter%22,%0A  %22start_url%22:%22.%22,%0A  %22display%22:%22standalone%22,%0A  %22background_color%22:%22%230f0f11%22,%0A  %22theme_color%22:%22%23A51C1C%22,%0A  %22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns=&#39;http://www.w3.org/2000/svg&#39;%20viewBox=&#39;0%200%20100%20100&#39;%3E%3Crect%20width=&#39;100&#39;%20height=&#39;100&#39;%20fill=&#39;%23A51C1C&#39;/%3E%3Ctext%20y=&#39;.9em&#39;%20font-size=&#39;80&#39;%20x=&#39;10&#39;%3ESK%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22any%22,%22type%22:%22image/svg+xml%22}]%0A}">
-<link href="file:///C:/Users/tj/Downloads/S%C3%B8ren%20Knudsen%20A_S%20%E2%80%94%20Projekt%20Oversigt%203_files/css2" rel="stylesheet">
+<link href="./Søren Knudsen A_S — Projekt Oversigt 3_files/css2" rel="stylesheet">
 <style>
 :root {
   --red:#A51C1C;--red-dark:#8a1616;--red-light:#bf2020;--red-dim:rgba(165,28,28,0.15);--red-border:rgba(165,28,28,0.35);
@@ -92,7 +92,7 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
 
 
 /* KOMMENTARER */
-.comment-section{margin-top:0}
+.comment-section{margin-top:4px;padding-top:20px;border-top:1px solid var(--border)}
 .comment-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
 .comment-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
 .comment-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
@@ -186,8 +186,17 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
 .modal-title{font-size:20px;font-weight:700;color:#fff;padding-right:40px;line-height:1.3}
 .modal-sub{font-size:12px;color:rgba(255,255,255,.65);margin-top:5px;font-family:'JetBrains Mono'}
 .modal-body{padding:24px 28px}
-.modal-section{margin-bottom:22px}
+.modal-section{margin-bottom:20px}
+.modal-section:last-child{margin-bottom:0}
 .modal-section-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:12px;font-weight:600;display:flex;align-items:center;gap:8px}
+
+/* Fieldwork group box */
+.fieldwork-group{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:20px}
+.fieldwork-group .modal-section-title{margin-bottom:14px}
+.fieldwork-group .landmaalt-btn{margin-top:0}
+.fieldwork-group .blaest-wrap{margin-top:12px}
+.fieldwork-group .blaest-done{margin-top:12px}
+.fieldwork-divider{height:1px;background:var(--border);margin:14px 0}
 .modal-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
 .modal-row{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);gap:16px}
 .modal-row:last-child{border-bottom:none}
@@ -237,13 +246,13 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
     <div class="nav-section">Overblik</div>
     <div class="nav-item active" onclick="showPage(&#39;dashboard&#39;)"><span class="dot" style="background:var(--red)"></span>Dashboard</div>
     <div class="nav-section">Arbejde</div>
-    <div class="nav-item" onclick="showPage(&#39;dso2026&#39;)"><span class="dot" style="background:#e05555"></span>DSO 2026<span class="nav-count" id="cnt-dso2026">0</span></div>
-    <div class="nav-item" onclick="showPage(&#39;norlys&#39;)"><span class="dot" style="background:var(--amber)"></span>Norlys Opgaver<span class="nav-count" id="cnt-norlys">0</span></div>
-    <div class="nav-item" onclick="showPage(&#39;bb&#39;)"><span class="dot" style="background:#a78bfa"></span>Bredbåndspulje<span class="nav-count" id="cnt-bb">0</span></div>
+    <div class="nav-item" onclick="showPage(&#39;dso2026&#39;)"><span class="dot" style="background:#e05555"></span>DSO 2026<span class="nav-count" id="cnt-dso2026">—</span></div>
+    <div class="nav-item" onclick="showPage(&#39;norlys&#39;)"><span class="dot" style="background:var(--amber)"></span>Norlys Opgaver<span class="nav-count" id="cnt-norlys">—</span></div>
+    <div class="nav-item" onclick="showPage(&#39;bb&#39;)"><span class="dot" style="background:#a78bfa"></span>Bredbåndspulje<span class="nav-count" id="cnt-bb">—</span></div>
     <div class="nav-section">Kode</div>
     <div class="nav-item" onclick="showPage(&#39;gridopt&#39;)"><span class="dot" style="background:var(--cyan)"></span>Gridoptimizer</div>
   </div>
-  <div class="sync-bar"><div class="sync-dot" id="sync-dot"></div><span id="sync-status">Opdateret 14.33</span></div>
+  <div class="sync-bar"><div class="sync-dot loading" id="sync-dot"></div><span id="sync-status">Henter data...</span></div>
 </nav>
 
 <div class="main">
@@ -261,71 +270,8 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
   <!-- DASHBOARD -->
   <div class="page active" id="page-dashboard">
     <div class="content">
-      <div class="stats-row" id="dash-stats">
-    <div class="stat-card" style="cursor:pointer" onclick="showPage(&#39;dso2026&#39;)">
-      <div class="stat-label">DSO 2026</div>
-      <div class="stat-value">0</div>
-      <div class="stat-sub">projekter</div>
-      <div style="margin-top:8px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px"><span>0 af 0</span><span>0%</span></div><div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden"><div style="height:100%;width:0%;background:var(--green);border-radius:3px;transition:width .6s"></div></div></div>
-    </div>
-    <div class="stat-card" style="cursor:pointer" onclick="showPage(&#39;norlys&#39;)">
-      <div class="stat-label">Norlys Opgaver</div>
-      <div class="stat-value">0</div>
-      <div class="stat-sub">sager</div>
-      <div style="margin-top:8px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px"><span>0 af 0</span><span>0%</span></div><div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden"><div style="height:100%;width:0%;background:var(--amber);border-radius:3px;transition:width .6s"></div></div></div>
-    </div>
-    <div class="stat-card" style="cursor:pointer" onclick="showPage(&#39;bb&#39;)">
-      <div class="stat-label">Bredbåndspulje</div>
-      <div class="stat-value">0</div>
-      <div class="stat-sub">projekter</div>
-      <div style="margin-top:8px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px"><span>0 af 0</span><span>0%</span></div><div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden"><div style="height:100%;width:0%;background:#a78bfa;border-radius:3px;transition:width .6s"></div></div></div>
-    </div>
-    <div class="stat-card" style="cursor:pointer" onclick="showPage(&#39;gridopt&#39;)">
-      <div class="stat-label">Gridoptimizer</div>
-      <div class="stat-value">0</div>
-      <div class="stat-sub">medarbejdere</div>
-    </div></div>
-      <div class="dash-grid" id="dash-charts">
-    <div class="chart-card"><h3>Samlet fremgang</h3>
-      <div class="bar-item">
-        <div class="bar-label">Landmålt</div>
-        <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--green)">0</div></div>
-        <div class="bar-num">0%</div>
-      </div>
-      <div class="bar-item">
-        <div class="bar-label">Blæst</div>
-        <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--cyan)">0</div></div>
-        <div class="bar-num">0%</div>
-      </div>
-      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
-        <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:&#39;JetBrains Mono&#39;">0/0</div><div style="font-size:10px;color:var(--muted);margin-top:2px">DSO landmålt</div></div>
-        <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:&#39;JetBrains Mono&#39;">0/0</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Norlys landmålt</div></div>
-        <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:&#39;JetBrains Mono&#39;">0/0</div><div style="font-size:10px;color:var(--muted);margin-top:2px">BB landmålt</div></div>
-      </div>
-    </div>
-    <div class="chart-card"><h3>DSO 2026 — pr. måned</h3>
-      
-    </div>
-    <div class="chart-card"><h3>DSO 2026 — projektledere</h3>
-      
-    </div>
-    <div class="chart-card"><h3>Blæst — pr. kategori</h3>
-      <div class="bar-item">
-        <div class="bar-label">DSO 2026</div>
-        <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--red)">0</div></div>
-        <div class="bar-num">0%</div>
-      </div>
-      <div class="bar-item">
-        <div class="bar-label">Norlys</div>
-        <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--amber)">0</div></div>
-        <div class="bar-num">0%</div>
-      </div>
-      <div class="bar-item">
-        <div class="bar-label">BB</div>
-        <div class="bar-track"><div class="bar-fill" style="width:0%;background:#a78bfa">0</div></div>
-        <div class="bar-num">0%</div>
-      </div>
-    </div></div>
+      <div class="stats-row" id="dash-stats"><div class="loading-msg"><span class="spinner"></span>Henter data...</div></div>
+      <div class="dash-grid" id="dash-charts"></div>
     </div>
   </div>
 
@@ -1050,9 +996,11 @@ function openModalBB(idx) {
     body += '</div>';
   }
 
-  // Landmålt-knap (BB)
+  // Feltarbejde sektion (BB)
   const bbSagsnr = (r[0]||'').trim();
   if(bbSagsnr) {
+    body+=`<div class="fieldwork-group"><div class="modal-section-title">Feltarbejde</div>`;
+
     const landmaaltValBB = (r[7]||'').trim();
     if(landmaaltValBB) {
       body+=`<button class="landmaalt-btn landmaalt-done" disabled>✓ Landmålt: ${landmaaltValBB}</button>`;
@@ -1060,13 +1008,15 @@ function openModalBB(idx) {
       body+=`<button class="landmaalt-btn" id="landmaalt-btn-bb-${idx}" onclick="markLandmaalt('${bbSagsnr}','bb',this)">📐 Registrer landmåling</button>`;
     }
 
-    // Blæst input (BB)
+    body+=`<div class="fieldwork-divider"></div>`;
+
     const blaestValBB = (r[8]||'').trim();
     if(blaestValBB) {
       body+=`<div class="blaest-done"><div class="blaest-done-title">💨 Blæst registreret</div>${blaestValBB}</div>`;
     } else {
       body+=buildBlaestUI('blaest-wrap-bb-'+idx, bbSagsnr, 'bb');
     }
+    body+=`</div>`;
   }
 
   // Færdig checkbox
@@ -1197,8 +1147,10 @@ function openModal(key, idx) {
     }
   }
 
-  // Landmålt-knap (DSO 2026 og Norlys)
+  // Feltarbejde sektion (Landmålt + Blæst)
   if(key==='dso2026' || key==='norlys') {
+    body+=`<div class="fieldwork-group"><div class="modal-section-title">Feltarbejde</div>`;
+    
     const landmaaltVal = (r[7]||'').trim();
     if(landmaaltVal) {
       body+=`<button class="landmaalt-btn landmaalt-done" disabled>✓ Landmålt: ${landmaaltVal}</button>`;
@@ -1206,13 +1158,15 @@ function openModal(key, idx) {
       body+=`<button class="landmaalt-btn" id="landmaalt-btn-${r[0]}" onclick="markLandmaalt('${r[0]}','${key}',this)">📐 Registrer landmåling</button>`;
     }
 
-    // Blæst input
+    body+=`<div class="fieldwork-divider"></div>`;
+
     const blaestVal = (r[8]||'').trim();
     if(blaestVal) {
       body+=`<div class="blaest-done"><div class="blaest-done-title">💨 Blæst registreret</div>${blaestVal}</div>`;
     } else {
       body+=buildBlaestUI('blaest-wrap-'+r[0], r[0], key);
     }
+    body+=`</div>`;
   }
 
   // Færdig checkbox
