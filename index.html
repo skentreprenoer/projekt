@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0042)file:///C:/Users/tj/Downloads/index_4.html -->
+<!-- saved from url=(0042)file:///C:/Users/tj/Downloads/index_5.html -->
 <html lang="da"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -146,14 +146,22 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
 
 /* BLAEST INPUT */
 .blaest-wrap{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-.blaest-row{display:flex;gap:8px;align-items:stretch}
-.blaest-input{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:14px 16px;border-radius:10px;font-size:15px;font-weight:600;font-family:'JetBrains Mono',monospace;outline:none;transition:border-color .2s}
-.blaest-input:focus{border-color:var(--amber)}
-.blaest-input::placeholder{color:var(--muted2);font-weight:400;font-family:'Inter',sans-serif}
+.blaest-rows{display:flex;flex-direction:column;gap:6px}
+.blaest-fiber-row{display:flex;gap:6px;align-items:center}
+.bf-meter{width:100px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-size:14px;font-weight:600;font-family:'JetBrains Mono',monospace;outline:none;transition:border-color .2s}
+.bf-meter:focus{border-color:var(--amber)}
+.bf-meter::placeholder{color:var(--muted2);font-weight:400;font-family:'Inter',sans-serif;font-size:13px}
+.bf-fiber{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-size:13px;font-family:inherit;outline:none;cursor:pointer;appearance:auto}
+.bf-fiber:focus{border-color:var(--amber)}
+.bf-remove{background:none;border:none;color:var(--muted2);font-size:16px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:color .15s}
+.bf-remove:hover{color:#ef4444}
+.bf-add-btn{background:none;border:1px dashed var(--border);color:var(--muted);padding:8px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s}
+.bf-add-btn:hover{border-color:var(--amber);color:var(--amber)}
 .blaest-btn{padding:14px 24px;background:rgba(243,156,18,.12);border:1px solid rgba(243,156,18,.3);border-radius:10px;color:var(--amber);font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap}
 .blaest-btn:hover{background:rgba(243,156,18,.2);border-color:rgba(243,156,18,.5)}
 .blaest-btn:disabled{cursor:not-allowed;opacity:.7}
-.blaest-done{background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);border-radius:10px;padding:16px 20px;color:var(--green);font-size:15px;font-weight:600;text-align:center}
+.blaest-done{background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);border-radius:10px;padding:16px 20px;color:var(--green);font-size:14px;font-weight:500;margin-top:8px}
+.blaest-done-title{font-weight:700;font-size:15px;margin-bottom:6px}
 
 /* DASHBOARD */
 #page-dashboard{position:relative}
@@ -235,7 +243,7 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
     <div class="nav-section">Kode</div>
     <div class="nav-item" onclick="showPage(&#39;gridopt&#39;)"><span class="dot" style="background:var(--cyan)"></span>Gridoptimizer</div>
   </div>
-  <div class="sync-bar"><div class="sync-dot" id="sync-dot"></div><span id="sync-status">Opdateret 14.10</span></div>
+  <div class="sync-bar"><div class="sync-dot" id="sync-dot"></div><span id="sync-status">Opdateret 14.16</span></div>
 </nav>
 
 <div class="main">
@@ -433,25 +441,46 @@ async function markLandmaalt(sagsnr, sheetKey, btnEl) {
   }
 }
 
-async function markBlaest(sagsnr, sheetKey, btnEl, inputEl) {
-  const meter = (inputEl.value||'').trim();
-  if (!meter) { inputEl.focus(); inputEl.style.borderColor='#ef4444'; return; }
-  inputEl.style.borderColor='';
+async function markBlaest(sagsnr, sheetKey, btnEl, containerId) {
+  const container = document.getElementById(containerId);
+  const rows = container.querySelectorAll('.blaest-fiber-row');
+  const lines = [];
+  let hasError = false;
+  
+  rows.forEach(row => {
+    const meterInput = row.querySelector('.bf-meter');
+    const fiberSelect = row.querySelector('.bf-fiber');
+    const meter = (meterInput.value||'').trim();
+    const fiber = fiberSelect.value;
+    meterInput.style.borderColor = '';
+    if (meter) {
+      lines.push(meter + 'm ' + fiber);
+    }
+  });
+  
+  if (!lines.length) {
+    // Highlight first empty meter input
+    const first = container.querySelector('.bf-meter');
+    if (first) { first.focus(); first.style.borderColor='#ef4444'; }
+    return;
+  }
+  
+  const value = lines.join(', ');
   btnEl.disabled = true;
   btnEl.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:6px"></span>Gemmer...';
   try {
     const resp = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ sagsnr, sheet: sheetKey, action: 'blaest', value: meter })
+      body: JSON.stringify({ sagsnr, sheet: sheetKey, action: 'blaest', value })
     });
     const result = await resp.json();
     if (result.success) {
       btnEl.innerHTML = '✓ Blæst registreret';
       btnEl.style.background = 'var(--green)';
       btnEl.style.borderColor = 'var(--green)';
-      inputEl.disabled = true;
-      inputEl.style.opacity = '0.5';
+      container.querySelectorAll('input,select').forEach(el => { el.disabled=true; el.style.opacity='0.5'; });
+      container.querySelectorAll('.bf-remove,.bf-add-btn').forEach(el => el.style.display='none');
       setTimeout(() => loadAll(), 1500);
     } else {
       btnEl.innerHTML = '⚠️ Fejl: ' + (result.error||'Ukendt');
@@ -463,6 +492,41 @@ async function markBlaest(sagsnr, sheetKey, btnEl, inputEl) {
     btnEl.disabled = false;
     setTimeout(() => { btnEl.innerHTML = '💨 Registrer blæsning'; btnEl.style.background=''; btnEl.style.borderColor=''; }, 3000);
   }
+}
+
+function addBlaestRow(containerId) {
+  const container = document.getElementById(containerId);
+  const rowsDiv = container.querySelector('.blaest-rows');
+  const row = document.createElement('div');
+  row.className = 'blaest-fiber-row';
+  row.innerHTML = `
+    <input class="bf-meter" type="number" inputmode="numeric" placeholder="Meter" />
+    <select class="bf-fiber">
+      <option>2 fiber</option><option>12 fiber</option><option>24 fiber</option>
+      <option>48 fiber</option><option>96 fiber</option><option>144 fiber</option>
+      <option>1212 fiber</option>
+    </select>
+    <button class="bf-remove" onclick="this.parentElement.remove()">✕</button>`;
+  rowsDiv.appendChild(row);
+}
+
+function buildBlaestUI(id, sagsnr, sheetKey) {
+  return `<div class="blaest-wrap" id="${id}">
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-bottom:4px">Blæsning — fiber registrering</div>
+    <div class="blaest-rows">
+      <div class="blaest-fiber-row">
+        <input class="bf-meter" type="number" inputmode="numeric" placeholder="Meter" />
+        <select class="bf-fiber">
+          <option>2 fiber</option><option>12 fiber</option><option>24 fiber</option>
+          <option>48 fiber</option><option>96 fiber</option><option>144 fiber</option>
+          <option>1212 fiber</option>
+        </select>
+        <button class="bf-remove" onclick="this.parentElement.remove()">✕</button>
+      </div>
+    </div>
+    <button class="bf-add-btn" onclick="addBlaestRow('${id}')">+ Tilføj fiber</button>
+    <button class="blaest-btn" style="width:100%;justify-content:center;display:flex;align-items:center" onclick="markBlaest('${sagsnr}','${sheetKey}',this,'${id}')">💨 Registrer blæsning</button>
+  </div>`;
 }
 
 // ---- JSONBin shared storage ----
@@ -944,15 +1008,9 @@ function openModalBB(idx) {
     // Blæst input (BB)
     const blaestValBB = (r[8]||'').trim();
     if(blaestValBB) {
-      body+=`<div class="blaest-done">💨 Blæst: ${blaestValBB} m</div>`;
+      body+=`<div class="blaest-done"><div class="blaest-done-title">💨 Blæst registreret</div>${blaestValBB}</div>`;
     } else {
-      body+=`<div class="blaest-wrap">
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:600">Blæsning</div>
-        <div class="blaest-row">
-          <input class="blaest-input" id="blaest-input-bb-${idx}" type="number" inputmode="numeric" placeholder="Indtast meter blæst..." />
-          <button class="blaest-btn" id="blaest-btn-bb-${idx}" onclick="markBlaest('${bbSagsnr}','bb',this,document.getElementById('blaest-input-bb-${idx}'))">💨 Registrer</button>
-        </div>
-      </div>`;
+      body+=buildBlaestUI('blaest-wrap-bb-'+idx, bbSagsnr, 'bb');
     }
   }
 
@@ -1096,15 +1154,9 @@ function openModal(key, idx) {
     // Blæst input
     const blaestVal = (r[8]||'').trim();
     if(blaestVal) {
-      body+=`<div class="blaest-done">💨 Blæst: ${blaestVal} m</div>`;
+      body+=`<div class="blaest-done"><div class="blaest-done-title">💨 Blæst registreret</div>${blaestVal}</div>`;
     } else {
-      body+=`<div class="blaest-wrap">
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:600">Blæsning</div>
-        <div class="blaest-row">
-          <input class="blaest-input" id="blaest-input-${r[0]}" type="number" inputmode="numeric" placeholder="Indtast meter blæst..." />
-          <button class="blaest-btn" id="blaest-btn-${r[0]}" onclick="markBlaest('${r[0]}','dso2026',this,document.getElementById('blaest-input-${r[0]}'))">💨 Registrer</button>
-        </div>
-      </div>`;
+      body+=buildBlaestUI('blaest-wrap-'+r[0], r[0], 'dso2026');
     }
   }
 
