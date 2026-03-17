@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0042)file:///C:/Users/tj/Downloads/index_5.html -->
+<!-- saved from url=(0042)file:///C:/Users/tj/Downloads/index_6.html -->
 <html lang="da"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -243,7 +243,7 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
     <div class="nav-section">Kode</div>
     <div class="nav-item" onclick="showPage(&#39;gridopt&#39;)"><span class="dot" style="background:var(--cyan)"></span>Gridoptimizer</div>
   </div>
-  <div class="sync-bar"><div class="sync-dot" id="sync-dot"></div><span id="sync-status">Opdateret 14.16</span></div>
+  <div class="sync-bar"><div class="sync-dot" id="sync-dot"></div><span id="sync-status">Opdateret 14.33</span></div>
 </nav>
 
 <div class="main">
@@ -262,16 +262,69 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
   <div class="page active" id="page-dashboard">
     <div class="content">
       <div class="stats-row" id="dash-stats">
-    <div class="stat-card"><div class="stat-label">DSO 2026</div><div class="stat-value">0</div><div class="stat-sub">projekter</div></div>
-    <div class="stat-card"><div class="stat-label">Udleveret</div><div class="stat-value">0</div><div class="stat-sub">af 0</div></div>
-    <div class="stat-card"><div class="stat-label">Norlys opgaver</div><div class="stat-value">0</div><div class="stat-sub">sager</div></div>
-    <div class="stat-card"><div class="stat-label">Gridoptimizer</div><div class="stat-value">0</div><div class="stat-sub">medarbejdere</div></div></div>
+    <div class="stat-card" style="cursor:pointer" onclick="showPage(&#39;dso2026&#39;)">
+      <div class="stat-label">DSO 2026</div>
+      <div class="stat-value">0</div>
+      <div class="stat-sub">projekter</div>
+      <div style="margin-top:8px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px"><span>0 af 0</span><span>0%</span></div><div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden"><div style="height:100%;width:0%;background:var(--green);border-radius:3px;transition:width .6s"></div></div></div>
+    </div>
+    <div class="stat-card" style="cursor:pointer" onclick="showPage(&#39;norlys&#39;)">
+      <div class="stat-label">Norlys Opgaver</div>
+      <div class="stat-value">0</div>
+      <div class="stat-sub">sager</div>
+      <div style="margin-top:8px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px"><span>0 af 0</span><span>0%</span></div><div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden"><div style="height:100%;width:0%;background:var(--amber);border-radius:3px;transition:width .6s"></div></div></div>
+    </div>
+    <div class="stat-card" style="cursor:pointer" onclick="showPage(&#39;bb&#39;)">
+      <div class="stat-label">Bredbåndspulje</div>
+      <div class="stat-value">0</div>
+      <div class="stat-sub">projekter</div>
+      <div style="margin-top:8px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px"><span>0 af 0</span><span>0%</span></div><div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden"><div style="height:100%;width:0%;background:#a78bfa;border-radius:3px;transition:width .6s"></div></div></div>
+    </div>
+    <div class="stat-card" style="cursor:pointer" onclick="showPage(&#39;gridopt&#39;)">
+      <div class="stat-label">Gridoptimizer</div>
+      <div class="stat-value">0</div>
+      <div class="stat-sub">medarbejdere</div>
+    </div></div>
       <div class="dash-grid" id="dash-charts">
+    <div class="chart-card"><h3>Samlet fremgang</h3>
+      <div class="bar-item">
+        <div class="bar-label">Landmålt</div>
+        <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--green)">0</div></div>
+        <div class="bar-num">0%</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">Blæst</div>
+        <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--cyan)">0</div></div>
+        <div class="bar-num">0%</div>
+      </div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+        <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:&#39;JetBrains Mono&#39;">0/0</div><div style="font-size:10px;color:var(--muted);margin-top:2px">DSO landmålt</div></div>
+        <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:&#39;JetBrains Mono&#39;">0/0</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Norlys landmålt</div></div>
+        <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:&#39;JetBrains Mono&#39;">0/0</div><div style="font-size:10px;color:var(--muted);margin-top:2px">BB landmålt</div></div>
+      </div>
+    </div>
     <div class="chart-card"><h3>DSO 2026 — pr. måned</h3>
       
     </div>
     <div class="chart-card"><h3>DSO 2026 — projektledere</h3>
       
+    </div>
+    <div class="chart-card"><h3>Blæst — pr. kategori</h3>
+      <div class="bar-item">
+        <div class="bar-label">DSO 2026</div>
+        <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--red)">0</div></div>
+        <div class="bar-num">0%</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">Norlys</div>
+        <div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--amber)">0</div></div>
+        <div class="bar-num">0%</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">BB</div>
+        <div class="bar-track"><div class="bar-fill" style="width:0%;background:#a78bfa">0</div></div>
+        <div class="bar-num">0%</div>
+      </div>
     </div></div>
     </div>
   </div>
@@ -303,7 +356,7 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
         <div id="loading-norlys" class="loading-msg"><span class="spinner"></span>Henter data...</div>
         <div id="err-norlys" class="err-msg" style="display:none"></div>
         <table id="table-norlys" style="display:none">
-          <thead><tr><th>Sagsnr</th><th>Måned</th><th>Adresse</th><th>Projektleder</th><th>Udleveret</th><th>LER/GT</th><th>Status</th><th>Link</th></tr></thead>
+          <thead><tr><th>Sagsnr</th><th>Måned</th><th>Adresse</th><th>Projektleder</th><th>Udleveret</th><th>LER/GT</th><th>Status</th><th>Landmålt</th><th>Blæst</th><th>Link</th></tr></thead>
           <tbody id="tbody-norlys"></tbody>
         </table>
         <div class="no-results" id="nores-norlys" style="display:none">Ingen resultater fundet</div>
@@ -504,7 +557,7 @@ function addBlaestRow(containerId) {
     <select class="bf-fiber">
       <option>2 fiber</option><option>12 fiber</option><option>24 fiber</option>
       <option>48 fiber</option><option>96 fiber</option><option>144 fiber</option>
-      <option>1212 fiber</option>
+      
     </select>
     <button class="bf-remove" onclick="this.parentElement.remove()">✕</button>`;
   rowsDiv.appendChild(row);
@@ -519,7 +572,7 @@ function buildBlaestUI(id, sagsnr, sheetKey) {
         <select class="bf-fiber">
           <option>2 fiber</option><option>12 fiber</option><option>24 fiber</option>
           <option>48 fiber</option><option>96 fiber</option><option>144 fiber</option>
-          <option>1212 fiber</option>
+          
         </select>
         <button class="bf-remove" onclick="this.parentElement.remove()">✕</button>
       </div>
@@ -845,6 +898,8 @@ function renderNorlys() {
     <td>${checkBadge(r[4])}</td>
     <td>${lerBadge(r[5])}</td>
     <td>${statusBadge(r[6])}</td>
+    <td>${checkBadge(r[7])}</td>
+    <td>${checkBadge(r[8])}</td>
     <td>${linkBtn(r[9])}</td>
   </tr>`).join('');
 
@@ -1142,13 +1197,13 @@ function openModal(key, idx) {
     }
   }
 
-  // Landmålt-knap (kun DSO 2026)
-  if(key==='dso2026') {
+  // Landmålt-knap (DSO 2026 og Norlys)
+  if(key==='dso2026' || key==='norlys') {
     const landmaaltVal = (r[7]||'').trim();
     if(landmaaltVal) {
       body+=`<button class="landmaalt-btn landmaalt-done" disabled>✓ Landmålt: ${landmaaltVal}</button>`;
     } else {
-      body+=`<button class="landmaalt-btn" id="landmaalt-btn-${r[0]}" onclick="markLandmaalt('${r[0]}','dso2026',this)">📐 Registrer landmåling</button>`;
+      body+=`<button class="landmaalt-btn" id="landmaalt-btn-${r[0]}" onclick="markLandmaalt('${r[0]}','${key}',this)">📐 Registrer landmåling</button>`;
     }
 
     // Blæst input
@@ -1156,7 +1211,7 @@ function openModal(key, idx) {
     if(blaestVal) {
       body+=`<div class="blaest-done"><div class="blaest-done-title">💨 Blæst registreret</div>${blaestVal}</div>`;
     } else {
-      body+=buildBlaestUI('blaest-wrap-'+r[0], r[0], 'dso2026');
+      body+=buildBlaestUI('blaest-wrap-'+r[0], r[0], key);
     }
   }
 
@@ -1223,26 +1278,69 @@ function setFilter(key,val,btn){
 
 // DASHBOARD
 function buildDashboard() {
-  const d26=DATA.dso2026, dn=DATA.norlys, dg=DATA.gridopt;
+  const d26=DATA.dso2026, dn=DATA.norlys, dg=DATA.gridopt, dbb=DATA.bb;
   const all26=d26?d26.rows.filter(r=>isSagsnr(r[0])):[];
   const alln=dn?dn.rows.filter(r=>isSagsnr(r[0])):[];
+  const allbb=dbb?dbb.rows.filter(r=>(r[2]||'').trim().length>2):[];
   const gridCount=dg?dg.rows.filter(r=>r[0]&&r[0].trim()&&r[0]!=='MEDARBEJDER').length:0;
 
   document.getElementById('cnt-dso2026').textContent=all26.length;
   document.getElementById('cnt-norlys').textContent=alln.length;
-  const allBB=DATA.bb?DATA.bb.rows.filter(r=>(r[2]||'').trim().length>2).length:0;
-  const elBB=document.getElementById('cnt-bb'); if(elBB) elBB.textContent=allBB;
+  const elBB=document.getElementById('cnt-bb'); if(elBB) elBB.textContent=allbb.length;
 
-  const udl=all26.filter(r=>r[4]).length;
-  const land=all26.filter(r=>r[7]).length;
-  const blae=all26.filter(r=>r[8]).length;
+  // DSO stats
+  const dsoUdl=all26.filter(r=>r[4]&&r[4].trim()).length;
+  const dsoLand=all26.filter(r=>r[7]&&r[7].trim()).length;
+  const dsoBlae=all26.filter(r=>r[8]&&r[8].trim()).length;
 
+  // Norlys stats
+  const norUdl=alln.filter(r=>r[4]&&r[4].trim()).length;
+  const norLand=alln.filter(r=>r[7]&&r[7].trim()).length;
+  const norBlae=alln.filter(r=>r[8]&&r[8].trim()).length;
+
+  // BB stats
+  const bbUdl=allbb.filter(r=>r[4]&&r[4].trim()).length;
+  const bbLand=allbb.filter(r=>r[7]&&r[7].trim()).length;
+  const bbBlae=allbb.filter(r=>r[8]&&r[8].trim()).length;
+
+  // Totals
+  const totalAll=all26.length+alln.length+allbb.length;
+  const totalLand=dsoLand+norLand+bbLand;
+  const totalBlae=dsoBlae+norBlae+bbBlae;
+
+  function pct(a,b){return b?Math.round(a/b*100):0;}
+  function progBar(val,total,color){
+    const p=pct(val,total);
+    return `<div style="margin-top:8px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px"><span>${val} af ${total}</span><span>${p}%</span></div><div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden"><div style="height:100%;width:${p}%;background:${color};border-radius:3px;transition:width .6s"></div></div></div>`;
+  }
+
+  // Clickable stat cards
   document.getElementById('dash-stats').innerHTML=`
-    <div class="stat-card"><div class="stat-label">DSO 2026</div><div class="stat-value">${all26.length}</div><div class="stat-sub">projekter</div></div>
-    <div class="stat-card"><div class="stat-label">Udleveret</div><div class="stat-value">${udl}</div><div class="stat-sub">af ${all26.length}</div></div>
-    <div class="stat-card"><div class="stat-label">Norlys opgaver</div><div class="stat-value">${alln.length}</div><div class="stat-sub">sager</div></div>
-    <div class="stat-card"><div class="stat-label">Gridoptimizer</div><div class="stat-value">${gridCount}</div><div class="stat-sub">medarbejdere</div></div>`;
+    <div class="stat-card" style="cursor:pointer" onclick="showPage('dso2026')">
+      <div class="stat-label">DSO 2026</div>
+      <div class="stat-value">${all26.length}</div>
+      <div class="stat-sub">projekter</div>
+      ${progBar(dsoLand,all26.length,'var(--green)')}
+    </div>
+    <div class="stat-card" style="cursor:pointer" onclick="showPage('norlys')">
+      <div class="stat-label">Norlys Opgaver</div>
+      <div class="stat-value">${alln.length}</div>
+      <div class="stat-sub">sager</div>
+      ${progBar(norLand,alln.length,'var(--amber)')}
+    </div>
+    <div class="stat-card" style="cursor:pointer" onclick="showPage('bb')">
+      <div class="stat-label">Bredbåndspulje</div>
+      <div class="stat-value">${allbb.length}</div>
+      <div class="stat-sub">projekter</div>
+      ${progBar(bbLand,allbb.length,'#a78bfa')}
+    </div>
+    <div class="stat-card" style="cursor:pointer" onclick="showPage('gridopt')">
+      <div class="stat-label">Gridoptimizer</div>
+      <div class="stat-value">${gridCount}</div>
+      <div class="stat-sub">medarbejdere</div>
+    </div>`;
 
+  // Charts
   const mc={};
   all26.forEach(r=>{mc[r[1]]=(mc[r[1]]||0)+1;});
   const mo=['Januar','Februar','Marts','April','Maj','Juni','Juli','August','September','Oktober','November','December'];
@@ -1256,6 +1354,23 @@ function buildDashboard() {
   const cols=['#A51C1C','#bf2020','#d42424','#e83030','#f44'];
 
   document.getElementById('dash-charts').innerHTML=`
+    <div class="chart-card"><h3>Samlet fremgang</h3>
+      <div class="bar-item">
+        <div class="bar-label">Landmålt</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct(totalLand,totalAll)}%;background:var(--green)">${totalLand}</div></div>
+        <div class="bar-num">${pct(totalLand,totalAll)}%</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">Blæst</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct(totalBlae,totalAll)}%;background:var(--cyan)">${totalBlae}</div></div>
+        <div class="bar-num">${pct(totalBlae,totalAll)}%</div>
+      </div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+        <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:'JetBrains Mono'">${dsoLand}/${all26.length}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">DSO landmålt</div></div>
+        <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:'JetBrains Mono'">${norLand}/${alln.length}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Norlys landmålt</div></div>
+        <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:'JetBrains Mono'">${bbLand}/${allbb.length}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">BB landmålt</div></div>
+      </div>
+    </div>
     <div class="chart-card"><h3>DSO 2026 — pr. måned</h3>
       ${months.map(m=>`<div class="bar-item">
         <div class="bar-label">${m}</div>
@@ -1269,6 +1384,23 @@ function buildDashboard() {
         <div class="bar-track"><div class="bar-fill" style="width:${cnt/maxPL*100}%;background:${cols[i%cols.length]}">${cnt}</div></div>
         <div class="bar-num">${cnt}</div>
       </div>`).join('')}
+    </div>
+    <div class="chart-card"><h3>Blæst — pr. kategori</h3>
+      <div class="bar-item">
+        <div class="bar-label">DSO 2026</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct(dsoBlae,all26.length)}%;background:var(--red)">${dsoBlae}</div></div>
+        <div class="bar-num">${pct(dsoBlae,all26.length)}%</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">Norlys</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct(norBlae,alln.length)}%;background:var(--amber)">${norBlae}</div></div>
+        <div class="bar-num">${pct(norBlae,alln.length)}%</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">BB</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct(bbBlae,allbb.length)}%;background:#a78bfa">${bbBlae}</div></div>
+        <div class="bar-num">${pct(bbBlae,allbb.length)}%</div>
+      </div>
     </div>`;
 }
 
