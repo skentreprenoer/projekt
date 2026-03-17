@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0042)file:///C:/Users/tj/Downloads/index_1.html -->
+<!-- saved from url=(0042)file:///C:/Users/tj/Downloads/index_2.html -->
 <html lang="da"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -111,13 +111,18 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
 .comment-delete{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px;padding:2px 6px;border-radius:4px;transition:color .15s}
 .comment-delete:hover{color:#f87171}
 /* CHECKBOX DONE */
-.done-wrap{display:flex;align-items:center;gap:10px;margin-top:16px;padding:14px 18px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;user-select:none;transition:border-color .15s}
-.done-wrap:hover{border-color:var(--red-border)}
-.done-wrap.checked{border-color:rgba(46,204,113,.4);background:rgba(46,204,113,.07)}
+.done-wrap{display:flex;align-items:center;gap:10px;margin-top:8px;padding:16px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;user-select:none;transition:all .2s;justify-content:center;width:100%}
+.done-wrap:hover{border-color:var(--red-border);background:rgba(165,28,28,.08)}
+.done-wrap.checked{border-color:rgba(46,204,113,.4);background:rgba(46,204,113,.1)}
+.done-wrap.checked:hover{border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.08)}
 .done-cb{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;transition:all .15s}
 .done-wrap.checked .done-cb{background:var(--green);border-color:var(--green)}
-.done-label{font-size:14px;font-weight:500;color:var(--text)}
+.done-wrap.checked:hover .done-cb{background:#ef4444;border-color:#ef4444}
+.done-label{font-size:15px;font-weight:600;color:var(--text)}
 .done-wrap.checked .done-label{color:var(--green)}
+.done-wrap.checked:hover .done-label{color:#ef4444}
+.done-undo{display:none;font-size:11px;color:var(--muted);margin-left:auto}
+.done-wrap.checked:hover .done-undo{display:block;color:#ef4444}
 /* LER badge */
 .ler-btn{display:flex;align-items:center;gap:10px;padding:14px 18px;background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.25);border-radius:10px;color:#22d3ee;text-decoration:none;font-size:14px;font-weight:500;transition:all .15s}
 .ler-btn:hover{background:rgba(6,182,212,.15)}
@@ -219,7 +224,7 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
     <div class="nav-section">Kode</div>
     <div class="nav-item" onclick="showPage(&#39;gridopt&#39;)"><span class="dot" style="background:var(--cyan)"></span>Gridoptimizer</div>
   </div>
-  <div class="sync-bar"><div class="sync-dot" id="sync-dot"></div><span id="sync-status">Opdateret 13.25</span></div>
+  <div class="sync-bar"><div class="sync-dot" id="sync-dot"></div><span id="sync-status">Opdateret 13.42</span></div>
 </nav>
 
 <div class="main">
@@ -373,7 +378,7 @@ let searchQuery = '';
 let activeFilters = {};
 
 // ---- Google Apps Script webhook for Landmålt ----
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw2WDK7iHcnb4sYfrWBM4v-4FpCU4EdSMBQwedaBD6d-IO8Xa-HCNznNgLtYfMa7w8QlQ/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydABkrKzLhTboTPW9pF0FJSW1QoShI5jsjTPxuTCNMv4WO4V1ATPyxktJllez1Pvjk7A/exec';
 
 async function markLandmaalt(sagsnr, sheetKey, btnEl) {
   if (!sagsnr || APPS_SCRIPT_URL.includes('INDSÆT')) {
@@ -477,7 +482,19 @@ async function fetchSheet(key) {
     const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
     const cols = json.table.cols.map(c => c.label);
     const rows = (json.table.rows || []).map(r =>
-      r.c.map(cell => (cell && cell.v !== null && cell.v !== undefined) ? String(cell.v) : '')
+      r.c.map(cell => {
+        if (!cell || cell.v === null || cell.v === undefined) return '';
+        // Parse Google Viz Date(year,month,day,...) format
+        const sv = String(cell.v);
+        const dm = sv.match(/^Date\((\d+),(\d+),(\d+)/);
+        if (dm) {
+          const d = parseInt(dm[3]), m = parseInt(dm[2])+1, y = parseInt(dm[1]);
+          return `${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}/${y}`;
+        }
+        // Use formatted value if available and looks like a date
+        if (cell.f && /\d{1,2}[\/.]\d{1,2}/.test(cell.f)) return cell.f;
+        return sv;
+      })
     );
     DATA[key] = { cols, rows };
     return true;
@@ -887,7 +904,8 @@ function openModalBB(idx) {
   const isDoneBB = checkDone(doneKey);
   body += `<div class="done-wrap${isDoneBB?' checked':''}" onclick="toggleDoneBB(${idx},this)">
     <div class="done-cb">${isDoneBB?'✓':''}</div>
-    <div class="done-label">${isDoneBB?'Projekt markeret som færdigt':'Marker projekt som færdigt'}</div>
+    <div class="done-label">${isDoneBB?'✓ Projekt markeret som færdigt':'Marker projekt som færdigt'}</div>
+    <span class="done-undo">Klik for at fortryde</span>
   </div>`;
 
   // Kommentarer
@@ -915,7 +933,6 @@ function openModalBB(idx) {
 async function toggleDoneBB(idx, wrap) {
   const key = 'done_bb_' + idx;
   const wasDone = checkDone(key);
-  // Update UI immediately
   if (wasDone) {
     wrap.classList.remove('checked');
     wrap.querySelector('.done-cb').textContent = '';
@@ -923,7 +940,7 @@ async function toggleDoneBB(idx, wrap) {
   } else {
     wrap.classList.add('checked');
     wrap.querySelector('.done-cb').textContent = '✓';
-    wrap.querySelector('.done-label').textContent = 'Projekt markeret som færdigt';
+    wrap.querySelector('.done-label').textContent = '✓ Projekt markeret som færdigt';
   }
   await saveDone(key, !wasDone);
 }
@@ -1025,7 +1042,8 @@ function openModal(key, idx) {
   const isDoneM = checkDone(doneKey);
   body+=`<div class="done-wrap${isDoneM?' checked':''}" onclick="toggleDone('${r[0]}',this)" id="done-wrap-${r[0]}">
     <div class="done-cb">${isDoneM?'✓':''}</div>
-    <div class="done-label">${isDoneM?'Projekt markeret som færdigt':'Marker projekt som færdigt'}</div>
+    <div class="done-label">${isDoneM?'✓ Projekt markeret som færdigt':'Marker projekt som færdigt'}</div>
+    <span class="done-undo">Klik for at fortryde</span>
   </div>`;
 
   // Kommentar sektion
@@ -1059,7 +1077,7 @@ async function toggleDone(sagsnr, wrap) {
   } else {
     wrap.classList.add('checked');
     wrap.querySelector('.done-cb').textContent='✓';
-    wrap.querySelector('.done-label').textContent='Projekt markeret som færdigt';
+    wrap.querySelector('.done-label').textContent='✓ Projekt markeret som færdigt';
   }
   await saveDone(key, !wasDone);
   renderCurrent();
