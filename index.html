@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0042)file:///C:/Users/tj/Downloads/index_3.html -->
+<!-- saved from url=(0042)file:///C:/Users/tj/Downloads/index_4.html -->
 <html lang="da"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -235,7 +235,7 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
     <div class="nav-section">Kode</div>
     <div class="nav-item" onclick="showPage(&#39;gridopt&#39;)"><span class="dot" style="background:var(--cyan)"></span>Gridoptimizer</div>
   </div>
-  <div class="sync-bar"><div class="sync-dot" id="sync-dot"></div><span id="sync-status">Opdateret 14.08</span></div>
+  <div class="sync-bar"><div class="sync-dot" id="sync-dot"></div><span id="sync-status">Opdateret 14.10</span></div>
 </nav>
 
 <div class="main">
@@ -275,8 +275,8 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
       <div class="stats-row" id="stats-dso2026"></div>
       <div class="table-wrap">
         <div class="table-header"><div class="table-title">DSO 2026</div><div class="table-info" id="info-dso2026"></div></div>
-        <div id="loading-dso2026" class="loading-msg" style="display: none;"><span class="spinner"></span>Henter data...</div>
-        <div id="err-dso2026" class="err-msg" style="">⚠️ Kunne ikke hente data. Er Google Sheet delt offentligt?</div>
+        <div id="loading-dso2026" class="loading-msg"><span class="spinner"></span>Henter data...</div>
+        <div id="err-dso2026" class="err-msg" style="display:none"></div>
         <table id="table-dso2026" style="display:none">
           <thead><tr><th>Sagsnr</th><th>Måned</th><th>Adresse</th><th>Projektleder</th><th>Udleveret</th><th>LER/GT</th><th>Status</th><th>Landmålt</th><th>Blæst</th><th>Link</th></tr></thead>
           <tbody id="tbody-dso2026"></tbody>
@@ -389,7 +389,7 @@ let searchQuery = '';
 let activeFilters = {};
 
 // ---- Google Apps Script webhook for Landmålt ----
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydABkrKzLhTboTPW9pF0FJSW1QoShI5jsjTPxuTCNMv4WO4V1ATPyxktJllez1Pvjk7A/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFrenn_3IXqoEqcVYAqGDVBKlt8ngGJlVLSfkhqER9HI8bypTBdNHAcUbH3CkH-bop9w/exec';
 
 async function markLandmaalt(sagsnr, sheetKey, btnEl) {
   if (!sagsnr || APPS_SCRIPT_URL.includes('INDSÆT')) {
