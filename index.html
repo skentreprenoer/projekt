@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0042)file:///C:/Users/tj/Downloads/index_2.html -->
+<!-- saved from url=(0042)file:///C:/Users/tj/Downloads/index_3.html -->
 <html lang="da"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -144,6 +144,17 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
 .landmaalt-done{background:rgba(46,204,113,.1);border-color:rgba(46,204,113,.3);color:var(--green);cursor:default}
 .landmaalt-done:hover{background:rgba(46,204,113,.1)}
 
+/* BLAEST INPUT */
+.blaest-wrap{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.blaest-row{display:flex;gap:8px;align-items:stretch}
+.blaest-input{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:14px 16px;border-radius:10px;font-size:15px;font-weight:600;font-family:'JetBrains Mono',monospace;outline:none;transition:border-color .2s}
+.blaest-input:focus{border-color:var(--amber)}
+.blaest-input::placeholder{color:var(--muted2);font-weight:400;font-family:'Inter',sans-serif}
+.blaest-btn{padding:14px 24px;background:rgba(243,156,18,.12);border:1px solid rgba(243,156,18,.3);border-radius:10px;color:var(--amber);font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap}
+.blaest-btn:hover{background:rgba(243,156,18,.2);border-color:rgba(243,156,18,.5)}
+.blaest-btn:disabled{cursor:not-allowed;opacity:.7}
+.blaest-done{background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);border-radius:10px;padding:16px 20px;color:var(--green);font-size:15px;font-weight:600;text-align:center}
+
 /* DASHBOARD */
 #page-dashboard{position:relative}
 #page-dashboard::before{content:'';position:absolute;inset:0;background:url('Biler.png') center/cover no-repeat;opacity:0.12;pointer-events:none;z-index:0}
@@ -224,7 +235,7 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
     <div class="nav-section">Kode</div>
     <div class="nav-item" onclick="showPage(&#39;gridopt&#39;)"><span class="dot" style="background:var(--cyan)"></span>Gridoptimizer</div>
   </div>
-  <div class="sync-bar"><div class="sync-dot" id="sync-dot"></div><span id="sync-status">Opdateret 13.42</span></div>
+  <div class="sync-bar"><div class="sync-dot" id="sync-dot"></div><span id="sync-status">Opdateret 14.08</span></div>
 </nav>
 
 <div class="main">
@@ -264,8 +275,8 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
       <div class="stats-row" id="stats-dso2026"></div>
       <div class="table-wrap">
         <div class="table-header"><div class="table-title">DSO 2026</div><div class="table-info" id="info-dso2026"></div></div>
-        <div id="loading-dso2026" class="loading-msg"><span class="spinner"></span>Henter data...</div>
-        <div id="err-dso2026" class="err-msg" style="display:none"></div>
+        <div id="loading-dso2026" class="loading-msg" style="display: none;"><span class="spinner"></span>Henter data...</div>
+        <div id="err-dso2026" class="err-msg" style="">⚠️ Kunne ikke hente data. Er Google Sheet delt offentligt?</div>
         <table id="table-dso2026" style="display:none">
           <thead><tr><th>Sagsnr</th><th>Måned</th><th>Adresse</th><th>Projektleder</th><th>Udleveret</th><th>LER/GT</th><th>Status</th><th>Landmålt</th><th>Blæst</th><th>Link</th></tr></thead>
           <tbody id="tbody-dso2026"></tbody>
@@ -392,7 +403,7 @@ async function markLandmaalt(sagsnr, sheetKey, btnEl) {
     const resp = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ sagsnr, sheet: sheetKey, value: dato })
+      body: JSON.stringify({ sagsnr, sheet: sheetKey, action: 'landmaalt', value: dato })
     });
     const result = await resp.json();
     if (result.success) {
@@ -419,6 +430,38 @@ async function markLandmaalt(sagsnr, sheetKey, btnEl) {
       btnEl.style.background = '';
       btnEl.style.borderColor = '';
     }, 3000);
+  }
+}
+
+async function markBlaest(sagsnr, sheetKey, btnEl, inputEl) {
+  const meter = (inputEl.value||'').trim();
+  if (!meter) { inputEl.focus(); inputEl.style.borderColor='#ef4444'; return; }
+  inputEl.style.borderColor='';
+  btnEl.disabled = true;
+  btnEl.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:6px"></span>Gemmer...';
+  try {
+    const resp = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ sagsnr, sheet: sheetKey, action: 'blaest', value: meter })
+    });
+    const result = await resp.json();
+    if (result.success) {
+      btnEl.innerHTML = '✓ Blæst registreret';
+      btnEl.style.background = 'var(--green)';
+      btnEl.style.borderColor = 'var(--green)';
+      inputEl.disabled = true;
+      inputEl.style.opacity = '0.5';
+      setTimeout(() => loadAll(), 1500);
+    } else {
+      btnEl.innerHTML = '⚠️ Fejl: ' + (result.error||'Ukendt');
+      btnEl.disabled = false;
+      setTimeout(() => { btnEl.innerHTML = '💨 Registrer blæsning'; btnEl.style.background=''; btnEl.style.borderColor=''; }, 3000);
+    }
+  } catch(e) {
+    btnEl.innerHTML = '⚠️ Netværksfejl';
+    btnEl.disabled = false;
+    setTimeout(() => { btnEl.innerHTML = '💨 Registrer blæsning'; btnEl.style.background=''; btnEl.style.borderColor=''; }, 3000);
   }
 }
 
@@ -897,6 +940,20 @@ function openModalBB(idx) {
     } else {
       body+=`<button class="landmaalt-btn" id="landmaalt-btn-bb-${idx}" onclick="markLandmaalt('${bbSagsnr}','bb',this)">📐 Registrer landmåling</button>`;
     }
+
+    // Blæst input (BB)
+    const blaestValBB = (r[8]||'').trim();
+    if(blaestValBB) {
+      body+=`<div class="blaest-done">💨 Blæst: ${blaestValBB} m</div>`;
+    } else {
+      body+=`<div class="blaest-wrap">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:600">Blæsning</div>
+        <div class="blaest-row">
+          <input class="blaest-input" id="blaest-input-bb-${idx}" type="number" inputmode="numeric" placeholder="Indtast meter blæst..." />
+          <button class="blaest-btn" id="blaest-btn-bb-${idx}" onclick="markBlaest('${bbSagsnr}','bb',this,document.getElementById('blaest-input-bb-${idx}'))">💨 Registrer</button>
+        </div>
+      </div>`;
+    }
   }
 
   // Færdig checkbox
@@ -1034,6 +1091,20 @@ function openModal(key, idx) {
       body+=`<button class="landmaalt-btn landmaalt-done" disabled>✓ Landmålt: ${landmaaltVal}</button>`;
     } else {
       body+=`<button class="landmaalt-btn" id="landmaalt-btn-${r[0]}" onclick="markLandmaalt('${r[0]}','dso2026',this)">📐 Registrer landmåling</button>`;
+    }
+
+    // Blæst input
+    const blaestVal = (r[8]||'').trim();
+    if(blaestVal) {
+      body+=`<div class="blaest-done">💨 Blæst: ${blaestVal} m</div>`;
+    } else {
+      body+=`<div class="blaest-wrap">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:600">Blæsning</div>
+        <div class="blaest-row">
+          <input class="blaest-input" id="blaest-input-${r[0]}" type="number" inputmode="numeric" placeholder="Indtast meter blæst..." />
+          <button class="blaest-btn" id="blaest-btn-${r[0]}" onclick="markBlaest('${r[0]}','dso2026',this,document.getElementById('blaest-input-${r[0]}'))">💨 Registrer</button>
+        </div>
+      </div>`;
     }
   }
 
