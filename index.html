@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0084)file:///C:/Users/tj/Downloads/S%C3%B8ren_Knudsen_A_S___Projekt_Oversigt_FIXED_9.html -->
+<!-- saved from url=(0059)file:///C:/Users/tj/Downloads/projekt_oversigt_live_13.html -->
 <html lang="da"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="SK Projekter">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="data:application/json,{%0A  %22name%22:%22S%C3%B8ren%20Knudsen%20A/S%22,%0A  %22short_name%22:%22SK%20Projekter%22,%0A  %22start_url%22:%22.%22,%0A  %22display%22:%22standalone%22,%0A  %22background_color%22:%22%230f0f11%22,%0A  %22theme_color%22:%22%23A51C1C%22,%0A  %22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns=&#39;http://www.w3.org/2000/svg&#39;%20viewBox=&#39;0%200%20100%20100&#39;%3E%3Crect%20width=&#39;100&#39;%20height=&#39;100&#39;%20fill=&#39;%23A51C1C&#39;/%3E%3Ctext%20y=&#39;.9em&#39;%20font-size=&#39;80&#39;%20x=&#39;10&#39;%3ESK%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22any%22,%22type%22:%22image/svg+xml%22}]%0A}">
-<link href="file:///C:/Users/tj/Downloads/S%C3%B8ren%20Knudsen%20A_S%20%E2%80%94%20Projekt%20Oversigt%203_files/css2" rel="stylesheet">
+<link href="./Søren Knudsen A_S — Projekt Oversigt 3_files/css2" rel="stylesheet">
 <style>
 :root {
   --red:#A51C1C;--red-dark:#8a1616;--red-light:#bf2020;--red-dim:rgba(165,28,28,0.15);--red-border:rgba(165,28,28,0.35);
@@ -133,6 +133,9 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
 .page{display:none}.page.active{display:block}
 
 /* DASHBOARD */
+#page-dashboard{position:relative}
+#page-dashboard::before{content:'';position:absolute;inset:0;background:url('Biler.png') center/cover no-repeat;opacity:0.12;pointer-events:none;z-index:0}
+#page-dashboard .content{position:relative;z-index:1}
 .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
 .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px}
 .chart-card h3{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;font-weight:600}
@@ -203,13 +206,13 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
     <div class="nav-section">Overblik</div>
     <div class="nav-item active" onclick="showPage(&#39;dashboard&#39;)"><span class="dot" style="background:var(--red)"></span>Dashboard</div>
     <div class="nav-section">Arbejde</div>
-    <div class="nav-item" onclick="showPage(&#39;dso2026&#39;)"><span class="dot" style="background:#e05555"></span>DSO 2026<span class="nav-count" id="cnt-dso2026">0</span></div>
-    <div class="nav-item" onclick="showPage(&#39;norlys&#39;)"><span class="dot" style="background:var(--amber)"></span>Norlys Opgaver<span class="nav-count" id="cnt-norlys">0</span></div>
-    <div class="nav-item" onclick="showPage(&#39;bb&#39;)"><span class="dot" style="background:#a78bfa"></span>Bredbåndspulje<span class="nav-count" id="cnt-bb">0</span></div>
+    <div class="nav-item" onclick="showPage(&#39;dso2026&#39;)"><span class="dot" style="background:#e05555"></span>DSO 2026<span class="nav-count" id="cnt-dso2026">—</span></div>
+    <div class="nav-item" onclick="showPage(&#39;norlys&#39;)"><span class="dot" style="background:var(--amber)"></span>Norlys Opgaver<span class="nav-count" id="cnt-norlys">—</span></div>
+    <div class="nav-item" onclick="showPage(&#39;bb&#39;)"><span class="dot" style="background:#a78bfa"></span>Bredbåndspulje<span class="nav-count" id="cnt-bb">—</span></div>
     <div class="nav-section">Kode</div>
     <div class="nav-item" onclick="showPage(&#39;gridopt&#39;)"><span class="dot" style="background:var(--cyan)"></span>Gridoptimizer</div>
   </div>
-  <div class="sync-bar"><div class="sync-dot" id="sync-dot"></div><span id="sync-status">Opdateret 08.44</span></div>
+  <div class="sync-bar"><div class="sync-dot loading" id="sync-dot"></div><span id="sync-status">Henter data...</span></div>
 </nav>
 
 <div class="main">
@@ -227,18 +230,8 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
   <!-- DASHBOARD -->
   <div class="page active" id="page-dashboard">
     <div class="content">
-      <div class="stats-row" id="dash-stats">
-    <div class="stat-card"><div class="stat-label">DSO 2026</div><div class="stat-value">0</div><div class="stat-sub">projekter</div></div>
-    <div class="stat-card"><div class="stat-label">Udleveret</div><div class="stat-value">0</div><div class="stat-sub">af 0</div></div>
-    <div class="stat-card"><div class="stat-label">Norlys opgaver</div><div class="stat-value">0</div><div class="stat-sub">sager</div></div>
-    <div class="stat-card"><div class="stat-label">Gridoptimizer</div><div class="stat-value">0</div><div class="stat-sub">medarbejdere</div></div></div>
-      <div class="dash-grid" id="dash-charts">
-    <div class="chart-card"><h3>DSO 2026 — pr. måned</h3>
-      
-    </div>
-    <div class="chart-card"><h3>DSO 2026 — projektledere</h3>
-      
-    </div></div>
+      <div class="stats-row" id="dash-stats"><div class="loading-msg"><span class="spinner"></span>Henter data...</div></div>
+      <div class="dash-grid" id="dash-charts"></div>
     </div>
   </div>
 
