@@ -6,27 +6,9 @@
 <title>Brøndregistrering — Søren Knudsen A/S</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --sk-red: #B31C2C;
-  --sk-red-dark: #8E1623;
-  --sk-red-glow: rgba(179,28,44,0.12);
-  --sk-charcoal: #2B2B2B;
-  --bg: #F4F3F1;
-  --surface: #FFFFFF;
-  --surface-2: #F0EFED;
-  --border: #E0DEDA;
-  --border-dark: #C8C5C0;
-  --text: #1A1A1A;
-  --text-muted: #7A7670;
-  --green: #2D8A4E;
-  --green-glow: rgba(45,138,78,0.1);
-  --warning: #D4850A;
-  --radius: 12px;
-  --radius-sm: 8px;
-}
+:root{--sk-red:#B31C2C;--sk-red-glow:rgba(179,28,44,0.12);--sk-charcoal:#2B2B2B;--bg:#F4F3F1;--surface:#FFFFFF;--surface-2:#F0EFED;--border:#E0DEDA;--border-dark:#C8C5C0;--text:#1A1A1A;--text-muted:#7A7670;--green:#2D8A4E;--green-glow:rgba(45,138,78,0.1);--warning:#D4850A;--radius:12px;--radius-sm:8px}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden}
-
 .header{position:sticky;top:0;z-index:100;background:var(--sk-charcoal);padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
 .header-brand{display:flex;align-items:center;gap:10px}
 .header-logo{width:34px;height:34px;background:var(--sk-red);border-radius:6px;display:flex;align-items:center;justify-content:center}
@@ -34,21 +16,17 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .header-text h1{font-size:15px;font-weight:700;color:#fff;letter-spacing:-0.3px}
 .header-text span{font-size:10px;color:rgba(255,255,255,0.5);font-weight:500;text-transform:uppercase;letter-spacing:1px}
 .header-actions{display:flex;gap:6px}
-.h-btn{width:38px;height:38px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all 0.15s;position:relative}
+.h-btn{width:38px;height:38px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;position:relative}
 .h-btn:active{transform:scale(0.93)}
 .h-btn .badge{position:absolute;top:-4px;right:-4px;background:var(--sk-red);color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--sk-charcoal)}
-
 .edit-banner{display:none;background:var(--sk-red-glow);border-bottom:2px solid var(--sk-red);padding:10px 20px;font-size:13px;font-weight:600;color:var(--sk-red);align-items:center;justify-content:space-between}
 .edit-banner.show{display:flex}
-.edit-banner button{background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;line-height:1}
-
+.edit-banner button{background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer}
 .gps-bar{padding:6px 20px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text-muted);background:var(--surface-2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px}
 .gps-dot{width:6px;height:6px;border-radius:50%;background:#ccc}
 .gps-dot.active{background:var(--green);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-
 .content{padding:14px 16px 100px;max-width:600px;margin:0 auto}
-
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.04);overflow:hidden}
 .card-header{padding:13px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
 .card-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
@@ -59,32 +37,24 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .card.open .card-chevron{transform:rotate(180deg)}
 .card-body{padding:0 14px 14px;display:none}
 .card.open .card-body{display:block}
-
-.field{margin-bottom:12px}
-.field:last-child{margin-bottom:0}
+.field{margin-bottom:12px}.field:last-child{margin-bottom:0}
 .field label{display:block;font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px}
-.field input[type="text"],.field textarea,.field select{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 12px;color:var(--text);font-family:'Inter',sans-serif;font-size:15px;outline:none;transition:border-color 0.2s}
+.field input[type="text"],.field textarea,.field select{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 12px;color:var(--text);font-family:'Inter',sans-serif;font-size:15px;outline:none}
 .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--sk-red)}
 .field textarea{resize:vertical;min-height:60px}
-
-/* Direction sections */
-.dir-section{margin-bottom:14px}
-.dir-section:last-child{margin-bottom:0}
+.dir-section{margin-bottom:14px}.dir-section:last-child{margin-bottom:0}
 .dir-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
 .dir-arrow{width:26px;height:26px;border-radius:50%;background:var(--sk-charcoal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
 .dir-label{font-size:13px;font-weight:700;flex:1}
-.dir-add-btn{font-size:11px;font-weight:600;padding:5px 10px;background:var(--sk-red-glow);color:var(--sk-red);border:1px solid rgba(179,28,44,0.2);border-radius:20px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s}
+.dir-add-btn{font-size:11px;font-weight:600;padding:5px 10px;background:var(--sk-red-glow);color:var(--sk-red);border:1px solid rgba(179,28,44,0.2);border-radius:20px;cursor:pointer;font-family:'Inter',sans-serif}
 .dir-add-btn:active{transform:scale(0.95)}
-
 .dir-items{display:flex;flex-direction:column;gap:6px}
 .dir-item{display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px}
-.dir-item-type{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;min-width:48px;padding:3px 8px;border-radius:4px;text-align:center}
+.dir-item-type{font-size:11px;font-weight:700;text-transform:uppercase;min-width:48px;padding:3px 8px;border-radius:4px;text-align:center}
 .dir-item-type.fiber{background:var(--sk-red-glow);color:var(--sk-red)}
 .dir-item-type.roer{background:rgba(43,43,43,0.08);color:var(--sk-charcoal)}
 .dir-item-dim{flex:1;font-size:14px;font-weight:500;font-family:'JetBrains Mono',monospace}
 .dir-item-remove{width:26px;height:26px;border-radius:50%;background:none;border:1px solid var(--border);color:var(--text-muted);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.dir-item-remove:active{background:rgba(179,28,44,0.1);color:var(--sk-red)}
-
 .add-modal{display:none;background:var(--surface);border:2px solid var(--sk-red);border-radius:var(--radius-sm);padding:12px;margin-top:8px}
 .add-modal.show{display:block}
 .add-modal-row{display:flex;gap:8px;align-items:end}
@@ -95,39 +65,24 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .add-modal-btns button{flex:1;padding:9px;border:none;border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer}
 .add-confirm{background:var(--sk-red);color:#fff}
 .add-cancel{background:var(--surface-2);color:var(--text-muted);border:1px solid var(--border)!important}
-
-/* Chips for quick multi-select */
-.chip-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.chip{padding:7px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:50px;font-size:12px;font-weight:600;color:var(--text-muted);cursor:pointer;user-select:none;transition:all 0.15s;font-family:'JetBrains Mono',monospace}
-.chip.active{background:var(--sk-red-glow);border-color:var(--sk-red);color:var(--sk-red)}
-.chip:active{transform:scale(0.95)}
-
-/* Photos */
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.photo-add{aspect-ratio:1;border:2px dashed var(--border-dark);border-radius:var(--radius-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--text-muted);font-size:11px;font-weight:600;transition:all 0.15s}
+.photo-add{aspect-ratio:1;border:2px dashed var(--border-dark);border-radius:var(--radius-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--text-muted);font-size:11px;font-weight:600}
 .photo-add:active{border-color:var(--sk-red);color:var(--sk-red)}
 .photo-add .plus{font-size:22px}
-.photo-thumb{aspect-ratio:1;border-radius:var(--radius-sm);overflow:hidden;position:relative}
+.photo-thumb{aspect-ratio:1;border-radius:var(--radius-sm);overflow:hidden;position:relative;background:var(--surface-2)}
 .photo-thumb img{width:100%;height:100%;object-fit:cover}
 .photo-thumb .ts-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.85));padding:16px 5px 3px;font-size:8px;color:#fff;font-family:'JetBrains Mono',monospace;font-weight:500;line-height:1.4}
 .photo-thumb .remove-btn{position:absolute;top:3px;right:3px;width:22px;height:22px;background:rgba(0,0,0,0.65);border-radius:50%;color:#fff;border:none;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .photo-thumb.uploaded{border:2px solid var(--green)}
 .photo-thumb .cloud{position:absolute;top:3px;left:3px;font-size:12px}
-
-/* Bottom bar */
 .bottom-bar{position:fixed;bottom:0;left:0;right:0;padding:10px 16px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:rgba(244,243,241,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);display:flex;gap:8px;z-index:100;max-width:600px;margin:0 auto}
-.btn{flex:1;padding:14px 8px;border:none;border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s;white-space:nowrap;text-transform:uppercase;letter-spacing:0.3px}
+.btn{flex:1;padding:14px 8px;border:none;border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;text-transform:uppercase;letter-spacing:0.3px}
 .btn:active{transform:scale(0.97)}
 .btn-red{background:var(--sk-red);color:#fff}
 .btn-outline{background:var(--surface);border:1px solid var(--border);color:var(--text-muted)}
 .btn:disabled{opacity:0.4;pointer-events:none}
-
-/* Toast */
 .toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-16px);background:var(--sk-charcoal);color:#fff;font-size:13px;font-weight:600;padding:10px 20px;border-radius:50px;opacity:0;transition:all 0.3s;z-index:500;pointer-events:none;max-width:90vw;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.2)}
-.toast.warn{background:var(--warning)}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* Panel */
+.toast.warn{background:var(--warning)}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;display:none;opacity:0;transition:opacity 0.3s}
 .overlay.show{display:block;opacity:1}
 .panel{position:fixed;right:0;top:0;bottom:0;width:min(420px,94vw);background:var(--bg);border-left:1px solid var(--border);z-index:201;transform:translateX(100%);transition:transform 0.3s ease;display:flex;flex-direction:column}
@@ -136,12 +91,10 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .panel-header h2{font-size:15px;font-weight:700}
 .panel-close{background:none;border:none;color:rgba(255,255,255,0.6);font-size:22px;cursor:pointer}
 .panel-body{flex:1;overflow-y:auto;padding:14px 16px}
-.panel-footer{padding:14px 16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
-
+.panel-footer{padding:14px 16px;border-top:1px solid var(--border)}
 .entry-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px}
 .entry-head{display:flex;justify-content:space-between;align-items:start;margin-bottom:6px}
-.entry-name{font-size:14px;font-weight:700}
-.entry-name span{color:var(--text-muted);font-weight:400;font-size:12px}
+.entry-name{font-size:14px;font-weight:700}.entry-name span{color:var(--text-muted);font-weight:400;font-size:12px}
 .entry-time{font-size:10px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;text-align:right}
 .entry-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .entry-tag{font-size:10px;padding:2px 7px;border-radius:50px;background:var(--surface-2);color:var(--text-muted);font-weight:500}
@@ -149,13 +102,9 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .entry-tag.local{background:rgba(212,133,10,0.1);color:var(--warning)}
 .entry-btns{display:flex;gap:6px;margin-top:8px}
 .entry-btn{font-size:11px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);cursor:pointer;font-family:'Inter',sans-serif;font-weight:600}
-.entry-btn.edit{color:var(--sk-red)}
-.entry-btn.del{color:#C0392B}
+.entry-btn.edit{color:var(--sk-red)}.entry-btn.del{color:#C0392B}
 .entry-btn:active{transform:scale(0.95)}
 .empty-state{text-align:center;padding:40px;color:var(--text-muted)}
-.empty-state .icon{font-size:36px;margin-bottom:8px}
-
-/* Settings */
 .settings-modal{position:fixed;inset:0;z-index:300;display:none;align-items:flex-end;justify-content:center}
 .settings-modal.show{display:flex}
 .settings-bg{position:absolute;inset:0;background:rgba(0,0,0,0.4)}
@@ -165,500 +114,311 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .s-block h3{font-size:12px;font-weight:700;margin-bottom:3px}
 .s-block p{font-size:11px;color:var(--text-muted);margin-bottom:8px}
 .s-status{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;margin-top:8px}
-.s-dot{width:7px;height:7px;border-radius:50%}
-.s-dot.on{background:var(--green)}
-.s-dot.off{background:#C0392B}
-
+.s-dot{width:7px;height:7px;border-radius:50%}.s-dot.on{background:var(--green)}.s-dot.off{background:#C0392B}
 .counter{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);text-align:center;padding:6px}
 #photoInput{display:none}
 </style>
 </head>
 <body>
-
 <div class="header">
   <div class="header-brand">
-    <div class="header-logo">
-      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#fff" stroke-width="2"/><line x1="6" y1="8" x2="18" y2="8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><line x1="6" y1="12" x2="15" y2="12" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><line x1="6" y1="16" x2="12" y2="16" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>
-    </div>
-    <div class="header-text">
-      <h1>Søren Knudsen A/S</h1>
-      <span>Brøndregistrering</span>
-    </div>
+    <div class="header-logo"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#fff" stroke-width="2"/><line x1="6" y1="8" x2="18" y2="8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><line x1="6" y1="12" x2="15" y2="12" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><line x1="6" y1="16" x2="12" y2="16" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+    <div class="header-text"><h1>Søren Knudsen A/S</h1><span>Brøndregistrering</span></div>
   </div>
   <div class="header-actions">
     <button class="h-btn" id="settingsBtn">⚙️</button>
     <button class="h-btn" id="historyBtn">📋<span class="badge" id="entryCount" style="display:none">0</span></button>
   </div>
 </div>
-
-<div class="gps-bar" id="gpsBar">
-  <div class="gps-dot" id="gpsDot"></div>
-  <span id="gpsText">Søger GPS...</span>
-</div>
-
-<div class="edit-banner" id="editBanner">
-  <span>✏️ Redigerer: <strong id="editBannerName"></strong></span>
-  <button onclick="cancelEdit()">✕</button>
-</div>
-
+<div class="gps-bar"><div class="gps-dot" id="gpsDot"></div><span id="gpsText">Søger GPS...</span></div>
+<div class="edit-banner" id="editBanner"><span>✏️ Redigerer: <strong id="editBannerName"></strong></span><button onclick="cancelEdit()">✕</button></div>
 <div class="content">
-  <!-- BRØNDNAVNE -->
   <div class="card open">
-    <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
-      <div class="card-icon red">🏷️</div>
-      <div class="card-title">Brøndnavne</div>
-      <div class="card-chevron">▼</div>
-    </div>
+    <div class="card-header" onclick="this.parentElement.classList.toggle('open')"><div class="card-icon red">🏷️</div><div class="card-title">Brøndnavne</div><div class="card-chevron">▼</div></div>
     <div class="card-body">
       <div class="field"><label>Jysk Energi</label><input type="text" id="jyskNavn" placeholder="Brøndnavn..."></div>
       <div class="field"><label>Norlys</label><input type="text" id="norlysNavn" placeholder="Brøndnavn..."></div>
     </div>
   </div>
-
-  <!-- RETNINGER -->
   <div class="card open">
-    <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
-      <div class="card-icon charcoal">🧭</div>
-      <div class="card-title">Retninger — fiber & rør</div>
-      <div class="card-chevron">▼</div>
-    </div>
+    <div class="card-header" onclick="this.parentElement.classList.toggle('open')"><div class="card-icon charcoal">🧭</div><div class="card-title">Retninger — fiber & rør</div><div class="card-chevron">▼</div></div>
     <div class="card-body" id="directionsBody"></div>
   </div>
-
-  <!-- BILLEDER -->
   <div class="card open">
-    <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
-      <div class="card-icon red">📷</div>
-      <div class="card-title">Billeder</div>
-      <div class="card-chevron">▼</div>
-    </div>
+    <div class="card-header" onclick="this.parentElement.classList.toggle('open')"><div class="card-icon red">📷</div><div class="card-title">Billeder</div><div class="card-chevron">▼</div></div>
     <div class="card-body">
-      <div class="photo-grid" id="photoGrid">
-        <div class="photo-add" onclick="document.getElementById('photoInput').click()"><div class="plus">+</div>Tag billede</div>
-      </div>
+      <div class="photo-grid" id="photoGrid"><div class="photo-add" onclick="document.getElementById('photoInput').click()"><div class="plus">+</div>Tag billede</div></div>
       <input type="file" id="photoInput" accept="image/*" capture="environment" multiple>
     </div>
   </div>
-
-  <!-- NOTER -->
   <div class="card">
-    <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
-      <div class="card-icon charcoal">📝</div>
-      <div class="card-title">Noter</div>
-      <div class="card-chevron">▼</div>
-    </div>
-    <div class="card-body">
-      <div class="field"><textarea id="notesField" placeholder="Yderligere bemærkninger..."></textarea></div>
-    </div>
+    <div class="card-header" onclick="this.parentElement.classList.toggle('open')"><div class="card-icon charcoal">📝</div><div class="card-title">Noter</div><div class="card-chevron">▼</div></div>
+    <div class="card-body"><div class="field"><textarea id="notesField" placeholder="Yderligere bemærkninger..."></textarea></div></div>
   </div>
-
   <div class="counter" id="counterText"></div>
 </div>
-
-<!-- BOTTOM -->
 <div class="bottom-bar">
   <button class="btn btn-outline" onclick="cancelEdit()" style="flex:0.4">Nulstil</button>
   <button class="btn btn-red" id="sendBtn" onclick="saveAndSend()">📤 Gem & Send</button>
 </div>
-
 <div class="toast" id="toast"></div>
-
-<!-- HISTORY -->
 <div class="overlay" id="overlay" onclick="closePanel()"></div>
 <div class="panel" id="panel">
-  <div class="panel-header"><h2>Registreringer</h2><div style="display:flex;gap:6px"><button class="entry-btn" onclick="syncFromSheets()" style="color:var(--green);padding:6px 10px">🔄 Synk</button><button class="panel-close" onclick="closePanel()">✕</button></div></div>
+  <div class="panel-header"><h2>Registreringer</h2><div style="display:flex;gap:6px;align-items:center"><button class="entry-btn" onclick="syncFromSheets()" style="color:var(--green);border-color:var(--green)">🔄 Synk</button><button class="panel-close" onclick="closePanel()">✕</button></div></div>
   <div class="panel-body" id="panelBody"></div>
-  <div class="panel-footer">
-    <button class="btn btn-outline" style="width:100%" onclick="exportCSV()">📄 CSV</button>
-  </div>
+  <div class="panel-footer"><button class="btn btn-outline" style="width:100%" onclick="exportCSV()">📄 CSV</button></div>
 </div>
-
-<!-- SETTINGS -->
 <div class="settings-modal" id="settingsModal">
   <div class="settings-bg" onclick="closeSettings()"></div>
   <div class="settings-content">
     <h2>⚙️ Indstillinger</h2>
-    <div class="s-block">
-      <h3>Google Sheets + Drive</h3>
-      <p>Billeder uploades i mapper per brønd. Mappe-link indsættes i sheetet.</p>
+    <div class="s-block"><h3>Google Sheets + Drive</h3><p>Billeder uploades i mapper per brønd.</p>
       <div class="field"><label>Apps Script Web App URL</label><input type="text" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/..."></div>
       <button class="btn btn-red" style="width:100%;margin-top:8px" onclick="saveSettings()">Gem</button>
       <div class="s-status" id="sheetsStatus"><div class="s-dot off"></div><span>Ikke konfigureret</span></div>
     </div>
-    <div class="s-block">
-      <h3>Slet data</h3>
-      <button class="btn btn-outline" style="width:100%;color:#C0392B;border-color:#C0392B" onclick="clearAllData()">🗑️ Slet alt lokal data</button>
-    </div>
+    <div class="s-block"><h3>Slet data</h3><button class="btn btn-outline" style="width:100%;color:#C0392B;border-color:#C0392B" onclick="clearAllData()">🗑️ Slet alt lokal data</button></div>
   </div>
 </div>
 
 <script>
-// ===================== CONFIG =====================
-var ROER_DIMS = ['Ø8','Ø10','Ø12','Ø14','Ø16','Ø32','Ø40','Ø50','Ø110'];
-var FIBER_DIMS = ['12','24','48','96','144','288'];
-var DIRECTIONS = [
-  {key:'nord',label:'Nord',arrow:'↑'},
-  {key:'syd',label:'Syd',arrow:'↓'},
-  {key:'vest',label:'Vest',arrow:'←'},
-  {key:'oest',label:'Øst',arrow:'→'}
-];
-var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz7kNFAk8BLGpaXIy8aaDEY-EzOE5LiSzpqmRfNN7xBmJ9YhjeUSD3D2M2Ina__QpsImQ/exec';
+var ROER_DIMS=['Ø8','Ø10','Ø12','Ø14','Ø16','Ø32','Ø40','Ø50','Ø110'];
+var FIBER_DIMS=['12','24','48','96','144','288'];
+var DIRECTIONS=[{key:'nord',label:'Nord',arrow:'↑'},{key:'syd',label:'Syd',arrow:'↓'},{key:'vest',label:'Vest',arrow:'←'},{key:'oest',label:'Øst',arrow:'→'}];
+var APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbz7kNFAk8BLGpaXIy8aaDEY-EzOE5LiSzpqmRfNN7xBmJ9YhjeUSD3D2M2Ina__QpsImQ/exec';
 
-// ===================== STATE =====================
-var directionData = {};
+var directionData={};
 DIRECTIONS.forEach(function(d){directionData[d.key]=[]});
-var photos = [];
-var existingPhotos = [];
-var entries = JSON.parse(localStorage.getItem('sk_broend3') || '[]');
-var settings = JSON.parse(localStorage.getItem('sk_settings3') || '{}');
-// Altid opdatér til nyeste URL
-settings.appsScriptUrl = APPS_SCRIPT_URL;
-localStorage.setItem('sk_settings3', JSON.stringify(settings));
-var editingIndex = -1;
-var currentLocation = null;
-var currentAddress = '';
+var photos=[];
+var existingPhotos=[];
+var entries=JSON.parse(localStorage.getItem('sk_b4')||'[]');
+var settings=JSON.parse(localStorage.getItem('sk_s4')||'{}');
+settings.appsScriptUrl=APPS_SCRIPT_URL;
+localStorage.setItem('sk_s4',JSON.stringify(settings));
+var editingIndex=-1;
+var currentLocation=null;
+var currentAddress='';
+var isSending=false;
 
-// ===================== INIT =====================
-buildDirectionUI();
-updateUI();
+buildDirectionUI();updateUI();
 
-// ===================== GPS =====================
-if (navigator.geolocation) {
-  navigator.geolocation.watchPosition(
-    function(pos) {
-      currentLocation = {lat:pos.coords.latitude, lng:pos.coords.longitude, acc:Math.round(pos.coords.accuracy)};
-      document.getElementById('gpsDot').classList.add('active');
-      document.getElementById('gpsText').textContent = currentLocation.lat.toFixed(5)+', '+currentLocation.lng.toFixed(5)+' (±'+currentLocation.acc+'m)';
-      // Reverse geocode
-      reverseGeocode(currentLocation.lat, currentLocation.lng);
-    },
-    function(err){document.getElementById('gpsText').textContent='GPS ikke tilgængelig'},
-    {enableHighAccuracy:true, maximumAge:15000, timeout:10000}
-  );
+// GPS
+if(navigator.geolocation){
+  navigator.geolocation.watchPosition(function(pos){
+    currentLocation={lat:pos.coords.latitude,lng:pos.coords.longitude};
+    document.getElementById('gpsDot').classList.add('active');
+    document.getElementById('gpsText').textContent=currentLocation.lat.toFixed(5)+', '+currentLocation.lng.toFixed(5);
+    fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+currentLocation.lat+'&lon='+currentLocation.lng+'&zoom=18',{headers:{'Accept-Language':'da'}})
+      .then(function(r){return r.json()}).then(function(d){if(d&&d.display_name)currentAddress=d.display_name.split(', ').slice(0,3).join(', ')}).catch(function(){});
+  },function(){document.getElementById('gpsText').textContent='GPS ikke tilgængelig'},{enableHighAccuracy:true,maximumAge:15000});
 }
 
-function reverseGeocode(lat,lng) {
-  fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+lat+'&lon='+lng+'&zoom=18&addressdetails=1',{headers:{'Accept-Language':'da'}})
-    .then(function(r){return r.json()})
-    .then(function(data){
-      if(data&&data.display_name){
-        var p=data.display_name.split(', ');
-        currentAddress=p.slice(0,3).join(', ');
-      }
-    }).catch(function(){});
+function showToast(m,w){var t=document.getElementById('toast');t.textContent=m;t.className='toast'+(w?' warn':'')+' show';setTimeout(function(){t.classList.remove('show')},2800)}
+function updateUI(){
+  var b=document.getElementById('entryCount');
+  if(entries.length>0){b.textContent=entries.length;b.style.display='flex'}else b.style.display='none';
+  var s=entries.filter(function(e){return e.synced}).length;
+  document.getElementById('counterText').textContent=entries.length+' reg.'+(s>0?' · '+s+' synk':'');
+  updateSheetsStatus();
 }
 
-// ===================== UI HELPERS =====================
-function showToast(msg,warn){var t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(warn?' warn':'')+' show';setTimeout(function(){t.classList.remove('show')},2800)}
-function updateUI(){updateEntryCount();updateCounter();updateSheetsStatus()}
-function updateEntryCount(){var b=document.getElementById('entryCount');if(entries.length>0){b.textContent=entries.length;b.style.display='flex'}else{b.style.display='none'}}
-function updateCounter(){var s=entries.filter(function(e){return e.synced}).length;var t=entries.length+' reg.';if(s>0)t+=' · '+s+' synk';document.getElementById('counterText').textContent=t}
-
-// ===================== DIRECTIONS =====================
+// DIRECTIONS
 function buildDirectionUI(){
-  var c=document.getElementById('directionsBody');
-  c.innerHTML=DIRECTIONS.map(function(d){return '<div class="dir-section" id="dir-'+d.key+'"><div class="dir-header"><div class="dir-arrow">'+d.arrow+'</div><div class="dir-label">'+d.label+'</div><button class="dir-add-btn" onclick="showAddModal(\''+d.key+'\')">+ Tilføj</button></div><div class="dir-items" id="items-'+d.key+'"></div><div class="add-modal" id="modal-'+d.key+'"><div class="add-modal-row"><div class="add-modal-field"><label>Type</label><select id="atype-'+d.key+'" onchange="updateDimOptions(\''+d.key+'\')"><option value="fiber">Fiber</option><option value="roer">Rør</option></select></div><div class="add-modal-field"><label>Dimension</label><select id="adim-'+d.key+'"></select></div></div><div class="add-modal-btns"><button class="add-cancel" onclick="hideAddModal(\''+d.key+'\')">Annullér</button><button class="add-confirm" onclick="confirmAdd(\''+d.key+'\')">Tilføj</button></div></div></div>'}).join('');
-  // Init dim dropdowns
-  DIRECTIONS.forEach(function(d){updateDimOptions(d.key)});
-}
-
-function updateDimOptions(dir){
-  var type=document.getElementById('atype-'+dir).value;
-  var sel=document.getElementById('adim-'+dir);
-  var dims=type==='fiber'?FIBER_DIMS:ROER_DIMS;
-  sel.innerHTML=dims.map(function(d){return '<option value="'+d+'">'+d+'</option>'}).join('');
-}
-
-function showAddModal(dir){document.getElementById('modal-'+dir).classList.add('show');updateDimOptions(dir)}
-function hideAddModal(dir){document.getElementById('modal-'+dir).classList.remove('show')}
-
-function confirmAdd(dir){
-  var type=document.getElementById('atype-'+dir).value;
-  var dim=document.getElementById('adim-'+dir).value;
-  if(!dim){showToast('Vælg dimension',true);return}
-  directionData[dir].push({type:type,dim:dim});
-  renderDirItems(dir);
-  // Keep modal open for quick multi-add
-}
-
-function removeDirItem(dir,idx){directionData[dir].splice(idx,1);renderDirItems(dir)}
-
-function renderDirItems(dir){
-  var c=document.getElementById('items-'+dir);
-  if(!directionData[dir].length){c.innerHTML='';return}
-  c.innerHTML=directionData[dir].map(function(item,i){
-    return '<div class="dir-item"><span class="dir-item-type '+item.type+'">'+(item.type==='fiber'?'Fiber':'Rør')+'</span><span class="dir-item-dim">'+item.dim+'</span><button class="dir-item-remove" onclick="removeDirItem(\''+dir+'\','+i+')">✕</button></div>'
+  document.getElementById('directionsBody').innerHTML=DIRECTIONS.map(function(d){
+    return '<div class="dir-section"><div class="dir-header"><div class="dir-arrow">'+d.arrow+'</div><div class="dir-label">'+d.label+'</div><button class="dir-add-btn" onclick="showAddModal(\''+d.key+'\')">+ Tilføj</button></div><div class="dir-items" id="items-'+d.key+'"></div><div class="add-modal" id="modal-'+d.key+'"><div class="add-modal-row"><div class="add-modal-field"><label>Type</label><select id="atype-'+d.key+'" onchange="updateDimOpts(\''+d.key+'\')"><option value="fiber">Fiber</option><option value="roer">Rør</option></select></div><div class="add-modal-field"><label>Dimension</label><select id="adim-'+d.key+'"></select></div></div><div class="add-modal-btns"><button class="add-cancel" onclick="hideAddModal(\''+d.key+'\')">Annullér</button><button class="add-confirm" onclick="confirmAdd(\''+d.key+'\')">Tilføj</button></div></div></div>';
   }).join('');
+  DIRECTIONS.forEach(function(d){updateDimOpts(d.key)});
 }
+function updateDimOpts(dir){var t=document.getElementById('atype-'+dir).value;var s=document.getElementById('adim-'+dir);s.innerHTML=(t==='fiber'?FIBER_DIMS:ROER_DIMS).map(function(d){return '<option value="'+d+'">'+d+'</option>'}).join('')}
+function showAddModal(dir){document.getElementById('modal-'+dir).classList.add('show');updateDimOpts(dir)}
+function hideAddModal(dir){document.getElementById('modal-'+dir).classList.remove('show')}
+function confirmAdd(dir){var t=document.getElementById('atype-'+dir).value;var d=document.getElementById('adim-'+dir).value;if(!d)return;directionData[dir].push({type:t,dim:d});renderDirItems(dir)}
+function removeDirItem(dir,i){directionData[dir].splice(i,1);renderDirItems(dir)}
+function renderDirItems(dir){var c=document.getElementById('items-'+dir);if(!directionData[dir].length){c.innerHTML='';return}c.innerHTML=directionData[dir].map(function(item,i){return '<div class="dir-item"><span class="dir-item-type '+item.type+'">'+(item.type==='fiber'?'Fiber':'Rør')+'</span><span class="dir-item-dim">'+item.dim+'</span><button class="dir-item-remove" onclick="removeDirItem(\''+dir+'\','+i+')">✕</button></div>'}).join('')}
 
-// ===================== PHOTOS =====================
-function stampImage(imgDataUrl, ts, loc, address) {
-  return new Promise(function(resolve) {
-    var img = new Image();
-    img.onload = function() {
-      var canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      var ctx = canvas.getContext('2d');
-
-      // Draw original image
-      ctx.drawImage(img, 0, 0);
-
-      // Calculate font size relative to image (works on any resolution)
-      var fontSize = Math.max(14, Math.round(img.width * 0.025));
-      var padding = Math.round(fontSize * 0.6);
-      var lineHeight = Math.round(fontSize * 1.4);
-
-      // Build text lines
-      var lines = [];
-      lines.push(ts);
-      if (loc) lines.push('GPS: ' + loc.lat.toFixed(6) + ', ' + loc.lng.toFixed(6));
-      if (address) lines.push(address);
-
-      // Draw semi-transparent background strip at bottom
-      var stripHeight = (lines.length * lineHeight) + padding * 2;
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-      ctx.fillRect(0, img.height - stripHeight, img.width, stripHeight);
-
-      // Draw text
-      ctx.font = '600 ' + fontSize + 'px "Inter", "Helvetica Neue", Arial, sans-serif';
-      ctx.fillStyle = '#ffffff';
-      ctx.textBaseline = 'top';
-      for (var i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i], padding, img.height - stripHeight + padding + (i * lineHeight));
-      }
-
-      // Also add small Søren Knudsen watermark top-left
-      var smallFont = Math.max(14, Math.round(fontSize * 0.85));
-      ctx.font = '700 ' + smallFont + 'px "Inter", Arial, sans-serif';
-      ctx.fillStyle = 'rgba(255,255,255,0.8)';
-      ctx.fillText('Søren Knudsen A/S', padding, padding);
-
-      resolve(canvas.toDataURL('image/jpeg', 0.85));
-    };
-    img.src = imgDataUrl;
+// PHOTOS WITH STAMP
+function stampImage(src,ts,loc,addr){
+  return new Promise(function(resolve){
+    var img=new Image();img.onload=function(){
+      var c=document.createElement('canvas');c.width=img.width;c.height=img.height;var ctx=c.getContext('2d');
+      ctx.drawImage(img,0,0);
+      var fs=Math.max(14,Math.round(img.width*0.025));var pad=Math.round(fs*0.6);var lh=Math.round(fs*1.4);
+      var lines=[ts];if(loc)lines.push('GPS: '+loc.lat.toFixed(6)+', '+loc.lng.toFixed(6));if(addr)lines.push(addr);
+      var sh=(lines.length*lh)+pad*2;
+      ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,img.height-sh,img.width,sh);
+      ctx.font='600 '+fs+'px Inter,Arial,sans-serif';ctx.fillStyle='#fff';ctx.textBaseline='top';
+      for(var i=0;i<lines.length;i++)ctx.fillText(lines[i],pad,img.height-sh+pad+(i*lh));
+      var sf=Math.max(14,Math.round(fs*0.85));
+      ctx.font='700 '+sf+'px Inter,Arial,sans-serif';ctx.fillStyle='rgba(255,255,255,0.8)';ctx.fillText('Søren Knudsen A/S',pad,pad);
+      resolve(c.toDataURL('image/jpeg',0.85));
+    };img.src=src;
   });
 }
 
-document.getElementById('photoInput').addEventListener('change', function(e) {
-  Array.from(e.target.files).forEach(function(file) {
-    var r = new FileReader();
-    r.onload = async function(ev) {
-      var ts = new Date().toLocaleString('da-DK', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit'});
-      var loc = currentLocation ? {lat: currentLocation.lat, lng: currentLocation.lng, acc: currentLocation.acc} : null;
-      var addr = currentAddress || '';
-
-      // Stamp the image with timestamp + GPS + address
-      var stampedData = await stampImage(ev.target.result, ts, loc, addr);
-
-      photos.push({name: file.name, data: stampedData, timestamp: ts, location: loc, address: addr});
+document.getElementById('photoInput').addEventListener('change',function(e){
+  Array.from(e.target.files).forEach(function(file){
+    var r=new FileReader();r.onload=async function(ev){
+      var ts=new Date().toLocaleString('da-DK',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      var loc=currentLocation?{lat:currentLocation.lat,lng:currentLocation.lng}:null;
+      var stamped=await stampImage(ev.target.result,ts,loc,currentAddress);
+      photos.push({data:stamped,timestamp:ts,location:loc,address:currentAddress||''});
       renderPhotos();
-    };
-    r.readAsDataURL(file);
-  });
-  e.target.value = '';
+    };r.readAsDataURL(file);
+  });e.target.value='';
 });
 
 function renderPhotos(){
-  var grid=document.getElementById('photoGrid');
-  grid.innerHTML='';
+  var grid=document.getElementById('photoGrid');grid.innerHTML='';
   existingPhotos.forEach(function(p,i){
     var d=document.createElement('div');d.className='photo-thumb uploaded';
     var url=typeof p==='string'?p:(p.url||'');
     var name=(typeof p==='object'&&p.name)?p.name:'Uploadet';
-    var driveId=extractDriveId(url);
-    var fallback='<div style="padding:8px;text-align:center;font-size:10px;color:#888;height:100%;display:flex;align-items:center;justify-content:center;background:#eee">☁️ '+name+'</div>';
-    if(driveId){
-      d.innerHTML='<img src="https://lh3.googleusercontent.com/d/'+driveId+'=w200" onerror="this.parentElement.querySelector(\'.img-wrap\').innerHTML=\''+fallback.replace(/'/g,"\\'")+'\'"><span class="cloud">☁️</span><div class="ts-overlay">'+name+'</div><button class="remove-btn" onclick="existingPhotos.splice('+i+',1);renderPhotos()">✕</button>';
-    } else {
-      d.innerHTML=fallback+'<button class="remove-btn" onclick="existingPhotos.splice('+i+',1);renderPhotos()">✕</button>';
+    var did=extractDriveId(url);
+    if(did){
+      d.innerHTML='<img src="https://lh3.googleusercontent.com/d/'+did+'=w200" onerror="this.style.display=\'none\'"><span class="cloud">☁️</span><div class="ts-overlay">'+name+'</div><button class="remove-btn" onclick="existingPhotos.splice('+i+',1);renderPhotos()">✕</button>';
+    }else{
+      d.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;color:#888">☁️ '+name+'</div><button class="remove-btn" onclick="existingPhotos.splice('+i+',1);renderPhotos()">✕</button>';
     }
     grid.appendChild(d);
   });
   photos.forEach(function(p,i){
     var d=document.createElement('div');d.className='photo-thumb';
     var loc=p.address||(p.location?p.location.lat.toFixed(5)+','+p.location.lng.toFixed(5):'');
-    d.innerHTML='<img src="'+p.data+'"><div class="ts-overlay">'+p.timestamp+(loc?'<br>📍 '+loc:'')+'</div><button class="remove-btn" onclick="photos.splice('+i+',1);renderPhotos()">✕</button>';
+    d.innerHTML='<img src="'+p.data+'"><div class="ts-overlay">'+p.timestamp+(loc?'<br>📍'+loc:'')+'</div><button class="remove-btn" onclick="photos.splice('+i+',1);renderPhotos()">✕</button>';
     grid.appendChild(d);
   });
-  var add=document.createElement('div');add.className='photo-add';add.innerHTML='<div class="plus">+</div>Tag billede';
-  add.onclick=function(){document.getElementById('photoInput').click()};grid.appendChild(add);
+  var a=document.createElement('div');a.className='photo-add';a.innerHTML='<div class="plus">+</div>Tag billede';
+  a.onclick=function(){document.getElementById('photoInput').click()};grid.appendChild(a);
 }
-function extractDriveId(url){
-  if(!url)return '';
-  var m=url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if(m)return m[1];
-  m=url.match(/id=([a-zA-Z0-9_-]+)/);
-  return m?m[1]:'';
-}
+function extractDriveId(u){if(!u)return '';var m=u.match(/\/d\/([a-zA-Z0-9_-]+)/);if(m)return m[1];m=u.match(/id=([a-zA-Z0-9_-]+)/);return m?m[1]:''}
 
-// ===================== COLLECT =====================
+// COLLECT
 function collectData(){
   var old=editingIndex>=0?entries[editingIndex]:null;
   return {
     id:old?old.id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),
     timestamp:old?old.timestamp:new Date().toISOString(),
     lastModified:new Date().toISOString(),
-    location:currentLocation?{lat:currentLocation.lat,lng:currentLocation.lng}:(old?old.location:null),
+    location:currentLocation||((old&&old.location)?old.location:null),
     address:currentAddress||(old?old.address:''),
     jyskNavn:document.getElementById('jyskNavn').value.trim(),
     norlysNavn:document.getElementById('norlysNavn').value.trim(),
     retninger:JSON.parse(JSON.stringify(directionData)),
     noter:document.getElementById('notesField').value.trim(),
-    newFotoData:photos.map(function(p){return{data:p.data,timestamp:p.timestamp,location:p.location,address:p.address}}),
+    newFotoData:photos.map(function(p){return{data:p.data,timestamp:p.timestamp}}),
     existingDriveLinks:existingPhotos.slice(),
     fotos:photos.length+existingPhotos.length,
     synced:false,
-    sheetRow:old?old.sheetRow:null,
     driveFolderId:old?old.driveFolderId:null
   };
 }
 
-// ===================== SAVE & SEND =====================
+// SAVE & SEND (always sends, always upserts)
 async function saveAndSend(){
+  if(isSending)return;
   var data=collectData();
   if(!data.jyskNavn&&!data.norlysNavn){showToast('⚠️ Indtast mindst ét brøndnavn',true);return}
-
+  isSending=true;
   var isEdit=editingIndex>=0;
   var idx;
   if(isEdit){entries[editingIndex]=data;idx=editingIndex}
   else{entries.push(data);idx=entries.length-1}
-  persistEntries();
-  updateUI();
-
-  // Reset form IMMEDIATELY so user can start next registration
+  persistEntries();updateUI();
   cancelEdit();
   showToast('✅ Gemt! Sender i baggrunden...');
-
   // Send in background
   if(settings.appsScriptUrl){
-    sendInBackground(idx);
+    try{
+      await sendToSheets(entries[idx]);
+      entries[idx].synced=true;
+      delete entries[idx].newFotoData;
+      persistEntries();updateUI();
+      showToast('☁️ Synkroniseret!');
+      // Sync back from sheets after 4 sec to get Drive links
+      setTimeout(syncFromSheets,4000);
+    }catch(err){showToast('⚠️ Sync fejl',true)}
   }
-}
-
-async function sendInBackground(idx){
-  var e=entries[idx];
-  if(!e)return;
-  var isUpdate=!!e.sheetRow;
-  try{
-    await sendToSheets(e,isUpdate);
-    entries[idx].synced=true;
-    delete entries[idx].newFotoData;
-    persistEntries();
-    updateUI();
-    showToast('☁️ Synkroniseret!');
-    // After send, sync from Sheets to get Drive folder info and photo links back
-    setTimeout(function(){ syncFromSheets(); }, 3000);
-  }catch(err){
-    showToast('⚠️ Baggrundssync fejlede',true);
-  }
+  isSending=false;
 }
 
 function persistEntries(){
   var s=entries.map(function(e){var c=Object.assign({},e);delete c.newFotoData;return c});
-  try{localStorage.setItem('sk_broend3',JSON.stringify(s))}catch(e){}
+  try{localStorage.setItem('sk_b4',JSON.stringify(s))}catch(e){}
 }
 
-async function sendToSheets(e,isUpdate){
+async function sendToSheets(e){
   var fmtDir=function(dir){return(e.retninger[dir]||[]).map(function(i){return i.dim+' '+(i.type==='fiber'?'Fiber':'Rør')}).join(', ')};
   var allIndhold={};
   Object.values(e.retninger).forEach(function(arr){arr.forEach(function(i){allIndhold[i.type==='fiber'?'Fiberkabler':'Tomrør']=true})});
-
-  var gps='';
-  if(e.location) gps=e.location.lat+', '+e.location.lng;
-
   var payload={
-    action:isUpdate?'updateEntry':'addEntry',
+    action:'addEntry',  // Always addEntry — server does upsert by ID
     entry:{
       id:e.id,
       timestamp:new Date(e.timestamp).toLocaleString('da-DK'),
       lastModified:new Date(e.lastModified).toLocaleString('da-DK'),
-      jyskNavn:e.jyskNavn, norlysNavn:e.norlysNavn,
-      gps:gps, adresse:e.address||'',
+      jyskNavn:e.jyskNavn,norlysNavn:e.norlysNavn,
+      gps:e.location?e.location.lat+', '+e.location.lng:'',
+      adresse:e.address||'',
       indhold:Object.keys(allIndhold).join(', '),
-      nord:fmtDir('nord'), syd:fmtDir('syd'), vest:fmtDir('vest'), oest:fmtDir('oest'),
-      fotos:e.fotos, noter:e.noter,
+      nord:fmtDir('nord'),syd:fmtDir('syd'),vest:fmtDir('vest'),oest:fmtDir('oest'),
+      fotos:e.fotos,noter:e.noter,
       newFotoData:(e.newFotoData||[]).map(function(p){return p.data}),
       fotoTimestamps:(e.newFotoData||[]).map(function(p){return p.timestamp}),
-      existingDriveLinks:(e.existingDriveLinks||[]).map(function(p){return p.url||p}),
-      sheetRow:e.sheetRow, driveFolderId:e.driveFolderId
+      existingDriveLinks:(e.existingDriveLinks||[]).map(function(p){return typeof p==='string'?p:p.url||''}),
+      driveFolderId:e.driveFolderId
     }
   };
-
-  try{
-    await fetch(settings.appsScriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    showToast('✅ Sendt til Sheets + Drive!');
-    return true;
-  }catch(err){showToast('⚠️ Fejl: '+err.message,true);return false}
+  await fetch(settings.appsScriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
 }
 
-// ===================== EDIT =====================
+// EDIT
 function loadEntryForEdit(i){
   var e=entries[i];if(!e)return;
   editingIndex=i;
   document.getElementById('jyskNavn').value=e.jyskNavn||'';
   document.getElementById('norlysNavn').value=e.norlysNavn||'';
   document.getElementById('notesField').value=e.noter||'';
-  DIRECTIONS.forEach(function(d){directionData[d.key]=e.retninger&&e.retninger[d.key]?e.retninger[d.key].slice():[];renderDirItems(d.key)});
+  DIRECTIONS.forEach(function(d){directionData[d.key]=(e.retninger&&e.retninger[d.key])?JSON.parse(JSON.stringify(e.retninger[d.key])):[];renderDirItems(d.key)});
   photos=[];
-  if(e.newFotoData)photos=e.newFotoData.map(function(p){return typeof p==='string'?{data:p,timestamp:'',location:null,address:''}:p});
   existingPhotos=(e.existingDriveLinks||[]).slice();
   renderPhotos();
   document.getElementById('editBanner').classList.add('show');
   document.getElementById('editBannerName').textContent=e.jyskNavn||e.norlysNavn||'?';
-  closePanel();
-  window.scrollTo({top:0,behavior:'smooth'});
+  closePanel();window.scrollTo({top:0,behavior:'smooth'});
 }
-
 function cancelEdit(){
   editingIndex=-1;
   document.getElementById('editBanner').classList.remove('show');
-  document.getElementById('jyskNavn').value='';
-  document.getElementById('norlysNavn').value='';
-  document.getElementById('notesField').value='';
+  document.getElementById('jyskNavn').value='';document.getElementById('norlysNavn').value='';document.getElementById('notesField').value='';
   DIRECTIONS.forEach(function(d){directionData[d.key]=[];renderDirItems(d.key)});
   photos=[];existingPhotos=[];renderPhotos();
 }
 
-// ===================== HISTORY =====================
-document.getElementById('historyBtn').onclick=function(){
-  document.getElementById('overlay').classList.add('show');
-  document.getElementById('panel').classList.add('show');
-  renderEntries();
-};
+// HISTORY
+document.getElementById('historyBtn').onclick=function(){document.getElementById('overlay').classList.add('show');document.getElementById('panel').classList.add('show');renderEntries()};
 function closePanel(){document.getElementById('overlay').classList.remove('show');document.getElementById('panel').classList.remove('show')}
-
 function renderEntries(){
   var body=document.getElementById('panelBody');
-  if(!entries.length){body.innerHTML='<div class="empty-state"><div class="icon">📭</div><p>Ingen registreringer</p></div>';return}
+  if(!entries.length){body.innerHTML='<div class="empty-state"><div style="font-size:36px;margin-bottom:8px">📭</div><p>Ingen registreringer</p></div>';return}
   body.innerHTML=entries.map(function(e,i){
     var tags=[];
-    Object.keys(e.retninger||{}).forEach(function(dir){
-      var items=e.retninger[dir]||[];
-      if(items.length){var lbl={nord:'N',syd:'S',vest:'V',oest:'Ø'}[dir];tags.push(lbl+': '+items.length+'stk')}
-    });
+    Object.keys(e.retninger||{}).forEach(function(d){if((e.retninger[d]||[]).length)tags.push({nord:'N',syd:'S',vest:'V',oest:'Ø'}[d]+': '+(e.retninger[d]).length)});
     if(e.fotos>0)tags.push('📷 '+e.fotos);
-    if(e.address)tags.push('📍');
-    var syncTag=e.synced?'<span class="entry-tag synced">☁️ Synk</span>':'<span class="entry-tag local">⏳ Lokal</span>';
-    var time=new Date(e.timestamp).toLocaleString('da-DK',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
-    return '<div class="entry-card"><div class="entry-head"><div class="entry-name">'+(e.jyskNavn||'—')+' <span>/ '+(e.norlysNavn||'—')+'</span></div><div class="entry-time">'+time+'</div></div><div class="entry-tags">'+tags.map(function(t){return '<span class="entry-tag">'+t+'</span>'}).join('')+syncTag+'</div><div class="entry-btns"><button class="entry-btn edit" onclick="loadEntryForEdit('+i+')">✏️ Redigér</button><button class="entry-btn del" onclick="deleteEntry('+i+')">Slet</button></div></div>'
+    var sync=e.synced?'<span class="entry-tag synced">☁️</span>':'<span class="entry-tag local">⏳</span>';
+    var time='';try{time=new Date(e.timestamp).toLocaleString('da-DK',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}catch(x){}
+    return '<div class="entry-card"><div class="entry-head"><div class="entry-name">'+(e.jyskNavn||'—')+' <span>/ '+(e.norlysNavn||'—')+'</span></div><div class="entry-time">'+time+'</div></div><div class="entry-tags">'+tags.map(function(t){return '<span class="entry-tag">'+t+'</span>'}).join('')+sync+'</div><div class="entry-btns"><button class="entry-btn edit" onclick="loadEntryForEdit('+i+')">✏️ Redigér</button><button class="entry-btn del" onclick="deleteEntry('+i+')">Slet</button></div></div>';
   }).reverse().join('');
 }
-
 function deleteEntry(i){
-  if(!confirm('Slet denne registrering?'))return;
+  if(!confirm('Slet?'))return;
   var e=entries[i];
-  // Delete from Sheets in background
   if(e&&e.id&&settings.appsScriptUrl){
-    fetch(settings.appsScriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({action:'deleteEntry',entryId:e.id})
-    }).catch(function(){});
+    fetch(settings.appsScriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'deleteEntry',entryId:e.id})}).catch(function(){});
   }
-  entries.splice(i,1);persistEntries();updateUI();renderEntries();
-  showToast('🗑️ Slettet');
+  entries.splice(i,1);persistEntries();updateUI();renderEntries();showToast('🗑️ Slettet');
 }
 
-// ===================== SYNC FROM SHEETS =====================
+// SYNC FROM SHEETS
 async function syncFromSheets(){
   if(!settings.appsScriptUrl)return;
   try{
@@ -666,59 +426,52 @@ async function syncFromSheets(){
     if(!resp.ok)return;
     var data=await resp.json();
     if(data.status==='success'&&data.entries){
-      // Merge: Sheets is source of truth for synced entries
-      var sheetEntries=data.entries;
-      var localOnly=entries.filter(function(e){return !e.synced});
-      // Build merged list: all from sheets + unsynced local
-      var merged=sheetEntries.map(function(se){
+      var localUnsent=entries.filter(function(e){return !e.synced});
+      var merged=data.entries.map(function(se){
         return{
           id:se.id,timestamp:se.timestamp,lastModified:se.lastModified,
           jyskNavn:se.jyskNavn,norlysNavn:se.norlysNavn,
           location:se.gps?{lat:parseFloat(se.gps.split(',')[0]),lng:parseFloat(se.gps.split(',')[1])}:null,
           address:se.adresse||'',
           retninger:se.retninger||{nord:[],syd:[],vest:[],oest:[]},
-          noter:se.noter||'',
-          fotos:se.fotos||0,
+          noter:se.noter||'',fotos:se.fotos||0,
           existingDriveLinks:se.driveLinks||[],
           driveFolderId:se.driveFolderId||null,
-          synced:true,sheetRow:se.sheetRow
+          synced:true
         };
       });
-      // Add unsynced local entries
-      localOnly.forEach(function(le){merged.push(le)});
-      entries=merged;
-      persistEntries();
-      updateUI();
-      showToast('🔄 Synkroniseret fra Sheets');
+      // Only add local entries that don't exist in sheets
+      localUnsent.forEach(function(le){
+        var exists=merged.some(function(m){return m.id===le.id});
+        if(!exists)merged.push(le);
+      });
+      entries=merged;persistEntries();updateUI();
+      showToast('🔄 Synkroniseret');
     }
-  }catch(err){
-    // Silently fail — offline is fine
-    console.log('Sync fejl:',err);
-  }
+  }catch(err){console.log('Sync:',err)}
 }
-
-// Sync on page load
+// Auto sync on load
 syncFromSheets();
 
-// ===================== CSV =====================
+// CSV
 function exportCSV(){
   if(!entries.length){showToast('Ingen data',true);return}
   var h=['ID','Tidspunkt','GPS','Adresse','Jysk Energi','Norlys','Nord','Syd','Vest','Øst','Fotos','Noter'];
   var rows=entries.map(function(e){
     var f=function(d){return(e.retninger[d]||[]).map(function(i){return i.dim+' '+(i.type==='fiber'?'Fiber':'Rør')}).join('; ')};
-    return[e.id,new Date(e.timestamp).toLocaleString('da-DK'),e.location?e.location.lat+','+e.location.lng:'',e.address||'',e.jyskNavn,e.norlysNavn,f('nord'),f('syd'),f('vest'),f('oest'),e.fotos,e.noter]
+    return[e.id,e.timestamp,e.location?e.location.lat+','+e.location.lng:'',e.address||'',e.jyskNavn,e.norlysNavn,f('nord'),f('syd'),f('vest'),f('oest'),e.fotos,e.noter];
   });
   var csv=[h].concat(rows).map(function(r){return r.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"'}).join(';')}).join('\n');
   var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
-  a.download='broend_'+new Date().toISOString().slice(0,10)+'.csv';a.click();showToast('✅ CSV downloadet');
+  a.download='broend_'+new Date().toISOString().slice(0,10)+'.csv';a.click();showToast('✅ CSV');
 }
 
-// ===================== SETTINGS =====================
+// SETTINGS
 document.getElementById('settingsBtn').onclick=function(){document.getElementById('appsScriptUrl').value=settings.appsScriptUrl||'';document.getElementById('settingsModal').classList.add('show')};
 function closeSettings(){document.getElementById('settingsModal').classList.remove('show')}
-function saveSettings(){settings.appsScriptUrl=document.getElementById('appsScriptUrl').value.trim();localStorage.setItem('sk_settings3',JSON.stringify(settings));updateSheetsStatus();closeSettings();showToast('✅ Gemt')}
+function saveSettings(){settings.appsScriptUrl=document.getElementById('appsScriptUrl').value.trim();localStorage.setItem('sk_s4',JSON.stringify(settings));updateUI();closeSettings();showToast('✅ Gemt')}
 function updateSheetsStatus(){document.getElementById('sheetsStatus').innerHTML=settings.appsScriptUrl?'<div class="s-dot on"></div><span>Konfigureret</span>':'<div class="s-dot off"></div><span>Ikke konfigureret</span>'}
-function clearAllData(){if(confirm('Slet alle lokale registreringer?')){entries=[];localStorage.removeItem('sk_broend3');updateUI();closeSettings();showToast('🗑️ Slettet')}}
+function clearAllData(){if(confirm('Slet alle lokale registreringer?')){entries=[];localStorage.removeItem('sk_b4');updateUI();closeSettings();showToast('🗑️ Slettet')}}
 </script>
 </body>
 </html>
