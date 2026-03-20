@@ -248,8 +248,8 @@ function stampImage(src,ts,loc,addr){
       ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,img.height-sh,img.width,sh);
       ctx.font='600 '+fs+'px Inter,Arial,sans-serif';ctx.fillStyle='#fff';ctx.textBaseline='top';
       for(var i=0;i<lines.length;i++)ctx.fillText(lines[i],pad,img.height-sh+pad+(i*lh));
-      var sf=Math.max(14,Math.round(fs*0.85));
-      ctx.font='700 '+sf+'px Inter,Arial,sans-serif';ctx.fillStyle='rgba(255,255,255,0.8)';ctx.fillText('Søren Knudsen A/S',pad,pad);
+      var sf=Math.max(18,Math.round(fs*1.1));
+      ctx.font='700 '+sf+'px Inter,Arial,sans-serif';ctx.fillStyle='rgba(255,255,255,0.85)';ctx.fillText('Søren Knudsen A/S',pad,pad);
       resolve(c.toDataURL('image/jpeg',0.85));
     };img.src=src;
   });
@@ -269,6 +269,18 @@ document.getElementById('photoInput').addEventListener('change',function(e){
 
 function renderPhotos(){
   var grid=document.getElementById('photoGrid');grid.innerHTML='';
+  
+  // Show existing uploaded photos (from Drive) if editing
+  if(editingIndex>=0 && entries[editingIndex] && entries[editingIndex].driveFolderId){
+    var fid=entries[editingIndex].driveFolderId;
+    var d=document.createElement('div');
+    d.style.cssText='grid-column:1/-1;background:var(--green-glow);border:1px solid var(--green);border-radius:var(--radius-sm);padding:12px;display:flex;align-items:center;gap:8px;cursor:pointer';
+    d.innerHTML='<span style="font-size:20px">📁</span><div><div style="font-size:13px;font-weight:600;color:var(--green)">'+entries[editingIndex].fotos+' billeder i Drive</div><div style="font-size:11px;color:var(--text-muted)">Tryk for at åbne mappen</div></div>';
+    d.onclick=function(){window.open('https://drive.google.com/drive/folders/'+fid,'_blank')};
+    grid.appendChild(d);
+  }
+  
+  // Show existing Drive link photos
   existingPhotos.forEach(function(p,i){
     var d=document.createElement('div');d.className='photo-thumb uploaded';
     var url=typeof p==='string'?p:(p.url||'');
@@ -281,12 +293,16 @@ function renderPhotos(){
     }
     grid.appendChild(d);
   });
+  
+  // Show new photos (not yet uploaded)
   photos.forEach(function(p,i){
     var d=document.createElement('div');d.className='photo-thumb';
     var loc=p.address||(p.location?p.location.lat.toFixed(5)+','+p.location.lng.toFixed(5):'');
     d.innerHTML='<img src="'+p.data+'"><div class="ts-overlay">'+p.timestamp+(loc?'<br>📍'+loc:'')+'</div><button class="remove-btn" onclick="photos.splice('+i+',1);renderPhotos()">✕</button>';
     grid.appendChild(d);
   });
+  
+  // Add button
   var a=document.createElement('div');a.className='photo-add';a.innerHTML='<div class="plus">+</div>Tag billede';
   a.onclick=function(){document.getElementById('photoInput').click()};grid.appendChild(a);
 }
@@ -418,43 +434,42 @@ function deleteEntry(i){
   entries.splice(i,1);persistEntries();updateUI();renderEntries();showToast('🗑️ Slettet');
 }
 
-// SYNC FROM SHEETS using JSONP (bypasses CORS)
-window._broendSyncCallback=function(data){
-  if(data.status==='success'&&data.entries){
-    var localUnsent=entries.filter(function(e){return !e.synced});
-    var merged=data.entries.map(function(se){
-      return{
-        id:se.id,timestamp:se.timestamp,lastModified:se.lastModified,
-        jyskNavn:se.jyskNavn,norlysNavn:se.norlysNavn,
-        location:se.gps?{lat:parseFloat(se.gps.split(',')[0]),lng:parseFloat(se.gps.split(',')[1])}:null,
-        address:se.adresse||'',
-        retninger:se.retninger||{nord:[],syd:[],vest:[],oest:[]},
-        noter:se.noter||'',fotos:se.fotos||0,
-        existingDriveLinks:se.driveLinks||[],
-        driveFolderId:se.driveFolderId||null,
-        synced:true
-      };
-    });
-    localUnsent.forEach(function(le){
-      var exists=merged.some(function(m){return m.id===le.id});
-      if(!exists)merged.push(le);
-    });
-    entries=merged;persistEntries();updateUI();
-    showToast('🔄 Synk ('+data.entries.length+' brønde)');
-  }
-};
-
-function syncFromSheets(){
+// SYNC FROM SHEETS
+async function syncFromSheets(){
   if(!settings.appsScriptUrl)return;
-  // Use JSONP — add script tag that calls our callback
-  var s=document.createElement('script');
-  s.src=settings.appsScriptUrl+'?action=getData&callback=_broendSyncCallback&t='+Date.now();
-  s.onerror=function(){console.log('Sync: script load fejl');document.head.removeChild(s)};
-  s.onload=function(){document.head.removeChild(s)};
-  document.head.appendChild(s);
+  try{
+    var resp=await fetch(settings.appsScriptUrl+'?action=getData&t='+Date.now(),{redirect:'follow'});
+    var text=await resp.text();
+    if(!text||text.charAt(0)!=='{')return; // Not JSON
+    var data=JSON.parse(text);
+    if(data.status==='success'&&data.entries&&data.entries.length>0){
+      var localUnsent=entries.filter(function(e){return !e.synced});
+      var merged=data.entries.map(function(se){
+        return{
+          id:se.id,timestamp:se.timestamp,lastModified:se.lastModified,
+          jyskNavn:se.jyskNavn,norlysNavn:se.norlysNavn,
+          location:se.gps?{lat:parseFloat(se.gps.split(',')[0]),lng:parseFloat(se.gps.split(',')[1])}:null,
+          address:se.adresse||'',
+          retninger:se.retninger||{nord:[],syd:[],vest:[],oest:[]},
+          noter:se.noter||'',fotos:se.fotos||0,
+          existingDriveLinks:se.driveLinks||[],
+          driveFolderId:se.driveFolderId||null,
+          synced:true
+        };
+      });
+      localUnsent.forEach(function(le){
+        if(!merged.some(function(m){return m.id===le.id}))merged.push(le);
+      });
+      entries=merged;persistEntries();updateUI();
+      showToast('🔄 '+data.entries.length+' brønde synkroniseret');
+    }
+  }catch(err){
+    // Silent fail — works offline from local storage
+    console.log('Sync:',err.message||err);
+  }
 }
-// Auto sync on load
-setTimeout(syncFromSheets,1000);
+// Auto sync on load (delayed to not block UI)
+setTimeout(syncFromSheets,2000);
 
 // CSV
 function exportCSV(){
