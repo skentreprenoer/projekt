@@ -368,19 +368,7 @@ async function sendToSheets(e){
       driveFolderId:e.driveFolderId
     }
   };
-  var resp=await fetch(settings.appsScriptUrl,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(payload),
-    redirect:'follow'
-  });
-  // Try to read response for driveFolderId
-  try{
-    var text=await resp.text();
-    var result=JSON.parse(text);
-    if(result.driveFolderId) e.driveFolderId=result.driveFolderId;
-    if(result.fotos) e.fotos=result.fotos;
-  }catch(x){}
+  await fetch(settings.appsScriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
 }
 
 // EDIT
@@ -430,46 +418,43 @@ function deleteEntry(i){
   entries.splice(i,1);persistEntries();updateUI();renderEntries();showToast('🗑️ Slettet');
 }
 
-// SYNC FROM SHEETS
-async function syncFromSheets(){
-  if(!settings.appsScriptUrl)return;
-  try{
-    // Use POST with redirect:follow — Apps Script redirects but returns JSON
-    var resp=await fetch(settings.appsScriptUrl,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({action:'getData'}),
-      redirect:'follow'
+// SYNC FROM SHEETS using JSONP (bypasses CORS)
+window._broendSyncCallback=function(data){
+  if(data.status==='success'&&data.entries){
+    var localUnsent=entries.filter(function(e){return !e.synced});
+    var merged=data.entries.map(function(se){
+      return{
+        id:se.id,timestamp:se.timestamp,lastModified:se.lastModified,
+        jyskNavn:se.jyskNavn,norlysNavn:se.norlysNavn,
+        location:se.gps?{lat:parseFloat(se.gps.split(',')[0]),lng:parseFloat(se.gps.split(',')[1])}:null,
+        address:se.adresse||'',
+        retninger:se.retninger||{nord:[],syd:[],vest:[],oest:[]},
+        noter:se.noter||'',fotos:se.fotos||0,
+        existingDriveLinks:se.driveLinks||[],
+        driveFolderId:se.driveFolderId||null,
+        synced:true
+      };
     });
-    var text=await resp.text();
-    var data;
-    try{data=JSON.parse(text)}catch(e){console.log('Parse fejl:',text.substring(0,200));return}
-    if(data.status==='success'&&data.entries){
-      var localUnsent=entries.filter(function(e){return !e.synced});
-      var merged=data.entries.map(function(se){
-        return{
-          id:se.id,timestamp:se.timestamp,lastModified:se.lastModified,
-          jyskNavn:se.jyskNavn,norlysNavn:se.norlysNavn,
-          location:se.gps?{lat:parseFloat(se.gps.split(',')[0]),lng:parseFloat(se.gps.split(',')[1])}:null,
-          address:se.adresse||'',
-          retninger:se.retninger||{nord:[],syd:[],vest:[],oest:[]},
-          noter:se.noter||'',fotos:se.fotos||0,
-          existingDriveLinks:se.driveLinks||[],
-          driveFolderId:se.driveFolderId||null,
-          synced:true
-        };
-      });
-      localUnsent.forEach(function(le){
-        var exists=merged.some(function(m){return m.id===le.id});
-        if(!exists)merged.push(le);
-      });
-      entries=merged;persistEntries();updateUI();
-      showToast('🔄 Synkroniseret ('+data.entries.length+' brønde)');
-    }
-  }catch(err){console.log('Sync:',err)}
+    localUnsent.forEach(function(le){
+      var exists=merged.some(function(m){return m.id===le.id});
+      if(!exists)merged.push(le);
+    });
+    entries=merged;persistEntries();updateUI();
+    showToast('🔄 Synk ('+data.entries.length+' brønde)');
+  }
+};
+
+function syncFromSheets(){
+  if(!settings.appsScriptUrl)return;
+  // Use JSONP — add script tag that calls our callback
+  var s=document.createElement('script');
+  s.src=settings.appsScriptUrl+'?action=getData&callback=_broendSyncCallback&t='+Date.now();
+  s.onerror=function(){console.log('Sync: script load fejl');document.head.removeChild(s)};
+  s.onload=function(){document.head.removeChild(s)};
+  document.head.appendChild(s);
 }
 // Auto sync on load
-syncFromSheets();
+setTimeout(syncFromSheets,1000);
 
 // CSV
 function exportCSV(){
