@@ -429,9 +429,9 @@ function stampImage(imgDataUrl, ts, loc, address) {
       }
 
       // Also add small Søren Knudsen watermark top-left
-      var smallFont = Math.max(10, Math.round(fontSize * 0.65));
+      var smallFont = Math.max(14, Math.round(fontSize * 0.85));
       ctx.font = '700 ' + smallFont + 'px "Inter", Arial, sans-serif';
-      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
       ctx.fillText('Søren Knudsen A/S', padding, padding);
 
       resolve(canvas.toDataURL('image/jpeg', 0.85));
@@ -464,8 +464,15 @@ function renderPhotos(){
   grid.innerHTML='';
   existingPhotos.forEach(function(p,i){
     var d=document.createElement('div');d.className='photo-thumb uploaded';
-    var info=p.timestamp||'';var loc=p.address||(p.location?p.location.lat.toFixed(5)+','+p.location.lng.toFixed(5):'');
-    d.innerHTML='<img src="https://drive.google.com/thumbnail?id='+extractDriveId(p.url||p)+'&sz=w200" onerror="this.style.display=\'none\'"><span class="cloud">☁️</span><div class="ts-overlay">'+info+(loc?'<br>📍 '+loc:'')+'</div><button class="remove-btn" onclick="existingPhotos.splice('+i+',1);renderPhotos()">✕</button>';
+    var url=typeof p==='string'?p:(p.url||'');
+    var name=(typeof p==='object'&&p.name)?p.name:'Uploadet';
+    var driveId=extractDriveId(url);
+    var fallback='<div style="padding:8px;text-align:center;font-size:10px;color:#888;height:100%;display:flex;align-items:center;justify-content:center;background:#eee">☁️ '+name+'</div>';
+    if(driveId){
+      d.innerHTML='<img src="https://lh3.googleusercontent.com/d/'+driveId+'=w200" onerror="this.parentElement.querySelector(\'.img-wrap\').innerHTML=\''+fallback.replace(/'/g,"\\'")+'\'"><span class="cloud">☁️</span><div class="ts-overlay">'+name+'</div><button class="remove-btn" onclick="existingPhotos.splice('+i+',1);renderPhotos()">✕</button>';
+    } else {
+      d.innerHTML=fallback+'<button class="remove-btn" onclick="existingPhotos.splice('+i+',1);renderPhotos()">✕</button>';
+    }
     grid.appendChild(d);
   });
   photos.forEach(function(p,i){
@@ -477,7 +484,13 @@ function renderPhotos(){
   var add=document.createElement('div');add.className='photo-add';add.innerHTML='<div class="plus">+</div>Tag billede';
   add.onclick=function(){document.getElementById('photoInput').click()};grid.appendChild(add);
 }
-function extractDriveId(url){if(!url)return '';var m=url.match(/\/d\/([a-zA-Z0-9_-]+)/);return m?m[1]:''}
+function extractDriveId(url){
+  if(!url)return '';
+  var m=url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if(m)return m[1];
+  m=url.match(/id=([a-zA-Z0-9_-]+)/);
+  return m?m[1]:'';
+}
 
 // ===================== COLLECT =====================
 function collectData(){
@@ -528,15 +541,14 @@ async function sendInBackground(idx){
   if(!e)return;
   var isUpdate=!!e.sheetRow;
   try{
-    var ok=await sendToSheets(e,isUpdate);
-    if(ok){
-      entries[idx].synced=true;
-      // Keep Drive folder info but clear raw photo data
-      delete entries[idx].newFotoData;
-      persistEntries();
-      updateUI();
-      showToast('☁️ Synkroniseret!');
-    }
+    await sendToSheets(e,isUpdate);
+    entries[idx].synced=true;
+    delete entries[idx].newFotoData;
+    persistEntries();
+    updateUI();
+    showToast('☁️ Synkroniseret!');
+    // After send, sync from Sheets to get Drive folder info and photo links back
+    setTimeout(function(){ syncFromSheets(); }, 3000);
   }catch(err){
     showToast('⚠️ Baggrundssync fejlede',true);
   }
