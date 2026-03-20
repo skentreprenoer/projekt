@@ -504,28 +504,40 @@ async function saveAndSend(){
   var data=collectData();
   if(!data.jyskNavn&&!data.norlysNavn){showToast('⚠️ Indtast mindst ét brøndnavn',true);return}
 
-  var btn=document.getElementById('sendBtn');
-  btn.disabled=true; btn.textContent='⏳ Sender...';
-
   var isEdit=editingIndex>=0;
-  if(isEdit) entries[editingIndex]=data;
-  else entries.push(data);
+  var idx;
+  if(isEdit){entries[editingIndex]=data;idx=editingIndex}
+  else{entries.push(data);idx=entries.length-1}
   persistEntries();
-
-  if(settings.appsScriptUrl){
-    var ok=await sendToSheets(data,isEdit);
-    if(ok){
-      var idx=isEdit?editingIndex:entries.length-1;
-      entries[idx].synced=true;
-      persistEntries();
-    }
-  } else {
-    showToast('⚠️ Gemt lokalt — konfigurér Sheets i ⚙️',true);
-  }
-
-  btn.disabled=false; btn.textContent='📤 Gem & Send';
   updateUI();
-  cancelEdit(); // Auto reset for next entry
+
+  // Reset form IMMEDIATELY so user can start next registration
+  cancelEdit();
+  showToast('✅ Gemt! Sender i baggrunden...');
+
+  // Send in background
+  if(settings.appsScriptUrl){
+    sendInBackground(idx);
+  }
+}
+
+async function sendInBackground(idx){
+  var e=entries[idx];
+  if(!e)return;
+  var isUpdate=!!e.sheetRow;
+  try{
+    var ok=await sendToSheets(e,isUpdate);
+    if(ok){
+      entries[idx].synced=true;
+      // Clear photo data from memory after successful upload
+      delete entries[idx].newFotoData;
+      persistEntries();
+      updateUI();
+      showToast('☁️ Synkroniseret!');
+    }
+  }catch(err){
+    showToast('⚠️ Baggrundssync fejlede',true);
+  }
 }
 
 function persistEntries(){
