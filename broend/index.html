@@ -351,7 +351,7 @@ async function sendToSheets(e){
   var allIndhold={};
   Object.values(e.retninger).forEach(function(arr){arr.forEach(function(i){allIndhold[i.type==='fiber'?'Fiberkabler':'Tomrør']=true})});
   var payload={
-    action:'addEntry',  // Always addEntry — server does upsert by ID
+    action:'addEntry',
     entry:{
       id:e.id,
       timestamp:new Date(e.timestamp).toLocaleString('da-DK'),
@@ -368,7 +368,19 @@ async function sendToSheets(e){
       driveFolderId:e.driveFolderId
     }
   };
-  await fetch(settings.appsScriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  var resp=await fetch(settings.appsScriptUrl,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload),
+    redirect:'follow'
+  });
+  // Try to read response for driveFolderId
+  try{
+    var text=await resp.text();
+    var result=JSON.parse(text);
+    if(result.driveFolderId) e.driveFolderId=result.driveFolderId;
+    if(result.fotos) e.fotos=result.fotos;
+  }catch(x){}
 }
 
 // EDIT
@@ -422,9 +434,16 @@ function deleteEntry(i){
 async function syncFromSheets(){
   if(!settings.appsScriptUrl)return;
   try{
-    var resp=await fetch(settings.appsScriptUrl+'?action=getData&t='+Date.now());
-    if(!resp.ok)return;
-    var data=await resp.json();
+    // Use POST with redirect:follow — Apps Script redirects but returns JSON
+    var resp=await fetch(settings.appsScriptUrl,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'getData'}),
+      redirect:'follow'
+    });
+    var text=await resp.text();
+    var data;
+    try{data=JSON.parse(text)}catch(e){console.log('Parse fejl:',text.substring(0,200));return}
     if(data.status==='success'&&data.entries){
       var localUnsent=entries.filter(function(e){return !e.synced});
       var merged=data.entries.map(function(se){
@@ -440,13 +459,12 @@ async function syncFromSheets(){
           synced:true
         };
       });
-      // Only add local entries that don't exist in sheets
       localUnsent.forEach(function(le){
         var exists=merged.some(function(m){return m.id===le.id});
         if(!exists)merged.push(le);
       });
       entries=merged;persistEntries();updateUI();
-      showToast('🔄 Synkroniseret');
+      showToast('🔄 Synkroniseret ('+data.entries.length+' brønde)');
     }
   }catch(err){console.log('Sync:',err)}
 }
