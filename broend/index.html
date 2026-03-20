@@ -302,7 +302,7 @@ var DIRECTIONS = [
   {key:'vest',label:'Vest',arrow:'←'},
   {key:'oest',label:'Øst',arrow:'→'}
 ];
-var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwKfCZ5nin3STNPF1EBpNEKAlNkDT9DYXPfFufeDlMEeGLXzajxXJEIyfUn5547uLJeRQ/exec';
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz7kNFAk8BLGpaXIy8aaDEY-EzOE5LiSzpqmRfNN7xBmJ9YhjeUSD3D2M2Ina__QpsImQ/exec';
 
 // ===================== STATE =====================
 var directionData = {};
@@ -311,7 +311,9 @@ var photos = [];
 var existingPhotos = [];
 var entries = JSON.parse(localStorage.getItem('sk_broend3') || '[]');
 var settings = JSON.parse(localStorage.getItem('sk_settings3') || '{}');
-if (!settings.appsScriptUrl) { settings.appsScriptUrl = APPS_SCRIPT_URL; localStorage.setItem('sk_settings3', JSON.stringify(settings)); }
+// Altid opdatér til nyeste URL
+settings.appsScriptUrl = APPS_SCRIPT_URL;
+localStorage.setItem('sk_settings3', JSON.stringify(settings));
 var editingIndex = -1;
 var currentLocation = null;
 var currentAddress = '';
