@@ -266,7 +266,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 <!-- HISTORY -->
 <div class="overlay" id="overlay" onclick="closePanel()"></div>
 <div class="panel" id="panel">
-  <div class="panel-header"><h2>Registreringer</h2><button class="panel-close" onclick="closePanel()">✕</button></div>
+  <div class="panel-header"><h2>Registreringer</h2><div style="display:flex;gap:6px"><button class="entry-btn" onclick="syncFromSheets()" style="color:var(--green);padding:6px 10px">🔄 Synk</button><button class="panel-close" onclick="closePanel()">✕</button></div></div>
   <div class="panel-body" id="panelBody"></div>
   <div class="panel-footer">
     <button class="btn btn-outline" style="width:100%" onclick="exportCSV()">📄 CSV</button>
@@ -531,7 +531,7 @@ async function sendInBackground(idx){
     var ok=await sendToSheets(e,isUpdate);
     if(ok){
       entries[idx].synced=true;
-      // Clear photo data from memory after successful upload
+      // Keep Drive folder info but clear raw photo data
       delete entries[idx].newFotoData;
       persistEntries();
       updateUI();
@@ -633,7 +633,60 @@ function renderEntries(){
   }).reverse().join('');
 }
 
-function deleteEntry(i){if(confirm('Slet?')){entries.splice(i,1);persistEntries();updateUI();renderEntries()}}
+function deleteEntry(i){
+  if(!confirm('Slet denne registrering?'))return;
+  var e=entries[i];
+  // Delete from Sheets in background
+  if(e&&e.id&&settings.appsScriptUrl){
+    fetch(settings.appsScriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'deleteEntry',entryId:e.id})
+    }).catch(function(){});
+  }
+  entries.splice(i,1);persistEntries();updateUI();renderEntries();
+  showToast('🗑️ Slettet');
+}
+
+// ===================== SYNC FROM SHEETS =====================
+async function syncFromSheets(){
+  if(!settings.appsScriptUrl)return;
+  try{
+    var resp=await fetch(settings.appsScriptUrl+'?action=getData&t='+Date.now());
+    if(!resp.ok)return;
+    var data=await resp.json();
+    if(data.status==='success'&&data.entries){
+      // Merge: Sheets is source of truth for synced entries
+      var sheetEntries=data.entries;
+      var localOnly=entries.filter(function(e){return !e.synced});
+      // Build merged list: all from sheets + unsynced local
+      var merged=sheetEntries.map(function(se){
+        return{
+          id:se.id,timestamp:se.timestamp,lastModified:se.lastModified,
+          jyskNavn:se.jyskNavn,norlysNavn:se.norlysNavn,
+          location:se.gps?{lat:parseFloat(se.gps.split(',')[0]),lng:parseFloat(se.gps.split(',')[1])}:null,
+          address:se.adresse||'',
+          retninger:se.retninger||{nord:[],syd:[],vest:[],oest:[]},
+          noter:se.noter||'',
+          fotos:se.fotos||0,
+          existingDriveLinks:se.driveLinks||[],
+          driveFolderId:se.driveFolderId||null,
+          synced:true,sheetRow:se.sheetRow
+        };
+      });
+      // Add unsynced local entries
+      localOnly.forEach(function(le){merged.push(le)});
+      entries=merged;
+      persistEntries();
+      updateUI();
+      showToast('🔄 Synkroniseret fra Sheets');
+    }
+  }catch(err){
+    // Silently fail — offline is fine
+    console.log('Sync fejl:',err);
+  }
+}
+
+// Sync on page load
+syncFromSheets();
 
 // ===================== CSV =====================
 function exportCSV(){
