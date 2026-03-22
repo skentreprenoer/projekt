@@ -186,6 +186,7 @@ var ROER_DIMS=['Ø8','Ø10','Ø12','Ø14','Ø16','Ø32','Ø40','Ø50','Ø110'];
 var FIBER_DIMS=['12','24','48','96','144','288'];
 var DIRECTIONS=[{key:'nord',label:'Nord',arrow:'↑'},{key:'syd',label:'Syd',arrow:'↓'},{key:'vest',label:'Vest',arrow:'←'},{key:'oest',label:'Øst',arrow:'→'}];
 var APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbz7kNFAk8BLGpaXIy8aaDEY-EzOE5LiSzpqmRfNN7xBmJ9YhjeUSD3D2M2Ina__QpsImQ/exec';
+var CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRTfv0ZsqekB52co9jfKAexo9i9IYn4sACseGvBzn5Fw5Ihgt2caBNu_f-8A9taS_lWozrwU0lpPcPQ/pub?gid=512889790&single=true&output=csv';
 
 var directionData={};
 DIRECTIONS.forEach(function(d){directionData[d.key]=[]});
@@ -434,42 +435,103 @@ function deleteEntry(i){
   entries.splice(i,1);persistEntries();updateUI();renderEntries();showToast('🗑️ Slettet');
 }
 
-// SYNC FROM SHEETS
+// SYNC FROM SHEETS via published CSV (no CORS issues!)
 async function syncFromSheets(){
-  if(!settings.appsScriptUrl)return;
   try{
-    var resp=await fetch(settings.appsScriptUrl+'?action=getData&t='+Date.now(),{redirect:'follow'});
+    var resp=await fetch(CSV_URL+'&t='+Date.now());
+    if(!resp.ok)return;
     var text=await resp.text();
-    if(!text||text.charAt(0)!=='{')return; // Not JSON
-    var data=JSON.parse(text);
-    if(data.status==='success'&&data.entries&&data.entries.length>0){
-      var localUnsent=entries.filter(function(e){return !e.synced});
-      var merged=data.entries.map(function(se){
-        return{
-          id:se.id,timestamp:se.timestamp,lastModified:se.lastModified,
-          jyskNavn:se.jyskNavn,norlysNavn:se.norlysNavn,
-          location:se.gps?{lat:parseFloat(se.gps.split(',')[0]),lng:parseFloat(se.gps.split(',')[1])}:null,
-          address:se.adresse||'',
-          retninger:se.retninger||{nord:[],syd:[],vest:[],oest:[]},
-          noter:se.noter||'',fotos:se.fotos||0,
-          existingDriveLinks:se.driveLinks||[],
-          driveFolderId:se.driveFolderId||null,
-          synced:true
-        };
+    var rows=parseCSV(text);
+    if(rows.length<2)return; // Only headers or empty
+    
+    var headers=rows[0];
+    var localUnsent=entries.filter(function(e){return !e.synced});
+    var merged=[];
+    
+    for(var i=1;i<rows.length;i++){
+      var r=rows[i];
+      if(!r[0])continue; // Skip empty rows
+      
+      // Parse directions from strings like "12 Fiber, Ø40 Rør"
+      var parseDir=function(str){
+        if(!str)return [];
+        return str.split(',').map(function(s){
+          s=s.trim();if(!s)return null;
+          var parts=s.split(' ');
+          if(parts.length>=2){
+            return{type:parts[1].toLowerCase().indexOf('fiber')>-1?'fiber':'roer',dim:parts[0]};
+          }
+          return null;
+        }).filter(function(x){return x});
+      };
+      
+      // Extract folderId from Drive URL
+      var folderUrl=r[13]||'';
+      var fm=folderUrl.match(/folders\/([a-zA-Z0-9_-]+)/);
+      var folderId=fm?fm[1]:null;
+      
+      merged.push({
+        id:String(r[0]),
+        timestamp:String(r[1]),
+        lastModified:String(r[2]),
+        jyskNavn:String(r[3]),
+        norlysNavn:String(r[4]),
+        location:r[5]?{lat:parseFloat(String(r[5]).split(',')[0]),lng:parseFloat(String(r[5]).split(',')[1])}:null,
+        address:String(r[6]||''),
+        retninger:{
+          nord:parseDir(r[8]),
+          syd:parseDir(r[9]),
+          vest:parseDir(r[10]),
+          oest:parseDir(r[11])
+        },
+        noter:String(r[14]||''),
+        fotos:Number(r[12])||0,
+        driveFolderId:folderId,
+        existingDriveLinks:[],
+        synced:true
       });
-      localUnsent.forEach(function(le){
-        if(!merged.some(function(m){return m.id===le.id}))merged.push(le);
-      });
-      entries=merged;persistEntries();updateUI();
-      showToast('🔄 '+data.entries.length+' brønde synkroniseret');
     }
+    
+    // Add local unsynced entries that aren't in sheets yet
+    localUnsent.forEach(function(le){
+      if(!merged.some(function(m){return m.id===le.id}))merged.push(le);
+    });
+    
+    entries=merged;
+    persistEntries();
+    updateUI();
+    showToast('🔄 '+merged.filter(function(e){return e.synced}).length+' brønde synkroniseret');
   }catch(err){
-    // Silent fail — works offline from local storage
-    console.log('Sync:',err.message||err);
+    console.log('CSV sync:',err);
   }
 }
-// Auto sync on load (delayed to not block UI)
-setTimeout(syncFromSheets,2000);
+
+// Simple CSV parser that handles quoted fields
+function parseCSV(text){
+  var rows=[];var row=[];var field='';var inQuote=false;
+  for(var i=0;i<text.length;i++){
+    var c=text[i];var next=text[i+1];
+    if(inQuote){
+      if(c==='"'&&next==='"'){field+='"';i++}
+      else if(c==='"'){inQuote=false}
+      else{field+=c}
+    }else{
+      if(c==='"'){inQuote=true}
+      else if(c===','){row.push(field);field=''}
+      else if(c==='\n'||(c==='\r'&&next==='\n')){
+        row.push(field);rows.push(row);row=[];field='';
+        if(c==='\r')i++;
+      }else if(c==='\r'){row.push(field);rows.push(row);row=[];field=''}
+      else{field+=c}
+    }
+  }
+  if(field||row.length)row.push(field);
+  if(row.length)rows.push(row);
+  return rows;
+}
+
+// Auto sync on load
+setTimeout(syncFromSheets,1500);
 
 // CSV
 function exportCSV(){
