@@ -320,7 +320,7 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
         <div id="loading-norlys" class="loading-msg"><span class="spinner"></span>Henter data...</div>
         <div id="err-norlys" class="err-msg" style="display:none"></div>
         <table id="table-norlys" style="display:none">
-          <thead><tr><th>Sagsnr</th><th>Måned</th><th>Adresse</th><th>Projektleder</th><th>Udleveret</th><th>LER/GT</th><th>GT slut</th><th>Status</th><th>Landmålt</th><th>Blæst</th><th>Link</th></tr></thead>
+          <thead><tr><th>Sagsnr</th><th>Måned</th><th>Adresse</th><th>Projektleder</th><th>Deadline</th><th>Udleveret</th><th>LER/GT</th><th>GT slut</th><th>Status</th><th>Landmålt</th><th>Blæst</th><th>Link</th></tr></thead>
           <tbody id="tbody-norlys"></tbody>
         </table>
         <div class="no-results" id="nores-norlys" style="display:none">Ingen resultater fundet</div>
@@ -860,13 +860,14 @@ function renderNorlys() {
   tbody.innerHTML=rows.map(r=>`<tr class="clickable" onclick="openModal('norlys',${all.indexOf(r)})">
     <td class="mono">${r[0]}</td><td>${r[1]||'—'}</td>
     <td class="trunc">${r[2]||'—'}</td><td>${r[3]||'—'}</td>
-    <td>${checkBadge(r[4])}</td>
-    <td>${lerBadge(r[5])}</td>
-    <td>${checkBadge(r[6])}</td>
-    <td>${statusBadge(r[7])}</td>
-    <td>${checkBadge(r[8])}</td>
+    <td>${r[4]||'—'}</td>
+    <td>${checkBadge(r[5])}</td>
+    <td>${lerBadge(r[6])}</td>
+    <td>${checkBadge(r[7])}</td>
+    <td>${statusBadge(r[8])}</td>
     <td>${checkBadge(r[9])}</td>
-    <td>${linkBtn(r[10])}</td>
+    <td>${checkBadge(r[10])}</td>
+    <td>${linkBtn(r[11])}</td>
   </tr>`).join('');
 
   const filterEl=document.getElementById('filter-norlys');
@@ -1094,6 +1095,19 @@ function openModal(key, idx) {
   const r=all[idx];
   if(!r) return;
 
+  // Norlys has extra Deadline column (E), so everything shifts +1
+  const isNorlys = key==='norlys';
+  const COL = {
+    deadline: isNorlys ? 4 : null,
+    udleveret: isNorlys ? 5 : 4,
+    ler: isNorlys ? 6 : 5,
+    gtslut: isNorlys ? 7 : 6,
+    status: isNorlys ? 8 : 7,
+    landmaalt: isNorlys ? 9 : 8,
+    blaest: isNorlys ? 10 : 9,
+    link: isNorlys ? 11 : 10
+  };
+
   const adresse = r[2]||'';
   document.getElementById('modal-title').textContent=adresse||'Ukendt adresse';
   document.getElementById('modal-sub').textContent=`Sagsnr. ${r[0]}  ·  ${key==='dso2026'?'DSO 2026':'Norlys'}`;
@@ -1105,7 +1119,7 @@ function openModal(key, idx) {
 
   // HURTIGE LINKS — Maps + Projektplan
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adresse)}`;
-  const projektLink = r[10];
+  const projektLink = r[COL.link];
 
   body+=`<div class="modal-section">
     <div class="modal-section-title">Links</div>
@@ -1122,8 +1136,8 @@ function openModal(key, idx) {
     </div>
   </div>`;
 
-  // LER link (col 5 = LER/GT)
-  const lerVal = r[5]||'';
+  // LER link
+  const lerVal = r[COL.ler]||'';
   const lerLink = lerVal.startsWith('http') ? lerVal : null;
 
   if(lerLink) {
@@ -1138,10 +1152,12 @@ function openModal(key, idx) {
 
   // Detaljer
   const fields=[
-    ['Måned',r[1]],['Projektleder',r[3]],['Udleveret til',r[4]],
-    ['LER/GT', lerLink ? '✓ Link tilgængeligt' : (r[5]||'')],
-    ['GT slut',r[6]],['Status',r[7]],['Landmålt',r[8]],['Blæst',r[9]]
-  ].filter(([,v])=>v&&v.trim());
+    ['Måned',r[1]],['Projektleder',r[3]],
+    COL.deadline!==null ? ['Deadline',r[COL.deadline]] : null,
+    ['Udleveret til',r[COL.udleveret]],
+    ['LER/GT', lerLink ? '✓ Link tilgængeligt' : (r[COL.ler]||'')],
+    ['GT slut',r[COL.gtslut]],['Status',r[COL.status]],['Landmålt',r[COL.landmaalt]],['Blæst',r[COL.blaest]]
+  ].filter(f=>f&&f[1]&&f[1].trim());
 
   if(fields.length) {
     body+=`<div class="modal-section"><div class="modal-section-title">Detaljer</div>`;
@@ -1172,7 +1188,7 @@ function openModal(key, idx) {
   if(key==='dso2026' || key==='norlys') {
     body+=`<div class="fieldwork-group"><div class="modal-section-title">Feltarbejde</div>`;
     
-    const landmaaltVal = (r[8]||'').trim();
+    const landmaaltVal = (r[COL.landmaalt]||'').trim();
     if(landmaaltVal) {
       body+=`<button class="landmaalt-btn landmaalt-done" disabled>✓ Landmålt: ${landmaaltVal}</button>`;
     } else {
@@ -1181,7 +1197,7 @@ function openModal(key, idx) {
 
     body+=`<div class="fieldwork-divider"></div>`;
 
-    const blaestVal = (r[9]||'').trim();
+    const blaestVal = (r[COL.blaest]||'').trim();
     if(blaestVal) {
       body+=`<div class="blaest-done"><div class="blaest-done-title">💨 Blæst registreret</div>${blaestVal}</div>`;
     } else {
@@ -1268,10 +1284,10 @@ function buildDashboard() {
   const dsoLand=all26.filter(r=>r[8]&&r[8].trim()).length;
   const dsoBlae=all26.filter(r=>r[9]&&r[9].trim()).length;
 
-  // Norlys stats
-  const norUdl=alln.filter(r=>r[4]&&r[4].trim()).length;
-  const norLand=alln.filter(r=>r[8]&&r[8].trim()).length;
-  const norBlae=alln.filter(r=>r[9]&&r[9].trim()).length;
+  // Norlys stats (Norlys has Deadline col so indices are +1)
+  const norUdl=alln.filter(r=>r[5]&&r[5].trim()).length;
+  const norLand=alln.filter(r=>r[9]&&r[9].trim()).length;
+  const norBlae=alln.filter(r=>r[10]&&r[10].trim()).length;
 
   // BB stats
   const bbUdl=allbb.filter(r=>r[4]&&r[4].trim()).length;
