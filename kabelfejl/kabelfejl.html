@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kabelfejl - Blæsekort - Søren Knudsen A/S</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <style>
+        :root {
+            --sk-red: #B30012;
+            --sk-red-dark: #8C000E;
+            --sk-red-light: #D4001A;
+            --sk-charcoal: #1A1A1A;
+            --sk-dark: #111111;
+            --sk-card: #222222;
+            --sk-border: #333333;
+            --sk-text: #F0F0F0;
+            --sk-text-dim: #999999;
+            --sk-white: #FFFFFF;
+            --sk-green: #22c55e;
+            --sk-green-dark: #16a34a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--sk-dark);
+            color: var(--sk-text);
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ── HEADER ── */
+        header {
+            background: var(--sk-red);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+
+        .logo-box {
+            width: 40px; height: 40px;
+            border: 2px solid var(--sk-white);
+            border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            padding: 3px;
+        }
+
+        .logo-box svg { width: 100%; height: 100%; }
+
+        .header-text h1 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--sk-white);
+            line-height: 1.2;
+        }
+
+        .header-text .subtitle {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.75);
+            letter-spacing: 0.5px;
+        }
+
+        /* ── LOADING OVERLAY ── */
+        #initOverlay {
+            position: fixed; inset: 0;
+            background: var(--sk-dark);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+        #initOverlay.hidden { opacity: 0; pointer-events: none; }
+        #initOverlay .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid var(--sk-border);
+            border-top-color: var(--sk-red);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #initOverlay p { color: var(--sk-text-dim); font-size: 0.9rem; }
+
+        /* ── MAIN LAYOUT ── */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 360px;
+            background: var(--sk-charcoal);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--sk-border);
+            flex-shrink: 0;
+            z-index: 500;
+        }
+
+        .search-section {
+            padding: 14px;
+            border-bottom: 1px solid var(--sk-border);
+            background: var(--sk-dark);
+        }
+
+        .search-section h2 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--sk-red);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 8px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--sk-border);
+            background: var(--sk-charcoal);
+            color: var(--sk-text);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-box input:focus { border-color: var(--sk-red); }
+        .search-box input::placeholder { color: var(--sk-text-dim); }
+
+        .search-box button {
+            padding: 10px 16px;
+            border-radius: 6px;
+            border: none;
+            background: var(--sk-red);
+            color: var(--sk-white);
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .search-box button:hover { background: var(--sk-red-light); }
+        .search-box button:active { background: var(--sk-red-dark); }
+
+        /* Autocomplete dropdown */
+        .autocomplete-list {
+            position: absolute;
+            left: 14px; right: 14px;
+            background: var(--sk-card);
+            border: 1px solid var(--sk-border);
+            border-radius: 6px;
+            margin-top: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 600;
+            display: none;
+        }
+        .autocomplete-list.visible { display: block; }
+        .autocomplete-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--sk-border);
+            color: var(--sk-text);
+        }
+        .autocomplete-item:last-child { border-bottom: none; }
+        .autocomplete-item:hover, .autocomplete-item.active { background: var(--sk-red); color: var(--sk-white); }
+
+        .status-msg {
+            font-size: 0.8rem;
+            padding: 6px 0;
+            display: none;
+        }
+        .status-msg.visible { display: block; }
+        .status-msg.loading { color: var(--sk-text-dim); }
+        .status-msg.error { color: var(--sk-red-light); }
+        .status-msg.success { color: var(--sk-green); }
+
+        /* ── SEARCH RESULTS ── */
+        .search-results {
+            margin-top: 10px;
+            display: none;
+        }
+        .search-results.visible { display: block; }
+        .search-results h3 {
+            font-size: 0.75rem;
+            color: var(--sk-text-dim);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .result-item {
+            background: var(--sk-card);
+            border: 1px solid var(--sk-border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .result-item:hover { border-color: var(--sk-red); }
+        .result-item.closest { border-color: var(--sk-red); border-width: 2px; }
+        .result-item .r-top { display: flex; justify-content: space-between; align-items: center; }
+        .result-item .r-name { font-weight: 600; font-size: 0.9rem; }
+        .result-item .r-dist { font-size: 0.85rem; color: var(--sk-red); font-weight: 700; }
+        .result-item .r-addr { font-size: 0.78rem; color: var(--sk-text-dim); margin: 2px 0 6px; }
+        .call-btn-sm {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 5px 10px; border-radius: 6px;
+            background: var(--sk-green); color: var(--sk-white);
+            font-size: 0.78rem; font-weight: 600;
+            text-decoration: none; transition: background 0.15s;
+            margin-right: 4px;
+        }
+        .call-btn-sm:hover { background: var(--sk-green-dark); }
+        .call-btn-sm.private { background: #6366f1; }
+        .call-btn-sm.private:hover { background: #4f46e5; }
+
+        /* ── TECH LIST ── */
+        .technician-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .technician-list h2 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--sk-red);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .tech-card {
+            background: var(--sk-card);
+            border: 1px solid var(--sk-border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+        .tech-card:hover { border-color: var(--sk-red); }
+        .tech-card:active { background: #2a2a2a; }
+        .tech-card .t-name { font-weight: 700; font-size: 0.95rem; color: var(--sk-white); margin-bottom: 2px; }
+        .tech-card .t-addr { font-size: 0.8rem; color: var(--sk-text-dim); margin-bottom: 8px; }
+        .tech-card .t-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .call-btn {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 7px 12px; border-radius: 6px;
+            background: var(--sk-green); color: var(--sk-white);
+            font-size: 0.8rem; font-weight: 600;
+            text-decoration: none; border: none; cursor: pointer;
+            transition: all 0.15s;
+        }
+        .call-btn:hover { background: var(--sk-green-dark); }
+        .call-btn:active { transform: scale(0.97); }
+        .call-btn.private { background: #6366f1; }
+        .call-btn.private:hover { background: #4f46e5; }
+
+        .locate-btn {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 7px 12px; border-radius: 6px;
+            background: var(--sk-red); color: var(--sk-white);
+            font-size: 0.8rem; font-weight: 600;
+            border: none; cursor: pointer;
+            transition: all 0.15s;
+        }
+        .locate-btn:hover { background: var(--sk-red-light); }
+        .locate-btn:active { transform: scale(0.97); }
+
+        /* ── MAP ── */
+        #map { flex: 1; min-height: 0; }
+
+        /* ── POPUP STYLING ── */
+        .leaflet-popup-content-wrapper {
+            background: var(--sk-charcoal) !important;
+            color: var(--sk-text) !important;
+            border-radius: 8px !important;
+            border: 2px solid var(--sk-red) !important;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
+        }
+        .leaflet-popup-tip { background: var(--sk-charcoal) !important; }
+        .leaflet-popup-content { margin: 10px 14px !important; }
+        .p-name { font-weight: 700; font-size: 0.95rem; color: var(--sk-white); }
+        .p-addr { font-size: 0.8rem; color: var(--sk-text-dim); margin: 3px 0 8px; }
+        .p-call {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 6px 12px; border-radius: 6px;
+            background: var(--sk-green); color: var(--sk-white);
+            font-weight: 600; text-decoration: none; font-size: 0.8rem;
+            margin: 2px 4px 2px 0;
+        }
+        .p-call:hover { background: var(--sk-green-dark); }
+        .p-call.private { background: #6366f1; }
+
+        .p-fault .leaflet-popup-content-wrapper { border-color: #ef4444 !important; }
+
+        /* ── MOBILE TAB BAR ── */
+        .mobile-tabs {
+            display: none;
+            background: var(--sk-charcoal);
+            border-top: 1px solid var(--sk-border);
+            flex-shrink: 0;
+            z-index: 500;
+        }
+        .mobile-tabs .tab-bar {
+            display: flex;
+        }
+        .mobile-tabs .tab-btn {
+            flex: 1;
+            padding: 10px 0;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--sk-text-dim);
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-top: 3px solid transparent;
+            transition: all 0.15s;
+        }
+        .mobile-tabs .tab-btn.active {
+            color: var(--sk-red);
+            border-top-color: var(--sk-red);
+        }
+        .mobile-tabs .tab-btn span { display: block; font-size: 1.2rem; margin-bottom: 2px; }
+
+        /* ── MOBILE LAYOUT ── */
+        @media (max-width: 768px) {
+            header { padding: 8px 12px; }
+            .header-text h1 { font-size: 0.9rem; }
+
+            .main-container { flex-direction: column; }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                position: absolute;
+                top: 0; left: 0; right: 0; bottom: 0;
+                z-index: 500;
+                transition: transform 0.3s ease;
+            }
+            .sidebar.hidden { transform: translateX(-100%); pointer-events: none; }
+
+            #map {
+                position: absolute;
+                top: 0; left: 0; right: 0; bottom: 0;
+            }
+
+            .mobile-tabs { display: block; }
+        }
+
+        /* ── PULSE ANIMATION FOR FAULT PIN ── */
+        @keyframes faultPulse {
+            0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); }
+            70% { box-shadow: 0 0 0 16px rgba(239,68,68,0); }
+            100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Loading overlay while geocoding -->
+<div id="initOverlay">
+    <div class="spinner"></div>
+    <p>Indlæser blæsefolks positioner...</p>
+</div>
+
+<header>
+    <div class="logo-box">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="2" width="3" height="28" rx="1" fill="white"/>
+            <rect x="9" y="6" width="3" height="24" rx="1" fill="white"/>
+            <rect x="14" y="4" width="3" height="26" rx="1" fill="white"/>
+            <rect x="19" y="8" width="3" height="22" rx="1" fill="white"/>
+            <rect x="24" y="3" width="3" height="27" rx="1" fill="white"/>
+            <rect x="29" y="10" width="3" height="20" rx="1" fill="white"/>
+            <rect x="34" y="5" width="3" height="25" rx="1" fill="white"/>
+            <text x="20" y="38" text-anchor="middle" fill="white" font-size="5.5" font-weight="700" font-family="Arial, sans-serif">ENTREPRENØR</text>
+        </svg>
+    </div>
+    <div class="header-text">
+        <h1>Søren Knudsen A/S</h1>
+        <div class="subtitle">KABELFEJL — BLÆSEKORT</div>
+    </div>
+</header>
+
+<div class="main-container">
+    <div class="sidebar" id="sidebar">
+        <div class="search-section" style="position:relative;">
+            <h2>Slå fejladresse op</h2>
+            <div class="search-box">
+                <input type="text" id="faultAddress" placeholder="F.eks. Vestergade 10, 6600 Vejen"
+                       autocomplete="off"
+                       oninput="onAddressInput(this.value)"
+                       onkeydown="onAddressKeydown(event)">
+                <button onclick="searchFaultAddress()">Søg</button>
+            </div>
+            <div class="autocomplete-list" id="autocomplete"></div>
+            <div class="status-msg loading" id="loading">Søger adresse...</div>
+            <div class="status-msg error" id="errorMsg"></div>
+            <div class="search-results" id="searchResults">
+                <h3>Nærmeste blæsefolk</h3>
+                <div id="resultsList"></div>
+            </div>
+        </div>
+
+        <div class="technician-list">
+            <h2>Blæsefolk</h2>
+            <div id="techCards"></div>
+        </div>
+    </div>
+
+    <div id="map"></div>
+</div>
+
+<div class="mobile-tabs" id="mobileTabs">
+    <div class="tab-bar">
+        <button class="tab-btn" id="tabList" onclick="showTab('list')">
+            <span>👷</span>Blæsefolk
+        </button>
+        <button class="tab-btn active" id="tabMap" onclick="showTab('map')">
+            <span>🗺️</span>Kort
+        </button>
+        <button class="tab-btn" id="tabSearch" onclick="showTab('search')">
+            <span>🔍</span>Fejlsøg
+        </button>
+    </div>
+</div>
+
+<script>
+    // ── Technician data (coordinates will be filled by DAWA) ──
+    const technicians = [
+        {
+            name: "Jonas Alnor Schmidt",
+            address: "Højrupvej 35, 6510 Gram",
+            dawaQuery: "Højrupvej 35, Gram",
+            phone: "26707650",
+            lat: null, lng: null
+        },
+        {
+            name: "Anders Christensen",
+            address: "Fynsgade 27, 1. 4, 7000 Fredericia",
+            dawaQuery: "Fynsgade 27, Fredericia",
+            phone: "40431846",
+            phonePrivate: "81737793",
+            lat: null, lng: null
+        },
+        {
+            name: "Hans Jørgen Schmidt",
+            address: "Højrupvej 35, 6510 Gram",
+            dawaQuery: "Højrupvej 35, Gram",
+            phone: "27898052",
+            lat: null, lng: null
+        },
+        {
+            name: "Kamil Stepien",
+            address: "Hillerup Markvej 3, 6760 Ribe",
+            dawaQuery: "Hillerup Markvej 3, Ribe",
+            phone: "28494319",
+            lat: null, lng: null
+        },
+        {
+            name: "Søren Poulsen",
+            address: "Trelde Næsvej 76, 7000 Fredericia",
+            dawaQuery: "Trelde Næsvej 76, Fredericia",
+            phone: "28195533",
+            lat: null, lng: null
+        }
+    ];
+
+    // ── Map setup ──
+    const map = L.map('map', { zoomControl: true }).setView([55.45, 9.40], 9);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+        maxZoom: 19,
+        subdomains: 'abcd'
+    }).addTo(map);
+
+    const markers = [];
+    let faultMarker = null;
+    let faultLines = [];
+
+    // ── Icon factories ──
+    function techIcon(label) {
+        return L.divIcon({
+            className: '',
+            html: `<div style="
+                background: var(--sk-red, #B30012);
+                border: 3px solid #fff;
+                border-radius: 50%;
+                width: 28px; height: 28px;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 12px; font-weight: 700; color: #fff;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+                font-family: sans-serif;
+            ">${label}</div>`,
+            iconSize: [28, 28],
+            iconAnchor: [14, 14],
+            popupAnchor: [0, -18]
+        });
+    }
+
+    function faultIcon() {
+        return L.divIcon({
+            className: '',
+            html: `<div style="
+                background: #ef4444;
+                border: 3px solid #fff;
+                border-radius: 50%;
+                width: 28px; height: 28px;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 14px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+                animation: faultPulse 1.5s infinite;
+            ">⚡</div>`,
+            iconSize: [28, 28],
+            iconAnchor: [14, 14],
+            popupAnchor: [0, -18]
+        });
+    }
+
+    // ── Geocode via DAWA (Danish Address Web API) ──
+    async function geocodeDAWA(query) {
+        try {
+            const url = `https://api.dataforsyningen.dk/adresser?q=${encodeURIComponent(query)}&struktur=mini&per_side=1`;
+            const resp = await fetch(url);
+            const data = await resp.json();
+            if (data && data.length > 0) {
+                return { lat: data[0].y, lng: data[0].x };
+            }
+        } catch(e) { /* fallback below */ }
+
+        // Fallback: try DAWA autocomplete
+        try {
+            const url2 = `https://api.dataforsyningen.dk/autocomplete?q=${encodeURIComponent(query)}&type=adresse&per_side=1`;
+            const resp2 = await fetch(url2);
+            const data2 = await resp2.json();
+            if (data2 && data2.length > 0 && data2[0].adresse) {
+                return { lat: data2[0].adresse.y, lng: data2[0].adresse.x };
+            }
+        } catch(e) { /* fallback below */ }
+
+        // Fallback: Nominatim
+        try {
+            const url3 = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Denmark')}&countrycodes=dk&limit=1`;
+            const resp3 = await fetch(url3);
+            const data3 = await resp3.json();
+            if (data3 && data3.length > 0) {
+                return { lat: parseFloat(data3[0].lat), lng: parseFloat(data3[0].lon) };
+            }
+        } catch(e) {}
+
+        return null;
+    }
+
+    // ── Initialize: geocode all technicians ──
+    async function init() {
+        const overlay = document.getElementById('initOverlay');
+        const promises = technicians.map(async (tech) => {
+            const coords = await geocodeDAWA(tech.dawaQuery);
+            if (coords) {
+                tech.lat = coords.lat;
+                tech.lng = coords.lng;
+            }
+        });
+
+        await Promise.all(promises);
+
+        // Add markers
+        const bounds = L.latLngBounds([]);
+        technicians.forEach((tech, i) => {
+            if (tech.lat === null) return;
+
+            const initials = tech.name.split(' ').map(n => n[0]).join('').slice(0, 2);
+            let popupHTML = `
+                <div class="p-name">${tech.name}</div>
+                <div class="p-addr">${tech.address}</div>
+                <a href="tel:${tech.phone}" class="p-call">📞 ${tech.phone}</a>
+            `;
+            if (tech.phonePrivate) {
+                popupHTML += `<a href="tel:${tech.phonePrivate}" class="p-call private">📱 Privat: ${tech.phonePrivate}</a>`;
+            }
+
+            const marker = L.marker([tech.lat, tech.lng], { icon: techIcon(initials) })
+                .addTo(map)
+                .bindPopup(popupHTML);
+            markers.push(marker);
+            bounds.extend([tech.lat, tech.lng]);
+        });
+
+        if (bounds.isValid()) {
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
+
+        buildTechCards();
+
+        // Hide loading overlay
+        overlay.classList.add('hidden');
+        setTimeout(() => overlay.remove(), 600);
+
+        // On mobile, default to map view
+        if (window.innerWidth <= 768) {
+            showTab('map');
+        }
+    }
+
+    // ── Build sidebar technician cards ──
+    function buildTechCards() {
+        const container = document.getElementById('techCards');
+        container.innerHTML = '';
+        technicians.forEach((tech, i) => {
+            if (tech.lat === null) return;
+
+            const card = document.createElement('div');
+            card.className = 'tech-card';
+            card.onclick = () => {
+                map.setView([tech.lat, tech.lng], 14);
+                markers[i].openPopup();
+                if (window.innerWidth <= 768) showTab('map');
+            };
+
+            let actions = `<a href="tel:${tech.phone}" class="call-btn" onclick="event.stopPropagation()">📞 ${tech.phone}</a>`;
+            if (tech.phonePrivate) {
+                actions += `<a href="tel:${tech.phonePrivate}" class="call-btn private" onclick="event.stopPropagation()">📱 Privat</a>`;
+            }
+            actions += `<button class="locate-btn" onclick="event.stopPropagation(); map.setView([${tech.lat},${tech.lng}],14); markers[${i}].openPopup(); if(window.innerWidth<=768) showTab('map');">📍 Vis</button>`;
+
+            card.innerHTML = `
+                <div class="t-name">${tech.name}</div>
+                <div class="t-addr">${tech.address}</div>
+                <div class="t-actions">${actions}</div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // ── Haversine distance ──
+    function haversine(lat1, lng1, lat2, lng2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    // ── Clear fault markers ──
+    function clearFault() {
+        if (faultMarker) { map.removeLayer(faultMarker); faultMarker = null; }
+        faultLines.forEach(l => map.removeLayer(l));
+        faultLines = [];
+    }
+
+    // ── Autocomplete for fault address ──
+    let acTimeout = null;
+    let acData = [];
+    let acIndex = -1;
+
+    function onAddressInput(val) {
+        if (acTimeout) clearTimeout(acTimeout);
+        if (val.length < 3) {
+            document.getElementById('autocomplete').classList.remove('visible');
+            return;
+        }
+        acTimeout = setTimeout(() => fetchAutocomplete(val), 250);
+    }
+
+    async function fetchAutocomplete(query) {
+        try {
+            const resp = await fetch(`https://api.dataforsyningen.dk/autocomplete?q=${encodeURIComponent(query)}&type=adresse&per_side=6`);
+            acData = await resp.json();
+            const list = document.getElementById('autocomplete');
+            if (acData.length === 0) { list.classList.remove('visible'); return; }
+            list.innerHTML = '';
+            acData.forEach((item, i) => {
+                const div = document.createElement('div');
+                div.className = 'autocomplete-item';
+                div.textContent = item.tekst;
+                div.onclick = () => selectAutocomplete(i);
+                list.appendChild(div);
+            });
+            list.classList.add('visible');
+            acIndex = -1;
+        } catch(e) {
+            document.getElementById('autocomplete').classList.remove('visible');
+        }
+    }
+
+    function selectAutocomplete(i) {
+        const item = acData[i];
+        document.getElementById('faultAddress').value = item.tekst;
+        document.getElementById('autocomplete').classList.remove('visible');
+        searchFaultAddress();
+    }
+
+    function onAddressKeydown(e) {
+        const list = document.getElementById('autocomplete');
+        const items = list.querySelectorAll('.autocomplete-item');
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            acIndex = Math.min(acIndex + 1, items.length - 1);
+            items.forEach((el, i) => el.classList.toggle('active', i === acIndex));
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            acIndex = Math.max(acIndex - 1, 0);
+            items.forEach((el, i) => el.classList.toggle('active', i === acIndex));
+        } else if (e.key === 'Enter') {
+            if (acIndex >= 0 && acIndex < items.length) {
+                selectAutocomplete(acIndex);
+            } else {
+                searchFaultAddress();
+            }
+        }
+    }
+
+    // ── Search fault address ──
+    async function searchFaultAddress() {
+        const address = document.getElementById('faultAddress').value.trim();
+        if (!address) return;
+
+        document.getElementById('autocomplete').classList.remove('visible');
+        const loading = document.getElementById('loading');
+        const errorMsg = document.getElementById('errorMsg');
+        const results = document.getElementById('searchResults');
+
+        loading.classList.add('visible');
+        errorMsg.classList.remove('visible');
+        results.classList.remove('visible');
+        clearFault();
+
+        const coords = await geocodeDAWA(address);
+        loading.classList.remove('visible');
+
+        if (!coords) {
+            errorMsg.textContent = 'Adressen kunne ikke findes. Prøv en mere præcis adresse.';
+            errorMsg.classList.add('visible');
+            return;
+        }
+
+        const faultLat = coords.lat;
+        const faultLng = coords.lng;
+
+        // Add fault marker
+        faultMarker = L.marker([faultLat, faultLng], { icon: faultIcon() })
+            .addTo(map)
+            .bindPopup(`
+                <div class="p-name" style="color:#ef4444;">⚡ Fejladresse</div>
+                <div class="p-addr">${address}</div>
+            `).openPopup();
+
+        // Calculate distances and sort
+        const sorted = technicians
+            .filter(t => t.lat !== null)
+            .map((tech, i) => ({
+                ...tech, index: i,
+                distance: haversine(faultLat, faultLng, tech.lat, tech.lng)
+            }))
+            .sort((a, b) => a.distance - b.distance);
+
+        // Draw dashed lines to nearest 3
+        sorted.slice(0, 3).forEach(tech => {
+            const line = L.polyline(
+                [[faultLat, faultLng], [tech.lat, tech.lng]],
+                { color: '#B30012', weight: 2, dashArray: '8, 6', opacity: 0.6 }
+            ).addTo(map);
+            faultLines.push(line);
+        });
+
+        // Fit bounds
+        const bounds = L.latLngBounds([[faultLat, faultLng]]);
+        sorted.slice(0, 3).forEach(t => bounds.extend([t.lat, t.lng]));
+        map.fitBounds(bounds, { padding: [50, 50] });
+
+        // Show results
+        const resultsList = document.getElementById('resultsList');
+        resultsList.innerHTML = '';
+        sorted.forEach((tech, rank) => {
+            const item = document.createElement('div');
+            item.className = 'result-item' + (rank === 0 ? ' closest' : '');
+            item.onclick = () => {
+                map.setView([tech.lat, tech.lng], 14);
+                markers[tech.index].openPopup();
+                if (window.innerWidth <= 768) showTab('map');
+            };
+
+            let btns = `<a href="tel:${tech.phone}" class="call-btn-sm" onclick="event.stopPropagation()">📞 Ring op</a>`;
+            if (tech.phonePrivate) {
+                btns += `<a href="tel:${tech.phonePrivate}" class="call-btn-sm private" onclick="event.stopPropagation()">📱 Privat</a>`;
+            }
+
+            item.innerHTML = `
+                <div class="r-top">
+                    <span class="r-name">${rank === 0 ? '⭐ ' : ''}${tech.name}</span>
+                    <span class="r-dist">${tech.distance.toFixed(1)} km</span>
+                </div>
+                <div class="r-addr">${tech.address}</div>
+                <div>${btns}</div>
+            `;
+            resultsList.appendChild(item);
+        });
+
+        results.classList.add('visible');
+
+        // On mobile, stay on search tab but show results
+        if (window.innerWidth <= 768) {
+            showTab('search');
+        }
+    }
+
+    // ── Mobile tab switching ──
+    function showTab(tab) {
+        const sidebar = document.getElementById('sidebar');
+        const tabs = document.querySelectorAll('.tab-btn');
+        tabs.forEach(t => t.classList.remove('active'));
+
+        if (tab === 'map') {
+            sidebar.classList.add('hidden');
+            document.getElementById('tabMap').classList.add('active');
+            setTimeout(() => map.invalidateSize(), 350);
+        } else if (tab === 'list') {
+            sidebar.classList.remove('hidden');
+            sidebar.scrollTop = 0;
+            document.getElementById('tabList').classList.add('active');
+            // Scroll to tech list
+            document.querySelector('.technician-list').scrollIntoView({ behavior: 'smooth' });
+        } else if (tab === 'search') {
+            sidebar.classList.remove('hidden');
+            sidebar.scrollTop = 0;
+            document.getElementById('tabSearch').classList.add('active');
+            // Focus search input
+            setTimeout(() => document.getElementById('faultAddress').focus(), 400);
+        }
+    }
+
+    // ── Close autocomplete on outside click ──
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-section')) {
+            document.getElementById('autocomplete').classList.remove('visible');
+        }
+    });
+
+    // ── Invalidate map on resize ──
+    window.addEventListener('resize', () => map.invalidateSize());
+
+    // ── Start ──
+    init();
+</script>
+
+</body>
+</html>
