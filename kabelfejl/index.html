@@ -205,14 +205,74 @@
         .tech-btns { display:flex; gap:5px; flex-wrap:wrap }
 
         #map { flex:1; min-height:0; background:var(--bg-primary) }
-        .map-controls { position:absolute; top:12px; right:12px; z-index:800; display:flex; flex-direction:column; gap:4px }
-        .map-controls button {
-            padding:7px 12px; border-radius:var(--radius-sm); border:1px solid var(--border);
-            background:rgba(10,10,15,.85); color:var(--text-primary); font-size:.7rem; cursor:pointer;
-            backdrop-filter:blur(12px); font-weight:600; font-family:var(--font); transition:var(--transition);
+
+        .map-controls {
+            position:absolute;
+            top:12px;
+            right:12px;
+            z-index:800;
         }
-        .map-controls button:hover { background:rgba(30,30,40,.9); border-color:var(--border-hover) }
-        .map-controls button.active { background:var(--accent); border-color:var(--accent); color:#fff }
+
+        .map-style-toggle {
+            padding:9px 12px;
+            border-radius:999px;
+            border:1px solid var(--border);
+            background:rgba(10,10,15,.88);
+            color:var(--text-primary);
+            font-size:.74rem;
+            cursor:pointer;
+            backdrop-filter:blur(12px);
+            font-weight:700;
+            font-family:var(--font);
+            transition:var(--transition);
+            box-shadow:var(--shadow-md);
+        }
+
+        .map-style-toggle:hover {
+            background:rgba(30,30,40,.92);
+            border-color:var(--border-hover);
+        }
+
+        .map-style-menu {
+            margin-top:6px;
+            background:rgba(18,18,26,.96);
+            border:1px solid var(--border-hover);
+            border-radius:14px;
+            padding:6px;
+            display:flex;
+            flex-direction:column;
+            gap:4px;
+            min-width:130px;
+            box-shadow:var(--shadow-lg);
+            backdrop-filter:blur(14px);
+        }
+
+        .map-style-menu.hidden {
+            display:none;
+        }
+
+        .map-style-option {
+            padding:9px 10px;
+            border-radius:10px;
+            border:none;
+            background:transparent;
+            color:var(--text-primary);
+            font-size:.74rem;
+            font-weight:600;
+            font-family:var(--font);
+            cursor:pointer;
+            text-align:left;
+            transition:var(--transition);
+        }
+
+        .map-style-option:hover {
+            background:var(--bg-card-hover);
+        }
+
+        .map-style-option.active {
+            background:var(--accent);
+            color:#fff;
+        }
 
         .leaflet-popup-content-wrapper { background:var(--bg-card)!important; color:var(--text-primary)!important; border-radius:var(--radius-md)!important; border:1.5px solid var(--accent)!important; box-shadow:var(--shadow-lg)!important }
         .leaflet-popup-tip { background:var(--bg-card)!important }
@@ -310,8 +370,21 @@
             .sidebar.hidden { transform:translateX(-100%); pointer-events:none; opacity:0 }
             #map { position:absolute; top:0; left:0; right:0; bottom:0 }
             .mobile-tabs { display:block }
-            .map-controls { top:8px; right:8px }
             .h-shortcut { display:none }
+
+            .map-controls {
+                top:8px;
+                right:8px;
+            }
+
+            .map-style-toggle {
+                padding:8px 10px;
+                font-size:.7rem;
+            }
+
+            .map-style-menu {
+                min-width:115px;
+            }
 
             .search-panel {
                 padding:14px 14px 10px;
@@ -535,18 +608,44 @@ let activeTile='Standard';
 TILES[activeTile].addTo(map);
 
 const mapCtrl=document.getElementById('mapControls');
+mapCtrl.innerHTML = `
+    <button class="map-style-toggle" id="mapStyleToggle" type="button">🗺️ Korttype</button>
+    <div class="map-style-menu hidden" id="mapStyleMenu"></div>
+`;
+
+const mapStyleMenu = document.getElementById('mapStyleMenu');
+const mapStyleToggle = document.getElementById('mapStyleToggle');
+
+function updateMapToggleLabel(){
+    mapStyleToggle.innerHTML = `🗺️ ${activeTile}`;
+}
+
 Object.keys(TILES).forEach(k=>{
     const b=document.createElement('button');
     b.textContent=k;
-    if(k===activeTile)b.classList.add('active');
-    b.onclick=()=>{
+    b.className='map-style-option' + (k===activeTile ? ' active' : '');
+    b.type='button';
+    b.onclick=(e)=>{
+        e.stopPropagation();
         map.removeLayer(TILES[activeTile]);
         activeTile=k;
         TILES[k].addTo(map);
-        mapCtrl.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x.textContent===k));
+
+        mapStyleMenu.querySelectorAll('.map-style-option')
+            .forEach(x=>x.classList.toggle('active', x.textContent===k));
+
+        updateMapToggleLabel();
+        mapStyleMenu.classList.add('hidden');
     };
-    mapCtrl.appendChild(b);
+    mapStyleMenu.appendChild(b);
 });
+
+mapStyleToggle.onclick=(e)=>{
+    e.stopPropagation();
+    mapStyleMenu.classList.toggle('hidden');
+};
+
+updateMapToggleLabel();
 
 const MARKERS=[];
 let faultMarker=null,faultLines=[],currentFaultAddr='';
@@ -989,9 +1088,14 @@ document.addEventListener('keydown',e=>{
         if(window.innerWidth<=768)tab('search');
     }
 });
+
 document.addEventListener('click',e=>{
     if(!e.target.closest('.search-panel'))document.getElementById('acList').classList.remove('visible');
+    if(!e.target.closest('#mapControls')) {
+        document.getElementById('mapStyleMenu')?.classList.add('hidden');
+    }
 });
+
 window.addEventListener('resize',()=>{
     map.invalidateSize();
     if(window.innerWidth>768){
