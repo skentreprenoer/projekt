@@ -34,7 +34,6 @@
             overflow: hidden;
         }
 
-        /* ── HEADER ── */
         header {
             background: var(--sk-red);
             padding: 10px 16px;
@@ -70,7 +69,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* ── LOADING OVERLAY ── */
         #initOverlay {
             position: fixed; inset: 0;
             background: var(--sk-dark);
@@ -91,7 +89,6 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         #initOverlay p { color: var(--sk-text-dim); font-size: 0.9rem; }
 
-        /* ── MAIN LAYOUT ── */
         .main-container {
             display: flex;
             flex: 1;
@@ -99,7 +96,6 @@
             position: relative;
         }
 
-        /* ── SIDEBAR ── */
         .sidebar {
             width: 360px;
             background: var(--sk-charcoal);
@@ -159,7 +155,6 @@
         .search-box button:hover { background: var(--sk-red-light); }
         .search-box button:active { background: var(--sk-red-dark); }
 
-        /* Autocomplete dropdown */
         .autocomplete-list {
             position: absolute;
             left: 14px; right: 14px;
@@ -193,7 +188,6 @@
         .status-msg.error { color: var(--sk-red-light); }
         .status-msg.success { color: var(--sk-green); }
 
-        /* ── SEARCH RESULTS ── */
         .search-results {
             margin-top: 10px;
             display: none;
@@ -234,7 +228,6 @@
         .call-btn-sm.private { background: #6366f1; }
         .call-btn-sm.private:hover { background: #4f46e5; }
 
-        /* ── TECH LIST ── */
         .technician-list {
             flex: 1;
             overflow-y: auto;
@@ -289,10 +282,8 @@
         .locate-btn:hover { background: var(--sk-red-light); }
         .locate-btn:active { transform: scale(0.97); }
 
-        /* ── MAP ── */
         #map { flex: 1; min-height: 0; }
 
-        /* ── POPUP STYLING ── */
         .leaflet-popup-content-wrapper {
             background: var(--sk-charcoal) !important;
             color: var(--sk-text) !important;
@@ -316,7 +307,6 @@
 
         .p-fault .leaflet-popup-content-wrapper { border-color: #ef4444 !important; }
 
-        /* ── MOBILE TAB BAR ── */
         .mobile-tabs {
             display: none;
             background: var(--sk-charcoal);
@@ -346,7 +336,6 @@
         }
         .mobile-tabs .tab-btn span { display: block; font-size: 1.2rem; margin-bottom: 2px; }
 
-        /* ── MOBILE LAYOUT ── */
         @media (max-width: 768px) {
             header { padding: 8px 12px; }
             .header-text h1 { font-size: 0.9rem; }
@@ -370,17 +359,37 @@
             .mobile-tabs { display: block; }
         }
 
-        /* ── PULSE ANIMATION FOR FAULT PIN ── */
         @keyframes faultPulse {
             0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); }
             70% { box-shadow: 0 0 0 16px rgba(239,68,68,0); }
             100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
         }
+
+        /* Kortvælger styling */
+        .leaflet-control-layers {
+            border: 1px solid var(--sk-border) !important;
+            border-radius: 8px !important;
+            overflow: hidden;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.25) !important;
+        }
+        .leaflet-control-layers-toggle {
+            width: 38px !important;
+            height: 38px !important;
+            background-size: 22px 22px !important;
+        }
+        .leaflet-control-layers-expanded {
+            background: var(--sk-charcoal) !important;
+            color: var(--sk-text) !important;
+            padding: 10px 12px !important;
+        }
+        .leaflet-control-layers-expanded label {
+            color: var(--sk-text) !important;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
 
-<!-- Loading overlay while geocoding -->
 <div id="initOverlay">
     <div class="spinner"></div>
     <p>Indlæser blæsefolks positioner...</p>
@@ -449,7 +458,6 @@
 </div>
 
 <script>
-    // ── Technician data (coordinates will be filled by DAWA) ──
     const technicians = [
         {
             name: "Jonas Alnor Schmidt",
@@ -489,19 +497,38 @@
         }
     ];
 
-    // ── Map setup ──
     const map = L.map('map', { zoomControl: true }).setView([55.45, 9.40], 9);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+
+    // Kortlag
+    const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
         maxZoom: 19,
         subdomains: 'abcd'
-    }).addTo(map);
+    });
+
+    const lightLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+        maxZoom: 19,
+        subdomains: 'abcd'
+    });
+
+    // Start med lyst kort
+    lightLayer.addTo(map);
+
+    // Skift mellem kort
+    L.control.layers(
+        {
+            "Lyst kort": lightLayer,
+            "Mørkt kort": darkLayer
+        },
+        null,
+        { position: 'topright', collapsed: true }
+    ).addTo(map);
 
     const markers = [];
     let faultMarker = null;
     let faultLines = [];
 
-    // ── Icon factories ──
     function techIcon(label) {
         return L.divIcon({
             className: '',
@@ -540,7 +567,6 @@
         });
     }
 
-    // ── Geocode via DAWA (Danish Address Web API) ──
     async function geocodeDAWA(query) {
         try {
             const url = `https://api.dataforsyningen.dk/adresser?q=${encodeURIComponent(query)}&struktur=mini&per_side=1`;
@@ -549,9 +575,8 @@
             if (data && data.length > 0) {
                 return { lat: data[0].y, lng: data[0].x };
             }
-        } catch(e) { /* fallback below */ }
+        } catch(e) {}
 
-        // Fallback: try DAWA autocomplete
         try {
             const url2 = `https://api.dataforsyningen.dk/autocomplete?q=${encodeURIComponent(query)}&type=adresse&per_side=1`;
             const resp2 = await fetch(url2);
@@ -559,9 +584,8 @@
             if (data2 && data2.length > 0 && data2[0].adresse) {
                 return { lat: data2[0].adresse.y, lng: data2[0].adresse.x };
             }
-        } catch(e) { /* fallback below */ }
+        } catch(e) {}
 
-        // Fallback: Nominatim
         try {
             const url3 = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Denmark')}&countrycodes=dk&limit=1`;
             const resp3 = await fetch(url3);
@@ -574,7 +598,6 @@
         return null;
     }
 
-    // ── Initialize: geocode all technicians ──
     async function init() {
         const overlay = document.getElementById('initOverlay');
         const promises = technicians.map(async (tech) => {
@@ -587,7 +610,6 @@
 
         await Promise.all(promises);
 
-        // Add markers
         const bounds = L.latLngBounds([]);
         technicians.forEach((tech, i) => {
             if (tech.lat === null) return;
@@ -615,17 +637,14 @@
 
         buildTechCards();
 
-        // Hide loading overlay
         overlay.classList.add('hidden');
         setTimeout(() => overlay.remove(), 600);
 
-        // On mobile, default to map view
         if (window.innerWidth <= 768) {
             showTab('map');
         }
     }
 
-    // ── Build sidebar technician cards ──
     function buildTechCards() {
         const container = document.getElementById('techCards');
         container.innerHTML = '';
@@ -655,7 +674,6 @@
         });
     }
 
-    // ── Haversine distance ──
     function haversine(lat1, lng1, lat2, lng2) {
         const R = 6371;
         const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -664,14 +682,12 @@
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
-    // ── Clear fault markers ──
     function clearFault() {
         if (faultMarker) { map.removeLayer(faultMarker); faultMarker = null; }
         faultLines.forEach(l => map.removeLayer(l));
         faultLines = [];
     }
 
-    // ── Autocomplete for fault address ──
     let acTimeout = null;
     let acData = [];
     let acIndex = -1;
@@ -733,7 +749,6 @@
         }
     }
 
-    // ── Search fault address ──
     async function searchFaultAddress() {
         const address = document.getElementById('faultAddress').value.trim();
         if (!address) return;
@@ -760,7 +775,6 @@
         const faultLat = coords.lat;
         const faultLng = coords.lng;
 
-        // Add fault marker
         faultMarker = L.marker([faultLat, faultLng], { icon: faultIcon() })
             .addTo(map)
             .bindPopup(`
@@ -768,7 +782,6 @@
                 <div class="p-addr">${address}</div>
             `).openPopup();
 
-        // Calculate distances and sort
         const sorted = technicians
             .filter(t => t.lat !== null)
             .map((tech, i) => ({
@@ -777,7 +790,6 @@
             }))
             .sort((a, b) => a.distance - b.distance);
 
-        // Draw dashed lines to nearest 3
         sorted.slice(0, 3).forEach(tech => {
             const line = L.polyline(
                 [[faultLat, faultLng], [tech.lat, tech.lng]],
@@ -786,12 +798,10 @@
             faultLines.push(line);
         });
 
-        // Fit bounds
         const bounds = L.latLngBounds([[faultLat, faultLng]]);
         sorted.slice(0, 3).forEach(t => bounds.extend([t.lat, t.lng]));
         map.fitBounds(bounds, { padding: [50, 50] });
 
-        // Show results
         const resultsList = document.getElementById('resultsList');
         resultsList.innerHTML = '';
         sorted.forEach((tech, rank) => {
@@ -821,13 +831,11 @@
 
         results.classList.add('visible');
 
-        // On mobile, stay on search tab but show results
         if (window.innerWidth <= 768) {
             showTab('search');
         }
     }
 
-    // ── Mobile tab switching ──
     function showTab(tab) {
         const sidebar = document.getElementById('sidebar');
         const tabs = document.querySelectorAll('.tab-btn');
@@ -841,28 +849,23 @@
             sidebar.classList.remove('hidden');
             sidebar.scrollTop = 0;
             document.getElementById('tabList').classList.add('active');
-            // Scroll to tech list
             document.querySelector('.technician-list').scrollIntoView({ behavior: 'smooth' });
         } else if (tab === 'search') {
             sidebar.classList.remove('hidden');
             sidebar.scrollTop = 0;
             document.getElementById('tabSearch').classList.add('active');
-            // Focus search input
             setTimeout(() => document.getElementById('faultAddress').focus(), 400);
         }
     }
 
-    // ── Close autocomplete on outside click ──
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.search-section')) {
             document.getElementById('autocomplete').classList.remove('visible');
         }
     });
 
-    // ── Invalidate map on resize ──
     window.addEventListener('resize', () => map.invalidateSize());
 
-    // ── Start ──
     init();
 </script>
 
