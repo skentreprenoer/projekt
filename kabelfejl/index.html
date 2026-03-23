@@ -3,871 +3,485 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kabelfejl - Blæsekort - Søren Knudsen A/S</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <title>Blæsekort - Søren Knudsen A/S</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <style>
-        :root {
-            --sk-red: #B30012;
-            --sk-red-dark: #8C000E;
-            --sk-red-light: #D4001A;
-            --sk-charcoal: #1A1A1A;
-            --sk-dark: #111111;
-            --sk-card: #222222;
-            --sk-border: #333333;
-            --sk-text: #F0F0F0;
-            --sk-text-dim: #999999;
-            --sk-white: #FFFFFF;
-            --sk-green: #22c55e;
-            --sk-green-dark: #16a34a;
-        }
+        :root{--r:#B30012;--rd:#8C000E;--rl:#D4001A;--ch:#1A1A1A;--dk:#111;--cd:#222;--bd:#333;--tx:#F0F0F0;--dm:#999;--wh:#FFF;--gn:#22c55e;--gd:#16a34a;--bl:#6366f1;--or:#e67e22}
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--dk);color:var(--tx);height:100dvh;display:flex;flex-direction:column;overflow:hidden}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        /* HEADER */
+        header{background:var(--r);padding:7px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.3);z-index:1000}
+        .logo{width:34px;height:34px;border:2px solid var(--wh);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:2px}
+        .logo svg{width:100%;height:100%}
+        .htxt h1{font-size:.95rem;font-weight:700;color:var(--wh);line-height:1.2}
+        .htxt .sub{font-size:.62rem;color:rgba(255,255,255,.7);letter-spacing:.5px}
+        .hbtns{margin-left:auto;display:flex;gap:6px}
+        .hbtn{padding:5px 10px;border-radius:5px;border:1.5px solid rgba(255,255,255,.5);background:transparent;color:var(--wh);font-size:.7rem;font-weight:600;cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:4px}
+        .hbtn:active{background:rgba(255,255,255,.15)}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--sk-dark);
-            color: var(--sk-text);
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+        /* OVERLAY */
+        #ov{position:fixed;inset:0;background:var(--dk);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s}
+        #ov.h{opacity:0;pointer-events:none}
+        .sp{width:36px;height:36px;border:4px solid var(--bd);border-top-color:var(--r);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:12px}
+        @keyframes spin{to{transform:rotate(360deg)}}
 
-        header {
-            background: var(--sk-red);
-            padding: 10px 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            z-index: 1000;
-        }
+        /* LAYOUT */
+        .main{display:flex;flex:1;overflow:hidden;position:relative}
+        .sb{width:370px;background:var(--ch);display:flex;flex-direction:column;border-right:1px solid var(--bd);flex-shrink:0;z-index:500;overflow:hidden}
 
-        .logo-box {
-            width: 40px; height: 40px;
-            border: 2px solid var(--sk-white);
-            border-radius: 4px;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-            padding: 3px;
-        }
+        /* SEARCH */
+        .ss{padding:10px 12px;border-bottom:1px solid var(--bd);background:var(--dk);position:relative;flex-shrink:0}
+        .ss h2{font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--r);margin-bottom:5px;font-weight:700}
+        .sbx{display:flex;gap:5px}
+        .sbx input{flex:1;padding:8px 9px;border-radius:5px;border:1px solid var(--bd);background:var(--ch);color:var(--tx);font-size:.83rem;outline:none}
+        .sbx input:focus{border-color:var(--r)}
+        .sbx input::placeholder{color:var(--dm)}
+        .sbx button{padding:8px 12px;border-radius:5px;border:none;background:var(--r);color:var(--wh);font-weight:700;cursor:pointer;font-size:.78rem}
 
-        .logo-box svg { width: 100%; height: 100%; }
+        /* AUTOCOMPLETE */
+        .ac{position:absolute;left:12px;right:12px;background:var(--cd);border:1px solid var(--bd);border-radius:5px;margin-top:2px;max-height:170px;overflow-y:auto;z-index:600;display:none}
+        .ac.v{display:block}
+        .aci{padding:8px 9px;cursor:pointer;font-size:.8rem;border-bottom:1px solid var(--bd);color:var(--tx)}
+        .aci:last-child{border-bottom:none}
+        .aci:hover,.aci.a{background:var(--r);color:var(--wh)}
 
-        .header-text h1 {
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: var(--sk-white);
-            line-height: 1.2;
-        }
+        .sm{font-size:.75rem;padding:4px 0;display:none}
+        .sm.v{display:block}
+        .sm.ld{color:var(--dm)}
+        .sm.er{color:var(--rl)}
 
-        .header-text .subtitle {
-            font-size: 0.7rem;
-            color: rgba(255,255,255,0.75);
-            letter-spacing: 0.5px;
-        }
+        /* RESULTS */
+        .sr{margin-top:6px;display:none;max-height:250px;overflow-y:auto}
+        .sr.v{display:block}
+        .sr h3{font-size:.68rem;color:var(--dm);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px}
+        .ri{background:var(--cd);border:1px solid var(--bd);border-radius:6px;padding:8px 9px;margin-bottom:4px;cursor:pointer;transition:all .12s}
+        .ri:hover{border-color:var(--r)}
+        .ri.top{border-color:var(--r);border-width:2px}
+        .ri .rt{display:flex;justify-content:space-between;align-items:center}
+        .ri .rn{font-weight:600;font-size:.83rem}
+        .ri .rd{font-size:.8rem;color:var(--r);font-weight:700}
+        .ri .ra{font-size:.72rem;color:var(--dm);margin:1px 0 4px}
+        .ri .rb{display:flex;flex-wrap:wrap;gap:3px}
 
-        #initOverlay {
-            position: fixed; inset: 0;
-            background: var(--sk-dark);
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.5s;
-        }
-        #initOverlay.hidden { opacity: 0; pointer-events: none; }
-        #initOverlay .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid var(--sk-border);
-            border-top-color: var(--sk-red);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-bottom: 16px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        #initOverlay p { color: var(--sk-text-dim); font-size: 0.9rem; }
+        /* SMALL BTNS */
+        .bs{display:inline-flex;align-items:center;gap:3px;padding:4px 7px;border-radius:4px;color:#fff;font-size:.7rem;font-weight:600;text-decoration:none;border:none;cursor:pointer}
+        .bs.gn{background:var(--gn)}.bs.pr{background:var(--bl)}.bs.sm{background:var(--or)}.bs.rt{background:#0ea5e9}.bs.cp{background:#8b5cf6}
 
-        .main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-        }
+        /* TECH LIST */
+        .tl{flex:1;overflow-y:auto;padding:10px 12px;-webkit-overflow-scrolling:touch}
+        .tl h2{font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--r);margin-bottom:6px;font-weight:700}
+        .fb{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap}
+        .ft{padding:4px 9px;border-radius:12px;border:1px solid var(--bd);background:transparent;color:var(--dm);font-size:.7rem;cursor:pointer}
+        .ft.a{background:var(--r);color:var(--wh);border-color:var(--r)}
 
-        .sidebar {
-            width: 360px;
-            background: var(--sk-charcoal);
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid var(--sk-border);
-            flex-shrink: 0;
-            z-index: 500;
-        }
+        .tc{background:var(--cd);border:1px solid var(--bd);border-radius:6px;padding:9px;margin-bottom:5px;cursor:pointer;transition:all .12s}
+        .tc:hover{border-color:var(--r)}
+        .tc .tn{font-weight:700;font-size:.87rem;color:var(--wh);display:flex;align-items:center;gap:6px}
+        .tc .ta{font-size:.75rem;color:var(--dm);margin:1px 0 5px}
+        .tc .tb{display:flex;gap:4px;flex-wrap:wrap}
+        .tc .st{font-size:.65rem;padding:2px 6px;border-radius:10px;font-weight:600;cursor:pointer;border:none;margin-left:auto}
+        .st.ledig{background:#166534;color:#86efac}
+        .st.optaget{background:#991b1b;color:#fca5a5}
+        .st.pvej{background:#92400e;color:#fcd34d}
 
-        .search-section {
-            padding: 14px;
-            border-bottom: 1px solid var(--sk-border);
-            background: var(--sk-dark);
-        }
+        .cb{display:inline-flex;align-items:center;gap:3px;padding:5px 9px;border-radius:5px;color:#fff;font-size:.74rem;font-weight:600;text-decoration:none;border:none;cursor:pointer}
+        .cb.gn{background:var(--gn)}.cb.pr{background:var(--bl)}.cb.lc{background:var(--r)}.cb.sm{background:var(--or)}.cb.rt{background:#0ea5e9}
 
-        .search-section h2 {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--sk-red);
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
+        /* MAP */
+        #map{flex:1;min-height:0}
+        .mc{position:absolute;top:8px;right:8px;z-index:800;display:flex;flex-direction:column;gap:3px}
+        .mc button{padding:6px 9px;border-radius:5px;border:1px solid rgba(255,255,255,.2);background:rgba(26,26,26,.9);color:var(--tx);font-size:.68rem;cursor:pointer;backdrop-filter:blur(4px);font-weight:600}
+        .mc button.a{background:var(--r);border-color:var(--r);color:#fff}
 
-        .search-box {
-            display: flex;
-            gap: 8px;
-        }
+        /* POPUP */
+        .leaflet-popup-content-wrapper{background:var(--ch)!important;color:var(--tx)!important;border-radius:8px!important;border:2px solid var(--r)!important;box-shadow:0 4px 16px rgba(0,0,0,.4)!important}
+        .leaflet-popup-tip{background:var(--ch)!important}
+        .leaflet-popup-content{margin:9px 11px!important}
+        .pn{font-weight:700;font-size:.87rem;color:var(--wh)}
+        .pa{font-size:.75rem;color:var(--dm);margin:2px 0 5px}
+        .pc{display:inline-flex;align-items:center;gap:3px;padding:4px 9px;border-radius:5px;color:#fff;font-weight:600;text-decoration:none;font-size:.74rem;margin:2px 2px 2px 0}
+        .pc.gn{background:var(--gn)}.pc.pr{background:var(--bl)}.pc.sm{background:var(--or)}.pc.rt{background:#0ea5e9}
 
-        .search-box input {
-            flex: 1;
-            padding: 10px 12px;
-            border-radius: 6px;
-            border: 1px solid var(--sk-border);
-            background: var(--sk-charcoal);
-            color: var(--sk-text);
-            font-size: 0.9rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .search-box input:focus { border-color: var(--sk-red); }
-        .search-box input::placeholder { color: var(--sk-text-dim); }
+        /* HISTORY PANEL */
+        .hp{border-top:1px solid var(--bd);padding:10px 12px;max-height:180px;overflow-y:auto;flex-shrink:0;background:var(--dk)}
+        .hp h2{font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--r);margin-bottom:6px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+        .hp .clr{font-size:.65rem;color:var(--dm);cursor:pointer;text-transform:none;letter-spacing:0;font-weight:400}
+        .hi{font-size:.75rem;padding:5px 0;border-bottom:1px solid var(--bd);color:var(--dm)}
+        .hi .ht{color:var(--tx);font-weight:600}
+        .hi .hw{color:var(--r)}
 
-        .search-box button {
-            padding: 10px 16px;
-            border-radius: 6px;
-            border: none;
-            background: var(--sk-red);
-            color: var(--sk-white);
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: background 0.2s;
-            white-space: nowrap;
+        /* MOBILE */
+        .mt{display:none;background:var(--ch);border-top:1px solid var(--bd);flex-shrink:0;z-index:500}
+        .mt .bar{display:flex}
+        .mt .btn{flex:1;padding:7px 0;text-align:center;font-size:.65rem;font-weight:600;color:var(--dm);background:none;border:none;cursor:pointer;border-top:3px solid transparent}
+        .mt .btn.a{color:var(--r);border-top-color:var(--r)}
+        .mt .btn span{display:block;font-size:1rem;margin-bottom:1px}
+        @media(max-width:768px){
+            header{padding:5px 8px}.htxt h1{font-size:.82rem}
+            .main{flex-direction:column}
+            .sb{width:100%;border-right:none;position:absolute;top:0;left:0;right:0;bottom:0;z-index:500;transition:transform .3s ease}
+            .sb.hid{transform:translateX(-100%);pointer-events:none}
+            #map{position:absolute;top:0;left:0;right:0;bottom:0}
+            .mt{display:block}
+            .mc{top:6px;right:6px}
+            .hbtns .hbtn span.dtxt{display:none}
         }
-        .search-box button:hover { background: var(--sk-red-light); }
-        .search-box button:active { background: var(--sk-red-dark); }
+        @keyframes fp{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}70%{box-shadow:0 0 0 16px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
 
-        .autocomplete-list {
-            position: absolute;
-            left: 14px; right: 14px;
-            background: var(--sk-card);
-            border: 1px solid var(--sk-border);
-            border-radius: 6px;
-            margin-top: 4px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 600;
-            display: none;
-        }
-        .autocomplete-list.visible { display: block; }
-        .autocomplete-item {
-            padding: 10px 12px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            border-bottom: 1px solid var(--sk-border);
-            color: var(--sk-text);
-        }
-        .autocomplete-item:last-child { border-bottom: none; }
-        .autocomplete-item:hover, .autocomplete-item.active { background: var(--sk-red); color: var(--sk-white); }
+        /* MODALS */
+        .mbg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10000;display:none;align-items:center;justify-content:center}
+        .mbg.v{display:flex}
+        .mdl{background:var(--ch);border:2px solid var(--r);border-radius:10px;padding:16px;max-width:380px;width:90%;max-height:80vh;overflow-y:auto}
+        .mdl h3{color:var(--r);margin-bottom:10px;font-size:.95rem}
+        .mdl label{font-size:.75rem;color:var(--dm);display:block;margin-bottom:3px}
+        .mdl textarea{width:100%;padding:9px;border-radius:5px;border:1px solid var(--bd);background:var(--dk);color:var(--tx);font-size:.82rem;min-height:70px;resize:vertical;outline:none;font-family:inherit;margin-bottom:10px}
+        .mdl textarea:focus{border-color:var(--r)}
+        .mdl .mr{display:flex;gap:6px}
+        .mdl .mb{flex:1;padding:9px;border-radius:5px;border:none;font-weight:700;font-size:.82rem;cursor:pointer}
+        .mdl .mb.ok{background:var(--gn);color:#fff}
+        .mdl .mb.no{background:var(--bd);color:var(--tx)}
 
-        .status-msg {
-            font-size: 0.8rem;
-            padding: 6px 0;
-            display: none;
-        }
-        .status-msg.visible { display: block; }
-        .status-msg.loading { color: var(--sk-text-dim); }
-        .status-msg.error { color: var(--sk-red-light); }
-        .status-msg.success { color: var(--sk-green); }
-
-        .search-results {
-            margin-top: 10px;
-            display: none;
-        }
-        .search-results.visible { display: block; }
-        .search-results h3 {
-            font-size: 0.75rem;
-            color: var(--sk-text-dim);
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .result-item {
-            background: var(--sk-card);
-            border: 1px solid var(--sk-border);
-            border-radius: 8px;
-            padding: 10px 12px;
-            margin-bottom: 6px;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-        .result-item:hover { border-color: var(--sk-red); }
-        .result-item.closest { border-color: var(--sk-red); border-width: 2px; }
-        .result-item .r-top { display: flex; justify-content: space-between; align-items: center; }
-        .result-item .r-name { font-weight: 600; font-size: 0.9rem; }
-        .result-item .r-dist { font-size: 0.85rem; color: var(--sk-red); font-weight: 700; }
-        .result-item .r-addr { font-size: 0.78rem; color: var(--sk-text-dim); margin: 2px 0 6px; }
-        .call-btn-sm {
-            display: inline-flex; align-items: center; gap: 4px;
-            padding: 5px 10px; border-radius: 6px;
-            background: var(--sk-green); color: var(--sk-white);
-            font-size: 0.78rem; font-weight: 600;
-            text-decoration: none; transition: background 0.15s;
-            margin-right: 4px;
-        }
-        .call-btn-sm:hover { background: var(--sk-green-dark); }
-        .call-btn-sm.private { background: #6366f1; }
-        .call-btn-sm.private:hover { background: #4f46e5; }
-
-        .technician-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 14px;
-            -webkit-overflow-scrolling: touch;
-        }
-        .technician-list h2 {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--sk-red);
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .tech-card {
-            background: var(--sk-card);
-            border: 1px solid var(--sk-border);
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 8px;
-            transition: all 0.15s;
-            cursor: pointer;
-        }
-        .tech-card:hover { border-color: var(--sk-red); }
-        .tech-card:active { background: #2a2a2a; }
-        .tech-card .t-name { font-weight: 700; font-size: 0.95rem; color: var(--sk-white); margin-bottom: 2px; }
-        .tech-card .t-addr { font-size: 0.8rem; color: var(--sk-text-dim); margin-bottom: 8px; }
-        .tech-card .t-actions { display: flex; gap: 6px; flex-wrap: wrap; }
-
-        .call-btn {
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 7px 12px; border-radius: 6px;
-            background: var(--sk-green); color: var(--sk-white);
-            font-size: 0.8rem; font-weight: 600;
-            text-decoration: none; border: none; cursor: pointer;
-            transition: all 0.15s;
-        }
-        .call-btn:hover { background: var(--sk-green-dark); }
-        .call-btn:active { transform: scale(0.97); }
-        .call-btn.private { background: #6366f1; }
-        .call-btn.private:hover { background: #4f46e5; }
-
-        .locate-btn {
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 7px 12px; border-radius: 6px;
-            background: var(--sk-red); color: var(--sk-white);
-            font-size: 0.8rem; font-weight: 600;
-            border: none; cursor: pointer;
-            transition: all 0.15s;
-        }
-        .locate-btn:hover { background: var(--sk-red-light); }
-        .locate-btn:active { transform: scale(0.97); }
-
-        #map { flex: 1; min-height: 0; }
-
-        .leaflet-popup-content-wrapper {
-            background: var(--sk-charcoal) !important;
-            color: var(--sk-text) !important;
-            border-radius: 8px !important;
-            border: 2px solid var(--sk-red) !important;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
-        }
-        .leaflet-popup-tip { background: var(--sk-charcoal) !important; }
-        .leaflet-popup-content { margin: 10px 14px !important; }
-        .p-name { font-weight: 700; font-size: 0.95rem; color: var(--sk-white); }
-        .p-addr { font-size: 0.8rem; color: var(--sk-text-dim); margin: 3px 0 8px; }
-        .p-call {
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 6px 12px; border-radius: 6px;
-            background: var(--sk-green); color: var(--sk-white);
-            font-weight: 600; text-decoration: none; font-size: 0.8rem;
-            margin: 2px 4px 2px 0;
-        }
-        .p-call:hover { background: var(--sk-green-dark); }
-        .p-call.private { background: #6366f1; }
-
-        .p-fault .leaflet-popup-content-wrapper { border-color: #ef4444 !important; }
-
-        .mobile-tabs {
-            display: none;
-            background: var(--sk-charcoal);
-            border-top: 1px solid var(--sk-border);
-            flex-shrink: 0;
-            z-index: 500;
-        }
-        .mobile-tabs .tab-bar {
-            display: flex;
-        }
-        .mobile-tabs .tab-btn {
-            flex: 1;
-            padding: 10px 0;
-            text-align: center;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--sk-text-dim);
-            background: none;
-            border: none;
-            cursor: pointer;
-            border-top: 3px solid transparent;
-            transition: all 0.15s;
-        }
-        .mobile-tabs .tab-btn.active {
-            color: var(--sk-red);
-            border-top-color: var(--sk-red);
-        }
-        .mobile-tabs .tab-btn span { display: block; font-size: 1.2rem; margin-bottom: 2px; }
-
-        @media (max-width: 768px) {
-            header { padding: 8px 12px; }
-            .header-text h1 { font-size: 0.9rem; }
-
-            .main-container { flex-direction: column; }
-            .sidebar {
-                width: 100%;
-                border-right: none;
-                position: absolute;
-                top: 0; left: 0; right: 0; bottom: 0;
-                z-index: 500;
-                transition: transform 0.3s ease;
-            }
-            .sidebar.hidden { transform: translateX(-100%); pointer-events: none; }
-
-            #map {
-                position: absolute;
-                top: 0; left: 0; right: 0; bottom: 0;
-            }
-
-            .mobile-tabs { display: block; }
-        }
-
-        @keyframes faultPulse {
-            0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); }
-            70% { box-shadow: 0 0 0 16px rgba(239,68,68,0); }
-            100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
-        }
-
-        /* Kortvælger styling */
-        .leaflet-control-layers {
-            border: 1px solid var(--sk-border) !important;
-            border-radius: 8px !important;
-            overflow: hidden;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.25) !important;
-        }
-        .leaflet-control-layers-toggle {
-            width: 38px !important;
-            height: 38px !important;
-            background-size: 22px 22px !important;
-        }
-        .leaflet-control-layers-expanded {
-            background: var(--sk-charcoal) !important;
-            color: var(--sk-text) !important;
-            padding: 10px 12px !important;
-        }
-        .leaflet-control-layers-expanded label {
-            color: var(--sk-text) !important;
-            font-size: 0.85rem;
-        }
+        /* STATUS MODAL */
+        .stm-opt{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+        .stm-opt button{padding:10px;border-radius:6px;border:2px solid var(--bd);background:var(--cd);color:var(--tx);font-size:.85rem;font-weight:600;cursor:pointer;text-align:left}
+        .stm-opt button:hover{border-color:var(--r)}
+        .stm-opt button.sel{border-color:var(--r);background:var(--r);color:#fff}
     </style>
 </head>
 <body>
 
-<div id="initOverlay">
-    <div class="spinner"></div>
-    <p>Indlæser blæsefolks positioner...</p>
+<div id="ov"><div class="sp"></div><p style="color:var(--dm);font-size:.83rem">Indlæser blæsefolk...</p></div>
+
+<!-- SMS MODAL -->
+<div class="mbg" id="smsM">
+    <div class="mdl">
+        <h3>Send fejladresse via SMS</h3>
+        <label>Modtager</label>
+        <div id="smsTo" style="font-weight:700;margin-bottom:8px;font-size:.87rem"></div>
+        <label>Besked</label>
+        <textarea id="smsTxt"></textarea>
+        <div class="mr">
+            <button class="mb no" onclick="clSms()">Annuller</button>
+            <button class="mb ok" onclick="doSms()">Send SMS</button>
+        </div>
+    </div>
+</div>
+
+<!-- STATUS MODAL -->
+<div class="mbg" id="stM">
+    <div class="mdl">
+        <h3 id="stName">Sæt status</h3>
+        <div class="stm-opt" id="stOpts"></div>
+        <div class="mr">
+            <button class="mb no" onclick="clSt()">Luk</button>
+        </div>
+    </div>
 </div>
 
 <header>
-    <div class="logo-box">
-        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="4" y="2" width="3" height="28" rx="1" fill="white"/>
-            <rect x="9" y="6" width="3" height="24" rx="1" fill="white"/>
-            <rect x="14" y="4" width="3" height="26" rx="1" fill="white"/>
-            <rect x="19" y="8" width="3" height="22" rx="1" fill="white"/>
-            <rect x="24" y="3" width="3" height="27" rx="1" fill="white"/>
-            <rect x="29" y="10" width="3" height="20" rx="1" fill="white"/>
-            <rect x="34" y="5" width="3" height="25" rx="1" fill="white"/>
-            <text x="20" y="38" text-anchor="middle" fill="white" font-size="5.5" font-weight="700" font-family="Arial, sans-serif">ENTREPRENØR</text>
-        </svg>
-    </div>
-    <div class="header-text">
+    <div class="logo"><svg viewBox="0 0 40 40" fill="none"><rect x="4" y="2" width="3" height="28" rx="1" fill="white"/><rect x="9" y="6" width="3" height="24" rx="1" fill="white"/><rect x="14" y="4" width="3" height="26" rx="1" fill="white"/><rect x="19" y="8" width="3" height="22" rx="1" fill="white"/><rect x="24" y="3" width="3" height="27" rx="1" fill="white"/><rect x="29" y="10" width="3" height="20" rx="1" fill="white"/><rect x="34" y="5" width="3" height="25" rx="1" fill="white"/><text x="20" y="38" text-anchor="middle" fill="white" font-size="5.5" font-weight="700" font-family="Arial">ENTREPRENØR</text></svg></div>
+    <div class="htxt">
         <h1>Søren Knudsen A/S</h1>
-        <div class="subtitle">KABELFEJL — BLÆSEKORT</div>
+        <div class="sub">KABELFEJL — BLÆSEKORT</div>
+    </div>
+    <div class="hbtns">
+        <a class="hbtn" href="https://app.fleetcomplete.com" target="_blank">🚛 <span class="dtxt">Fleet</span></a>
+        <a class="hbtn" href="https://keatech.dk" target="_blank">📡 <span class="dtxt">Keatech</span></a>
     </div>
 </header>
 
-<div class="main-container">
-    <div class="sidebar" id="sidebar">
-        <div class="search-section" style="position:relative;">
+<div class="main">
+    <div class="sb" id="sb">
+        <div class="ss">
             <h2>Slå fejladresse op</h2>
-            <div class="search-box">
-                <input type="text" id="faultAddress" placeholder="F.eks. Vestergade 10, 6600 Vejen"
-                       autocomplete="off"
-                       oninput="onAddressInput(this.value)"
-                       onkeydown="onAddressKeydown(event)">
-                <button onclick="searchFaultAddress()">Søg</button>
+            <div class="sbx">
+                <input type="text" id="fA" placeholder="F.eks. Vestergade 10, Vejen" autocomplete="off" oninput="acI(this.value)" onkeydown="acK(event)">
+                <button onclick="doSearch()">Søg</button>
             </div>
-            <div class="autocomplete-list" id="autocomplete"></div>
-            <div class="status-msg loading" id="loading">Søger adresse...</div>
-            <div class="status-msg error" id="errorMsg"></div>
-            <div class="search-results" id="searchResults">
+            <div class="ac" id="ac"></div>
+            <div class="sm ld" id="ld">Søger adresse...</div>
+            <div class="sm er" id="er"></div>
+            <div class="sr" id="sr">
                 <h3>Nærmeste blæsefolk</h3>
-                <div id="resultsList"></div>
+                <div id="rl"></div>
             </div>
         </div>
-
-        <div class="technician-list">
+        <div class="tl" id="tl">
             <h2>Blæsefolk</h2>
-            <div id="techCards"></div>
+            <div class="fb" id="fb"></div>
+            <div id="tc"></div>
+        </div>
+        <div class="hp" id="hp">
+            <h2>Historik <span class="clr" onclick="clrHist()">Ryd</span></h2>
+            <div id="hl"></div>
         </div>
     </div>
-
-    <div id="map"></div>
+    <div id="map"><div class="mc" id="mc"></div></div>
 </div>
 
-<div class="mobile-tabs" id="mobileTabs">
-    <div class="tab-bar">
-        <button class="tab-btn" id="tabList" onclick="showTab('list')">
-            <span>👷</span>Blæsefolk
-        </button>
-        <button class="tab-btn active" id="tabMap" onclick="showTab('map')">
-            <span>🗺️</span>Kort
-        </button>
-        <button class="tab-btn" id="tabSearch" onclick="showTab('search')">
-            <span>🔍</span>Fejlsøg
-        </button>
+<div class="mt">
+    <div class="bar">
+        <button class="btn" onclick="tab('list')"><span>👷</span>Folk</button>
+        <button class="btn a" id="tM" onclick="tab('map')"><span>🗺️</span>Kort</button>
+        <button class="btn" id="tS" onclick="tab('search')"><span>🔍</span>Fejlsøg</button>
+        <button class="btn" onclick="tab('hist')"><span>📋</span>Log</button>
     </div>
 </div>
 
 <script>
-    const technicians = [
-        {
-            name: "Jonas Alnor Schmidt",
-            address: "Højrupvej 35, 6510 Gram",
-            dawaQuery: "Højrupvej 35, Gram",
-            phone: "26707650",
-            lat: null, lng: null
-        },
-        {
-            name: "Anders Christensen",
-            address: "Fynsgade 27, 1. 4, 7000 Fredericia",
-            dawaQuery: "Fynsgade 27, Fredericia",
-            phone: "40431846",
-            phonePrivate: "81737793",
-            lat: null, lng: null
-        },
-        {
-            name: "Hans Jørgen Schmidt",
-            address: "Højrupvej 35, 6510 Gram",
-            dawaQuery: "Højrupvej 35, Gram",
-            phone: "27898052",
-            lat: null, lng: null
-        },
-        {
-            name: "Kamil Stepien",
-            address: "Hillerup Markvej 3, 6760 Ribe",
-            dawaQuery: "Hillerup Markvej 3, Ribe",
-            phone: "28494319",
-            lat: null, lng: null
-        },
-        {
-            name: "Søren Poulsen",
-            address: "Trelde Næsvej 76, 7000 Fredericia",
-            dawaQuery: "Trelde Næsvej 76, Fredericia",
-            phone: "28195533",
-            lat: null, lng: null
-        }
-    ];
+// ═══ DATA ═══
+const C=[
+{n:"Jonas Alnor Schmidt",ad:"Højrupvej 35, 6510 Gram",dq:"Højrupvej 35, Gram",ph:"26707650",ar:"Syd"},
+{n:"Anders Christensen",ad:"Fynsgade 27, 1.4, 7000 Fredericia",dq:"Fynsgade 27, Fredericia",ph:"40431846",pp:"81737793",ar:"Syd"},
+{n:"Hans Jørgen Schmidt",ad:"Højrupvej 35, 6510 Gram",dq:"Højrupvej 35, Gram",ph:"27898052",ar:"Syd"},
+{n:"Kamil Stepien",ad:"Hillerup Markvej 3, 6760 Ribe",dq:"Hillerup Markvej 3, Ribe",ph:"28494319",ar:"Syd"},
+{n:"Søren Poulsen",ad:"Trelde Næsvej 76, 7000 Fredericia",dq:"Trelde Næsvej 76, Fredericia",ph:"28195533",ar:"Syd"},
+{n:"Jan Aanum",ad:"Sognefogedvej 1, Ulfborg",dq:"Sognefogedvej 1, Ulfborg",ph:"23687629",pp:"28126406",ar:"Nord"},
+{n:"Michael Erenskjold",ad:"Naurvej 2, Holstebro",dq:"Naurvej 2, Holstebro",ph:"93397962",pp:"28941093",ar:"Nord"},
+{n:"Torben Jørgensen",ad:"Karupvej 46, Karup J",dq:"Karupvej 46, Karup",ph:"23687654",pp:"50491733",ar:"Nord"},
+{n:"Emil Kristensen",ad:"Slussi 8, Kjellerup",dq:"Slussi 8, Kjellerup",ph:"93634931",pp:"53354896",ar:"Nord"},
+{n:"Lasse Vestergaard",ad:"Åparken 140, Struer",dq:"Åparken 140, Struer",ph:"23687689",pp:"26822155",ar:"Nord"},
+{n:"Rasmus Dalgaard",ad:"Nordkap 40, 1.TV, Holstebro",dq:"Nordkap 40, Holstebro",ph:"23687643",pp:"71709967",ar:"Nord"},
+{n:"Tyson Poulsen",ad:"Heimdalsparken 54, st.th, Holstebro",dq:"Heimdalsparken 54, Holstebro",ph:"23687647",pp:"53566106",ar:"Nord"},
+{n:"Mikkel Dalgaard",ad:"Nordkap 40, 1.TV, Holstebro",dq:"Nordkap 40, Holstebro",ph:"24979132",pp:"71709966",ar:"Nord"},
+{n:"Glen Jensen",ad:"Søndergade 42, Bording",dq:"Søndergade 42, Bording",ph:"93634918",pp:"40982434",ar:"Nord"},
+{n:"Michelle Jensen",ad:"Gåsdalvej 40, Skjern",dq:"Gåsdalvej 40, Skjern",ph:"23687671",pp:"28598648",ar:"Nord"},
+{n:"Michael Mechlenborg",ad:"Hovedgaden 43, Aulum",dq:"Hovedgaden 43, Aulum",ph:"23687634",pp:"23649131",ar:"Nord"},
+{n:"Jess Sørensen",ad:"Bredgade 20, Ulfborg",dq:"Bredgade 20, Ulfborg",ph:"23687690",pp:"60468030",ar:"Nord"},
+{n:"Simon Aanum",ad:"Holmvej 5, Ulfborg",dq:"Holmvej 5, Ulfborg",ph:"23687665",pp:"60183460",ar:"Nord"},
+];
+C.forEach(c=>{c.lat=null;c.lng=null;c.status='ledig'});
 
-    const map = L.map('map', { zoomControl: true }).setView([55.45, 9.40], 9);
+// ═══ MAP ═══
+const map=L.map('map',{zoomControl:true}).setView([55.8,9.2],8);
+const tls={
+'Standard':L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM',maxZoom:19}),
+'Mørkt':L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© CARTO',maxZoom:19,subdomains:'abcd'}),
+'Satellit':L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri',maxZoom:19}),
+'Lyst':L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© CARTO',maxZoom:19,subdomains:'abcd'})
+};
+let aT='Standard';tls[aT].addTo(map);
+const mc=document.getElementById('mc');
+Object.keys(tls).forEach(k=>{const b=document.createElement('button');b.textContent=k;if(k===aT)b.classList.add('a');b.onclick=()=>{map.removeLayer(tls[aT]);aT=k;tls[k].addTo(map);mc.querySelectorAll('button').forEach(x=>x.classList.toggle('a',x.textContent===k))};mc.appendChild(b)});
 
-    // Kortlag
-    const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
-        maxZoom: 19,
-        subdomains: 'abcd'
+const MK=[];let fM=null,fL=[],curFA='';
+
+// ═══ ICONS ═══
+const stCol={ledig:'#22c55e',optaget:'#ef4444',pvej:'#f59e0b'};
+function mkI(init,area,status){
+    const bg=area==='Syd'?'#B30012':'#1d4ed8';
+    const ring=stCol[status]||stCol.ledig;
+    return L.divIcon({className:'',html:`<div style="background:${bg};border:3px solid ${ring};border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.4);font-family:sans-serif">${init}</div>`,iconSize:[28,28],iconAnchor:[14,14],popupAnchor:[0,-18]});
+}
+function fI(){return L.divIcon({className:'',html:`<div style="background:#ef4444;border:3px solid #fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,.4);animation:fp 1.5s infinite">⚡</div>`,iconSize:[30,30],iconAnchor:[15,15],popupAnchor:[0,-19]})}
+
+// ═══ GEOCODE ═══
+async function geo(q){
+    try{const r=await fetch(`https://api.dataforsyningen.dk/adresser?q=${encodeURIComponent(q)}&struktur=mini&per_side=1`);const d=await r.json();if(d.length)return{lat:d[0].y,lng:d[0].x}}catch(e){}
+    try{const r=await fetch(`https://api.dataforsyningen.dk/autocomplete?q=${encodeURIComponent(q)}&type=adresse&per_side=1`);const d=await r.json();if(d.length&&d[0].adresse)return{lat:d[0].adresse.y,lng:d[0].adresse.x}}catch(e){}
+    try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q+', Denmark')}&countrycodes=dk&limit=1`);const d=await r.json();if(d.length)return{lat:+d[0].lat,lng:+d[0].lon}}catch(e){}
+    return null;
+}
+
+// ═══ INIT ═══
+async function init(){
+    // Load saved statuses
+    try{const s=JSON.parse(localStorage.getItem('sk_status')||'{}');Object.keys(s).forEach(k=>{const i=C.findIndex(c=>c.n===k);if(i>=0)C[i].status=s[k]})}catch(e){}
+
+    await Promise.all(C.map(async c=>{const p=await geo(c.dq);if(p){c.lat=p.lat;c.lng=p.lng}}));
+
+    const bnd=L.latLngBounds([]);
+    C.forEach((c,i)=>{
+        if(!c.lat)return;
+        const ini=c.n.split(' ').map(w=>w[0]).join('').slice(0,2);
+        const m=L.marker([c.lat,c.lng],{icon:mkI(ini,c.ar,c.status)}).addTo(map);
+        m.bindPopup(()=>mkPopup(i));
+        MK.push(m);
+        bnd.extend([c.lat,c.lng]);
+    });
+    if(bnd.isValid())map.fitBounds(bnd,{padding:[40,40]});
+    buildCards();loadHist();
+    document.getElementById('ov').classList.add('h');
+    setTimeout(()=>document.getElementById('ov').remove(),600);
+    if(window.innerWidth<=768)tab('map');
+}
+
+function mkPopup(i){
+    const c=C[i];
+    let h=`<div class="pn">${c.n}</div><div class="pa">${c.ad}</div>`;
+    h+=`<a href="tel:${c.ph}" class="pc gn">📞 ${c.ph}</a>`;
+    if(c.pp)h+=`<a href="tel:${c.pp}" class="pc pr">📱 ${c.pp}</a>`;
+    h+=`<a href="#" class="pc sm" onclick="event.preventDefault();openSms(${i})">💬 SMS</a>`;
+    if(curFA)h+=`<a href="https://www.google.com/maps/dir/${c.lat},${c.lng}/${encodeURIComponent(curFA)}" target="_blank" class="pc rt">🧭 Rute</a>`;
+    return h;
+}
+
+// ═══ STATUS ═══
+let stIdx=-1;
+function openSt(i){
+    stIdx=i;
+    document.getElementById('stName').textContent=C[i].n;
+    const o=document.getElementById('stOpts');o.innerHTML='';
+    [{k:'ledig',l:'🟢 Ledig',d:'Klar til at køre ud'},{k:'optaget',l:'🔴 Optaget',d:'På en opgave'},{k:'pvej',l:'🟡 På vej',d:'Er på vej til en fejl'}].forEach(s=>{
+        const b=document.createElement('button');
+        b.innerHTML=`${s.l}<br><span style="font-size:.72rem;font-weight:400;color:var(--dm)">${s.d}</span>`;
+        if(C[i].status===s.k)b.classList.add('sel');
+        b.onclick=()=>{setSt(i,s.k);clSt()};
+        o.appendChild(b);
+    });
+    document.getElementById('stM').classList.add('v');
+}
+function clSt(){document.getElementById('stM').classList.remove('v');stIdx=-1}
+function setSt(i,s){
+    C[i].status=s;
+    const ini=C[i].n.split(' ').map(w=>w[0]).join('').slice(0,2);
+    MK[i].setIcon(mkI(ini,C[i].ar,s));
+    // Save
+    const sv={};C.forEach(c=>sv[c.n]=c.status);
+    try{localStorage.setItem('sk_status',JSON.stringify(sv))}catch(e){}
+    buildCards();
+}
+
+// ═══ FILTERS ═══
+let aF='Alle';
+function buildCards(){
+    const tc=document.getElementById('tc');tc.innerHTML='';
+    const fb=document.getElementById('fb');fb.innerHTML='';
+    ['Alle','Syd','Nord','🟢 Ledig'].forEach(f=>{
+        const b=document.createElement('button');b.className='ft'+(f===aF?' a':'');b.textContent=f;
+        b.onclick=()=>{aF=f;buildCards()};fb.appendChild(b);
     });
 
-    const lightLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
-        maxZoom: 19,
-        subdomains: 'abcd'
+    C.forEach((c,i)=>{
+        if(!c.lat)return;
+        if(aF==='Syd'&&c.ar!=='Syd')return;
+        if(aF==='Nord'&&c.ar!=='Nord')return;
+        if(aF==='🟢 Ledig'&&c.status!=='ledig')return;
+
+        const d=document.createElement('div');d.className='tc';
+        d.onclick=()=>{map.setView([c.lat,c.lng],14);MK[i].openPopup();if(window.innerWidth<=768)tab('map')};
+
+        const stL={ledig:'🟢 Ledig',optaget:'🔴 Optaget',pvej:'🟡 På vej'};
+        const stC={ledig:'ledig',optaget:'optaget',pvej:'pvej'};
+        const badge=c.ar==='Syd'?'🔴':'🔵';
+
+        let btns=`<a href="tel:${c.ph}" class="cb gn" onclick="event.stopPropagation()">📞</a>`;
+        if(c.pp)btns+=`<a href="tel:${c.pp}" class="cb pr" onclick="event.stopPropagation()">📱</a>`;
+        btns+=`<button class="cb sm" onclick="event.stopPropagation();openSms(${i})">💬</button>`;
+        if(curFA)btns+=`<a href="https://www.google.com/maps/dir/${c.lat},${c.lng}/${encodeURIComponent(curFA)}" target="_blank" class="cb rt" onclick="event.stopPropagation()">🧭</a>`;
+        btns+=`<button class="cb lc" onclick="event.stopPropagation();map.setView([${c.lat},${c.lng}],14);MK[${i}].openPopup();if(window.innerWidth<=768)tab('map')">📍</button>`;
+
+        d.innerHTML=`<div class="tn">${badge} ${c.n}<button class="st ${stC[c.status]}" onclick="event.stopPropagation();openSt(${i})">${stL[c.status]}</button></div><div class="ta">${c.ad}</div><div class="tb">${btns}</div>`;
+        tc.appendChild(d);
     });
+}
 
-    // Start med lyst kort
-    lightLayer.addTo(map);
+// ═══ HAVERSINE ═══
+function hav(a,b,c,d){const R=6371,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180,z=Math.sin(x/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(y/2)**2;return R*2*Math.atan2(Math.sqrt(z),Math.sqrt(1-z))}
 
-    // Skift mellem kort
-    L.control.layers(
-        {
-            "Lyst kort": lightLayer,
-            "Mørkt kort": darkLayer
-        },
-        null,
-        { position: 'topright', collapsed: true }
-    ).addTo(map);
+// ═══ CLEAR FAULT ═══
+function clF(){if(fM){map.removeLayer(fM);fM=null}fL.forEach(l=>map.removeLayer(l));fL=[]}
 
-    const markers = [];
-    let faultMarker = null;
-    let faultLines = [];
+// ═══ AUTOCOMPLETE ═══
+let acTm=null,acDt=[],acIdx=-1;
+function acI(v){if(acTm)clearTimeout(acTm);if(v.length<3){document.getElementById('ac').classList.remove('v');return}acTm=setTimeout(()=>acFt(v),250)}
+async function acFt(q){try{const r=await fetch(`https://api.dataforsyningen.dk/autocomplete?q=${encodeURIComponent(q)}&type=adresse&per_side=6`);acDt=await r.json();const l=document.getElementById('ac');if(!acDt.length){l.classList.remove('v');return}l.innerHTML='';acDt.forEach((it,i)=>{const d=document.createElement('div');d.className='aci';d.textContent=it.tekst;d.onclick=()=>acS(i);l.appendChild(d)});l.classList.add('v');acIdx=-1}catch(e){document.getElementById('ac').classList.remove('v')}}
+function acS(i){document.getElementById('fA').value=acDt[i].tekst;document.getElementById('ac').classList.remove('v');doSearch()}
+function acK(e){const l=document.getElementById('ac').querySelectorAll('.aci');if(e.key==='ArrowDown'){e.preventDefault();acIdx=Math.min(acIdx+1,l.length-1);l.forEach((x,j)=>x.classList.toggle('a',j===acIdx))}else if(e.key==='ArrowUp'){e.preventDefault();acIdx=Math.max(acIdx-1,0);l.forEach((x,j)=>x.classList.toggle('a',j===acIdx))}else if(e.key==='Enter'){acIdx>=0&&acIdx<l.length?acS(acIdx):doSearch()}}
 
-    function techIcon(label) {
-        return L.divIcon({
-            className: '',
-            html: `<div style="
-                background: var(--sk-red, #B30012);
-                border: 3px solid #fff;
-                border-radius: 50%;
-                width: 28px; height: 28px;
-                display: flex; align-items: center; justify-content: center;
-                font-size: 12px; font-weight: 700; color: #fff;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-                font-family: sans-serif;
-            ">${label}</div>`,
-            iconSize: [28, 28],
-            iconAnchor: [14, 14],
-            popupAnchor: [0, -18]
-        });
-    }
+// ═══ SEARCH ═══
+async function doSearch(){
+    const addr=document.getElementById('fA').value.trim();if(!addr)return;
+    document.getElementById('ac').classList.remove('v');
+    const ld=document.getElementById('ld'),er=document.getElementById('er'),sr=document.getElementById('sr');
+    ld.classList.add('v');er.classList.remove('v');sr.classList.remove('v');clF();
 
-    function faultIcon() {
-        return L.divIcon({
-            className: '',
-            html: `<div style="
-                background: #ef4444;
-                border: 3px solid #fff;
-                border-radius: 50%;
-                width: 28px; height: 28px;
-                display: flex; align-items: center; justify-content: center;
-                font-size: 14px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-                animation: faultPulse 1.5s infinite;
-            ">⚡</div>`,
-            iconSize: [28, 28],
-            iconAnchor: [14, 14],
-            popupAnchor: [0, -18]
-        });
-    }
+    const co=await geo(addr);ld.classList.remove('v');
+    if(!co){er.textContent='Adressen kunne ikke findes.';er.classList.add('v');return}
 
-    async function geocodeDAWA(query) {
-        try {
-            const url = `https://api.dataforsyningen.dk/adresser?q=${encodeURIComponent(query)}&struktur=mini&per_side=1`;
-            const resp = await fetch(url);
-            const data = await resp.json();
-            if (data && data.length > 0) {
-                return { lat: data[0].y, lng: data[0].x };
-            }
-        } catch(e) {}
+    curFA=addr;
+    fM=L.marker([co.lat,co.lng],{icon:fI()}).addTo(map).bindPopup(`<div class="pn" style="color:#ef4444">⚡ Fejladresse</div><div class="pa">${addr}</div><button class="pc" style="background:#8b5cf6" onclick="navigator.clipboard.writeText('${addr.replace(/'/g,"\\'")}')">📋 Kopier</button>`).openPopup();
 
-        try {
-            const url2 = `https://api.dataforsyningen.dk/autocomplete?q=${encodeURIComponent(query)}&type=adresse&per_side=1`;
-            const resp2 = await fetch(url2);
-            const data2 = await resp2.json();
-            if (data2 && data2.length > 0 && data2[0].adresse) {
-                return { lat: data2[0].adresse.y, lng: data2[0].adresse.x };
-            }
-        } catch(e) {}
+    const sorted=C.filter(c=>c.lat).map((c,i)=>({...c,idx:i,dist:hav(co.lat,co.lng,c.lat,c.lng)})).sort((a,b)=>a.dist-b.dist);
+    sorted.slice(0,3).forEach(t=>{const ln=L.polyline([[co.lat,co.lng],[t.lat,t.lng]],{color:'#B30012',weight:2,dashArray:'8,6',opacity:.5}).addTo(map);fL.push(ln)});
 
-        try {
-            const url3 = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Denmark')}&countrycodes=dk&limit=1`;
-            const resp3 = await fetch(url3);
-            const data3 = await resp3.json();
-            if (data3 && data3.length > 0) {
-                return { lat: parseFloat(data3[0].lat), lng: parseFloat(data3[0].lon) };
-            }
-        } catch(e) {}
+    const bnd=L.latLngBounds([[co.lat,co.lng]]);sorted.slice(0,3).forEach(t=>bnd.extend([t.lat,t.lng]));map.fitBounds(bnd,{padding:[50,50]});
 
-        return null;
-    }
-
-    async function init() {
-        const overlay = document.getElementById('initOverlay');
-        const promises = technicians.map(async (tech) => {
-            const coords = await geocodeDAWA(tech.dawaQuery);
-            if (coords) {
-                tech.lat = coords.lat;
-                tech.lng = coords.lng;
-            }
-        });
-
-        await Promise.all(promises);
-
-        const bounds = L.latLngBounds([]);
-        technicians.forEach((tech, i) => {
-            if (tech.lat === null) return;
-
-            const initials = tech.name.split(' ').map(n => n[0]).join('').slice(0, 2);
-            let popupHTML = `
-                <div class="p-name">${tech.name}</div>
-                <div class="p-addr">${tech.address}</div>
-                <a href="tel:${tech.phone}" class="p-call">📞 ${tech.phone}</a>
-            `;
-            if (tech.phonePrivate) {
-                popupHTML += `<a href="tel:${tech.phonePrivate}" class="p-call private">📱 Privat: ${tech.phonePrivate}</a>`;
-            }
-
-            const marker = L.marker([tech.lat, tech.lng], { icon: techIcon(initials) })
-                .addTo(map)
-                .bindPopup(popupHTML);
-            markers.push(marker);
-            bounds.extend([tech.lat, tech.lng]);
-        });
-
-        if (bounds.isValid()) {
-            map.fitBounds(bounds, { padding: [50, 50] });
-        }
-
-        buildTechCards();
-
-        overlay.classList.add('hidden');
-        setTimeout(() => overlay.remove(), 600);
-
-        if (window.innerWidth <= 768) {
-            showTab('map');
-        }
-    }
-
-    function buildTechCards() {
-        const container = document.getElementById('techCards');
-        container.innerHTML = '';
-        technicians.forEach((tech, i) => {
-            if (tech.lat === null) return;
-
-            const card = document.createElement('div');
-            card.className = 'tech-card';
-            card.onclick = () => {
-                map.setView([tech.lat, tech.lng], 14);
-                markers[i].openPopup();
-                if (window.innerWidth <= 768) showTab('map');
-            };
-
-            let actions = `<a href="tel:${tech.phone}" class="call-btn" onclick="event.stopPropagation()">📞 ${tech.phone}</a>`;
-            if (tech.phonePrivate) {
-                actions += `<a href="tel:${tech.phonePrivate}" class="call-btn private" onclick="event.stopPropagation()">📱 Privat</a>`;
-            }
-            actions += `<button class="locate-btn" onclick="event.stopPropagation(); map.setView([${tech.lat},${tech.lng}],14); markers[${i}].openPopup(); if(window.innerWidth<=768) showTab('map');">📍 Vis</button>`;
-
-            card.innerHTML = `
-                <div class="t-name">${tech.name}</div>
-                <div class="t-addr">${tech.address}</div>
-                <div class="t-actions">${actions}</div>
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    function haversine(lat1, lng1, lat2, lng2) {
-        const R = 6371;
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLng = (lng2 - lng1) * Math.PI / 180;
-        const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    }
-
-    function clearFault() {
-        if (faultMarker) { map.removeLayer(faultMarker); faultMarker = null; }
-        faultLines.forEach(l => map.removeLayer(l));
-        faultLines = [];
-    }
-
-    let acTimeout = null;
-    let acData = [];
-    let acIndex = -1;
-
-    function onAddressInput(val) {
-        if (acTimeout) clearTimeout(acTimeout);
-        if (val.length < 3) {
-            document.getElementById('autocomplete').classList.remove('visible');
-            return;
-        }
-        acTimeout = setTimeout(() => fetchAutocomplete(val), 250);
-    }
-
-    async function fetchAutocomplete(query) {
-        try {
-            const resp = await fetch(`https://api.dataforsyningen.dk/autocomplete?q=${encodeURIComponent(query)}&type=adresse&per_side=6`);
-            acData = await resp.json();
-            const list = document.getElementById('autocomplete');
-            if (acData.length === 0) { list.classList.remove('visible'); return; }
-            list.innerHTML = '';
-            acData.forEach((item, i) => {
-                const div = document.createElement('div');
-                div.className = 'autocomplete-item';
-                div.textContent = item.tekst;
-                div.onclick = () => selectAutocomplete(i);
-                list.appendChild(div);
-            });
-            list.classList.add('visible');
-            acIndex = -1;
-        } catch(e) {
-            document.getElementById('autocomplete').classList.remove('visible');
-        }
-    }
-
-    function selectAutocomplete(i) {
-        const item = acData[i];
-        document.getElementById('faultAddress').value = item.tekst;
-        document.getElementById('autocomplete').classList.remove('visible');
-        searchFaultAddress();
-    }
-
-    function onAddressKeydown(e) {
-        const list = document.getElementById('autocomplete');
-        const items = list.querySelectorAll('.autocomplete-item');
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            acIndex = Math.min(acIndex + 1, items.length - 1);
-            items.forEach((el, i) => el.classList.toggle('active', i === acIndex));
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            acIndex = Math.max(acIndex - 1, 0);
-            items.forEach((el, i) => el.classList.toggle('active', i === acIndex));
-        } else if (e.key === 'Enter') {
-            if (acIndex >= 0 && acIndex < items.length) {
-                selectAutocomplete(acIndex);
-            } else {
-                searchFaultAddress();
-            }
-        }
-    }
-
-    async function searchFaultAddress() {
-        const address = document.getElementById('faultAddress').value.trim();
-        if (!address) return;
-
-        document.getElementById('autocomplete').classList.remove('visible');
-        const loading = document.getElementById('loading');
-        const errorMsg = document.getElementById('errorMsg');
-        const results = document.getElementById('searchResults');
-
-        loading.classList.add('visible');
-        errorMsg.classList.remove('visible');
-        results.classList.remove('visible');
-        clearFault();
-
-        const coords = await geocodeDAWA(address);
-        loading.classList.remove('visible');
-
-        if (!coords) {
-            errorMsg.textContent = 'Adressen kunne ikke findes. Prøv en mere præcis adresse.';
-            errorMsg.classList.add('visible');
-            return;
-        }
-
-        const faultLat = coords.lat;
-        const faultLng = coords.lng;
-
-        faultMarker = L.marker([faultLat, faultLng], { icon: faultIcon() })
-            .addTo(map)
-            .bindPopup(`
-                <div class="p-name" style="color:#ef4444;">⚡ Fejladresse</div>
-                <div class="p-addr">${address}</div>
-            `).openPopup();
-
-        const sorted = technicians
-            .filter(t => t.lat !== null)
-            .map((tech, i) => ({
-                ...tech, index: i,
-                distance: haversine(faultLat, faultLng, tech.lat, tech.lng)
-            }))
-            .sort((a, b) => a.distance - b.distance);
-
-        sorted.slice(0, 3).forEach(tech => {
-            const line = L.polyline(
-                [[faultLat, faultLng], [tech.lat, tech.lng]],
-                { color: '#B30012', weight: 2, dashArray: '8, 6', opacity: 0.6 }
-            ).addTo(map);
-            faultLines.push(line);
-        });
-
-        const bounds = L.latLngBounds([[faultLat, faultLng]]);
-        sorted.slice(0, 3).forEach(t => bounds.extend([t.lat, t.lng]));
-        map.fitBounds(bounds, { padding: [50, 50] });
-
-        const resultsList = document.getElementById('resultsList');
-        resultsList.innerHTML = '';
-        sorted.forEach((tech, rank) => {
-            const item = document.createElement('div');
-            item.className = 'result-item' + (rank === 0 ? ' closest' : '');
-            item.onclick = () => {
-                map.setView([tech.lat, tech.lng], 14);
-                markers[tech.index].openPopup();
-                if (window.innerWidth <= 768) showTab('map');
-            };
-
-            let btns = `<a href="tel:${tech.phone}" class="call-btn-sm" onclick="event.stopPropagation()">📞 Ring op</a>`;
-            if (tech.phonePrivate) {
-                btns += `<a href="tel:${tech.phonePrivate}" class="call-btn-sm private" onclick="event.stopPropagation()">📱 Privat</a>`;
-            }
-
-            item.innerHTML = `
-                <div class="r-top">
-                    <span class="r-name">${rank === 0 ? '⭐ ' : ''}${tech.name}</span>
-                    <span class="r-dist">${tech.distance.toFixed(1)} km</span>
-                </div>
-                <div class="r-addr">${tech.address}</div>
-                <div>${btns}</div>
-            `;
-            resultsList.appendChild(item);
-        });
-
-        results.classList.add('visible');
-
-        if (window.innerWidth <= 768) {
-            showTab('search');
-        }
-    }
-
-    function showTab(tab) {
-        const sidebar = document.getElementById('sidebar');
-        const tabs = document.querySelectorAll('.tab-btn');
-        tabs.forEach(t => t.classList.remove('active'));
-
-        if (tab === 'map') {
-            sidebar.classList.add('hidden');
-            document.getElementById('tabMap').classList.add('active');
-            setTimeout(() => map.invalidateSize(), 350);
-        } else if (tab === 'list') {
-            sidebar.classList.remove('hidden');
-            sidebar.scrollTop = 0;
-            document.getElementById('tabList').classList.add('active');
-            document.querySelector('.technician-list').scrollIntoView({ behavior: 'smooth' });
-        } else if (tab === 'search') {
-            sidebar.classList.remove('hidden');
-            sidebar.scrollTop = 0;
-            document.getElementById('tabSearch').classList.add('active');
-            setTimeout(() => document.getElementById('faultAddress').focus(), 400);
-        }
-    }
-
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.search-section')) {
-            document.getElementById('autocomplete').classList.remove('visible');
-        }
+    const rl=document.getElementById('rl');rl.innerHTML='';
+    sorted.forEach((t,rank)=>{
+        const d=document.createElement('div');d.className='ri'+(rank===0?' top':'');
+        d.onclick=()=>{map.setView([t.lat,t.lng],14);MK[t.idx].openPopup();if(window.innerWidth<=768)tab('map')};
+        const badge=t.ar==='Syd'?'🔴':'🔵';
+        const stL={ledig:'🟢',optaget:'🔴',pvej:'🟡'};
+        let btns=`<a href="tel:${t.ph}" class="bs gn" onclick="event.stopPropagation()">📞 Ring</a>`;
+        if(t.pp)btns+=`<a href="tel:${t.pp}" class="bs pr" onclick="event.stopPropagation()">📱 Privat</a>`;
+        btns+=`<a href="#" class="bs sm" onclick="event.preventDefault();event.stopPropagation();openSms(${t.idx})">💬 SMS</a>`;
+        btns+=`<a href="https://www.google.com/maps/dir/${t.lat},${t.lng}/${encodeURIComponent(addr)}" target="_blank" class="bs rt" onclick="event.stopPropagation()">🧭 Rute</a>`;
+        d.innerHTML=`<div class="rt"><span class="rn">${rank===0?'⭐ ':''}${stL[t.status]||'🟢'} ${badge} ${t.n}</span><span class="rd">${t.dist.toFixed(1)} km</span></div><div class="ra">${t.ad}</div><div class="rb">${btns}</div>`;
+        rl.appendChild(d);
     });
+    sr.classList.add('v');
+    buildCards(); // refresh route buttons
+    addHist(addr,sorted[0]?sorted[0].n:'?',sorted[0]?sorted[0].dist:0);
+    if(window.innerWidth<=768)tab('search');
+}
 
-    window.addEventListener('resize', () => map.invalidateSize());
+// ═══ HISTORY ═══
+let hist=[];
+function loadHist(){try{hist=JSON.parse(localStorage.getItem('sk_hist')||'[]')}catch(e){hist=[]}renderHist()}
+function addHist(addr,who,dist){
+    const now=new Date();
+    const ts=now.toLocaleDateString('da-DK',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    hist.unshift({addr,who,dist:dist.toFixed(1),ts});
+    if(hist.length>50)hist=hist.slice(0,50);
+    try{localStorage.setItem('sk_hist',JSON.stringify(hist))}catch(e){}
+    renderHist();
+}
+function renderHist(){
+    const hl=document.getElementById('hl');hl.innerHTML='';
+    if(!hist.length){hl.innerHTML='<div style="font-size:.75rem;color:var(--dm)">Ingen fejl søgt endnu</div>';return}
+    hist.slice(0,20).forEach(h=>{
+        const d=document.createElement('div');d.className='hi';
+        d.innerHTML=`<span class="ht">${h.addr}</span> → <span class="hw">${h.who}</span> (${h.dist} km) <span style="float:right">${h.ts}</span>`;
+        d.style.cursor='pointer';
+        d.onclick=()=>{document.getElementById('fA').value=h.addr;doSearch()};
+        hl.appendChild(d);
+    });
+}
+function clrHist(){hist=[];try{localStorage.removeItem('sk_hist')}catch(e){}renderHist()}
 
-    init();
+// ═══ SMS ═══
+let smsIdx=-1;
+function openSms(i){
+    smsIdx=i;const c=C[i];
+    document.getElementById('smsTo').textContent=`${c.n} — ${c.pp||c.ph}`;
+    const fa=curFA||'(ingen fejladresse søgt)';
+    document.getElementById('smsTxt').value=`Hej ${c.n.split(' ')[0]},\n\nDer er en kabelfejl på:\n${fa}\n\nKan du køre derud?\n\nMvh`;
+    document.getElementById('smsM').classList.add('v');
+}
+function clSms(){document.getElementById('smsM').classList.remove('v');smsIdx=-1}
+function doSms(){
+    if(smsIdx<0)return;const c=C[smsIdx];
+    const num=c.pp||c.ph;
+    const body=encodeURIComponent(document.getElementById('smsTxt').value);
+    window.open(`sms:${num}?body=${body}`,'_self');clSms();
+}
+
+// ═══ MOBILE TABS ═══
+function tab(t){
+    const sb=document.getElementById('sb');
+    document.querySelectorAll('.mt .btn').forEach(b=>b.classList.remove('a'));
+    if(t==='map'){sb.classList.add('hid');document.getElementById('tM').classList.add('a');setTimeout(()=>map.invalidateSize(),350)}
+    else if(t==='list'){sb.classList.remove('hid');document.querySelector('.mt .btn').classList.add('a');document.getElementById('tl').scrollIntoView()}
+    else if(t==='search'){sb.classList.remove('hid');document.getElementById('tS').classList.add('a');setTimeout(()=>document.getElementById('fA').focus(),400)}
+    else if(t==='hist'){sb.classList.remove('hid');document.querySelectorAll('.mt .btn')[3].classList.add('a');document.getElementById('hp').scrollIntoView()}
+}
+
+document.addEventListener('click',e=>{if(!e.target.closest('.ss'))document.getElementById('ac').classList.remove('v')});
+window.addEventListener('resize',()=>map.invalidateSize());
+init();
 </script>
-
 </body>
 </html>
