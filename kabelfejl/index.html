@@ -36,6 +36,7 @@
             --radius-sm: 6px;
             --radius-md: 10px;
             --radius-lg: 16px;
+            --radius-xl: 24px;
             --shadow-sm: 0 1px 3px rgba(0,0,0,.3);
             --shadow-md: 0 4px 16px rgba(0,0,0,.4);
             --shadow-lg: 0 8px 32px rgba(0,0,0,.5);
@@ -50,7 +51,6 @@
         ::-webkit-scrollbar-track { background:transparent }
         ::-webkit-scrollbar-thumb { background:var(--border-hover); border-radius:10px }
 
-        /* ── LOADING ── */
         #ov { position:fixed; inset:0; background:var(--bg-primary); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; transition:opacity .6s ease, filter .6s ease }
         #ov.h { opacity:0; filter:blur(8px); pointer-events:none }
         .ov-logo { font-size:2rem; font-weight:700; color:var(--accent); margin-bottom:6px; letter-spacing:-1px }
@@ -59,7 +59,6 @@
         .ov-bar-inner { width:40%; height:100%; background:linear-gradient(90deg, var(--accent), #ff4466); border-radius:3px; animation:loadSlide 1.2s ease-in-out infinite }
         @keyframes loadSlide { 0%{transform:translateX(-100%)} 100%{transform:translateX(350%)} }
 
-        /* ── HEADER ── */
         header {
             background:linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
             padding:0 16px; height:54px; display:flex; align-items:center; gap:12px; flex-shrink:0;
@@ -84,7 +83,6 @@
         .h-btn:hover { background:rgba(255,255,255,.18); border-color:rgba(255,255,255,.35) }
         .h-shortcut { display:inline-flex; padding:1px 5px; border-radius:3px; background:rgba(255,255,255,.15); font-size:.6rem; font-family:var(--mono); margin-left:2px }
 
-        /* ── STATS BAR ── */
         .stats-bar {
             background:var(--bg-secondary); border-bottom:1px solid var(--border);
             padding:8px 16px; display:flex; gap:16px; flex-shrink:0; z-index:999; align-items:center;
@@ -98,7 +96,6 @@
         .stat-num { font-weight:700; color:var(--text-primary); font-family:var(--mono); font-size:.8rem }
         .stat-sep { width:1px; height:16px; background:var(--border) }
 
-        /* ── LAYOUT ── */
         .main { display:flex; flex:1; overflow:hidden; position:relative }
         .sidebar {
             width:380px; background:var(--bg-secondary); display:flex; flex-direction:column;
@@ -106,7 +103,6 @@
             transition:transform .35s cubic-bezier(.4,0,.2,1), opacity .35s ease;
         }
 
-        /* ── SEARCH ── */
         .search-panel { padding:14px 16px; border-bottom:1px solid var(--border); background:var(--bg-primary); flex-shrink:0; position:relative }
         .search-label { font-size:.6rem; text-transform:uppercase; letter-spacing:2px; color:var(--accent); margin-bottom:8px; font-weight:700 }
         .search-box { display:flex; gap:6px }
@@ -140,7 +136,6 @@
         .search-msg.loading { color:var(--text-muted) }
         .search-msg.error { color:var(--red) }
 
-        /* ── RESULTS ── */
         .results-panel { margin-top:10px; display:none; max-height:260px; overflow-y:auto }
         .results-panel.visible { display:block }
         .results-panel h3 { font-size:.6rem; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:2px; font-weight:700 }
@@ -151,14 +146,13 @@
         .result-card:hover { border-color:var(--border-hover); background:var(--bg-card-hover); transform:translateY(-1px) }
         .result-card.top-pick { border-color:var(--accent); background:var(--accent-glow) }
         .result-card.top-pick:hover { background:var(--accent-glow-strong) }
-        .result-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:2px }
+        .result-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:2px; gap:10px }
         .result-name { font-weight:700; font-size:.85rem; display:flex; align-items:center; gap:5px }
-        .result-dist { font-size:.82rem; color:var(--accent); font-weight:700; font-family:var(--mono) }
+        .result-dist { font-size:.82rem; color:var(--accent); font-weight:700; font-family:var(--mono); white-space:nowrap }
         .result-addr { font-size:.73rem; color:var(--text-secondary); margin-bottom:4px }
         .result-drive { font-size:.7rem; color:var(--text-muted); margin-bottom:6px; font-style:italic }
         .result-btns { display:flex; flex-wrap:wrap; gap:4px }
 
-        /* ── BUTTONS ── */
         .btn-mini {
             display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:var(--radius-sm);
             color:#fff; font-size:.7rem; font-weight:600; text-decoration:none; border:none; cursor:pointer;
@@ -172,7 +166,6 @@
         .btn-mini.copy { background:var(--purple) }
         .btn-mini.locate { background:var(--accent) }
 
-        /* ── TECH LIST ── */
         .tech-list { flex:1; overflow-y:auto; padding:14px 16px; -webkit-overflow-scrolling:touch }
         .tech-list h2 { font-size:.6rem; text-transform:uppercase; letter-spacing:2px; color:var(--accent); margin-bottom:10px; font-weight:700 }
         .filter-bar { display:flex; gap:5px; margin-bottom:12px; flex-wrap:wrap }
@@ -196,7 +189,7 @@
         .tech-card.status-optaget::before { background:var(--red) }
         .tech-card.status-pvej::before { background:var(--yellow) }
         .tech-card:hover { border-color:var(--border-hover); background:var(--bg-card-hover); transform:translateX(2px) }
-        .tech-name { font-weight:700; font-size:.87rem; color:var(--text-primary); display:flex; align-items:center; gap:8px }
+        .tech-name { font-weight:700; font-size:.87rem; color:var(--text-primary); display:flex; align-items:center; gap:8px; flex-wrap:wrap }
         .tech-area { font-size:.55rem; padding:2px 7px; border-radius:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase }
         .tech-area.syd { background:var(--red-dim); color:var(--red) }
         .tech-area.nord { background:var(--blue-dim); color:var(--blue) }
@@ -211,7 +204,6 @@
         .tech-addr { font-size:.75rem; color:var(--text-secondary); margin:3px 0 8px; padding-left:3px }
         .tech-btns { display:flex; gap:5px; flex-wrap:wrap }
 
-        /* ── MAP ── */
         #map { flex:1; min-height:0; background:var(--bg-primary) }
         .map-controls { position:absolute; top:12px; right:12px; z-index:800; display:flex; flex-direction:column; gap:4px }
         .map-controls button {
@@ -238,17 +230,15 @@
         .popup-btn.sms { background:#e67e22 }
         .popup-btn.route { background:#0ea5e9 }
 
-        /* ── HISTORY ── */
         .history-panel { border-top:1px solid var(--border); padding:12px 16px; max-height:180px; overflow-y:auto; flex-shrink:0; background:var(--bg-primary) }
         .history-panel h2 { font-size:.6rem; text-transform:uppercase; letter-spacing:2px; color:var(--accent); margin-bottom:8px; font-weight:700; display:flex; justify-content:space-between; align-items:center }
         .history-clear { font-size:.65rem; color:var(--text-muted); cursor:pointer; text-transform:none; letter-spacing:0; font-weight:400; transition:var(--transition) }
         .history-clear:hover { color:var(--red) }
-        .history-item { font-size:.75rem; padding:6px 0; border-bottom:1px solid var(--border); color:var(--text-muted); cursor:pointer; transition:var(--transition) }
+        .history-item { font-size:.75rem; padding:8px 0; border-bottom:1px solid var(--border); color:var(--text-muted); cursor:pointer; transition:var(--transition) }
         .history-item:hover { color:var(--text-primary) }
-        .history-item .hi-addr { color:var(--text-primary); font-weight:600 }
+        .history-item .hi-addr { color:var(--text-primary); font-weight:600; display:block; margin-bottom:2px }
         .history-item .hi-who { color:var(--accent) }
 
-        /* ── MOBILE TABS ── */
         .mobile-tabs { display:none; background:var(--bg-secondary); border-top:1px solid var(--border); flex-shrink:0; z-index:500 }
         .mobile-tabs .bar { display:flex }
         .mobile-tabs .tab-btn {
@@ -259,7 +249,6 @@
         .mobile-tabs .tab-btn.active { color:var(--accent); border-top-color:var(--accent) }
         .mobile-tabs .tab-btn span { display:block; font-size:1.1rem; margin-bottom:1px }
 
-        /* ── MODALS ── */
         .modal-bg {
             position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(4px);
             z-index:10000; display:none; align-items:center; justify-content:center;
@@ -299,7 +288,6 @@
         .status-opts button[data-status="optaget"]::before { background:var(--red) }
         .status-opts button[data-status="pvej"]::before { background:var(--yellow) }
 
-        /* ── TOAST ── */
         .toast {
             position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(10px);
             background:var(--bg-card); border:1px solid var(--border-hover); color:var(--text-primary);
@@ -309,20 +297,104 @@
         }
         .toast.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto }
 
-        /* ── RESPONSIVE ── */
         @media(max-width:768px) {
             header { padding:0 10px; height:48px }
             .header-text h1 { font-size:.8rem }
             .stats-bar { padding:6px 10px; gap:10px; overflow-x:auto }
             .stat-item { font-size:.68rem; white-space:nowrap }
             .main { flex-direction:column }
-            .sidebar { width:100%; border-right:none; position:absolute; top:0; left:0; right:0; bottom:0; z-index:500 }
+            .sidebar {
+                width:100%; border-right:none; position:absolute; top:0; left:0; right:0; bottom:0; z-index:500;
+                background:rgba(10,10,15,.94); backdrop-filter:blur(16px);
+            }
             .sidebar.hidden { transform:translateX(-100%); pointer-events:none; opacity:0 }
             #map { position:absolute; top:0; left:0; right:0; bottom:0 }
             .mobile-tabs { display:block }
             .map-controls { top:8px; right:8px }
-            .h-btn span.d-txt { display:none }
             .h-shortcut { display:none }
+
+            .search-panel {
+                padding:14px 14px 10px;
+                border-bottom:none;
+                background:transparent;
+            }
+            .search-label {
+                font-size:.7rem;
+                margin-bottom:10px;
+            }
+            .search-box {
+                gap:8px;
+                background:rgba(255,255,255,.04);
+                border:1px solid rgba(255,255,255,.08);
+                border-radius:999px;
+                padding:6px;
+                box-shadow:0 8px 28px rgba(0,0,0,.28);
+            }
+            .search-box input {
+                background:transparent;
+                border:none;
+                border-radius:999px;
+                padding:12px 14px;
+                font-size:.92rem;
+                min-width:0;
+            }
+            .search-box input:focus {
+                box-shadow:none;
+            }
+            .search-btn {
+                border-radius:999px;
+                padding:12px 18px;
+                font-size:.82rem;
+                flex-shrink:0;
+            }
+            .ac-list {
+                left:14px;
+                right:14px;
+                border-radius:18px;
+                overflow:hidden;
+            }
+            .results-panel {
+                max-height:none;
+                overflow:visible;
+                margin-top:12px;
+            }
+            .result-card {
+                border-radius:16px;
+                padding:13px 14px;
+            }
+            .result-btns {
+                gap:6px;
+            }
+
+            .tech-list,
+            .history-panel {
+                padding:14px;
+                border-top:none;
+                background:transparent;
+            }
+
+            .search-panel.mobile-only,
+            .tech-list.mobile-only,
+            .history-panel.mobile-only {
+                display:block;
+                flex:1;
+                overflow-y:auto;
+            }
+            .search-panel.mobile-hidden,
+            .tech-list.mobile-hidden,
+            .history-panel.mobile-hidden {
+                display:none !important;
+            }
+
+            .history-panel {
+                max-height:none;
+            }
+
+            .result-top {
+                align-items:flex-start;
+                flex-direction:column;
+                gap:4px;
+            }
         }
 
         @keyframes fault-pulse { 0%{box-shadow:0 0 0 0 rgba(239,68,68,.6)} 70%{box-shadow:0 0 0 18px rgba(239,68,68,0)} 100%{box-shadow:0 0 0 0 rgba(239,68,68,0)} }
@@ -337,7 +409,6 @@
     <div class="ov-bar"><div class="ov-bar-inner"></div></div>
 </div>
 
-<!-- SMS MODAL -->
 <div class="modal-bg" id="smsModal">
     <div class="modal">
         <h3>💬 Send SMS</h3>
@@ -352,7 +423,6 @@
     </div>
 </div>
 
-<!-- STATUS MODAL -->
 <div class="modal-bg" id="statusModal">
     <div class="modal">
         <h3 id="statusName">Sæt status</h3>
@@ -374,8 +444,6 @@
         <div class="sub">Kabelfejl — Blæsekort</div>
     </div>
     <div class="header-actions">
-        <a class="h-btn" href="https://app.fleetcomplete.com" target="_blank">🚛 <span class="d-txt">Fleet</span></a>
-        <a class="h-btn" href="https://keatech.dk" target="_blank">📡 <span class="d-txt">Keatech</span></a>
         <button class="h-btn" onclick="document.getElementById('fA').focus();if(window.innerWidth<=768)tab('search')">🔍 <span class="d-txt">Søg</span><span class="h-shortcut">⌘K</span></button>
     </div>
 </header>
@@ -392,7 +460,7 @@
 
 <div class="main">
     <div class="sidebar" id="sidebar">
-        <div class="search-panel">
+        <div class="search-panel" id="searchPanel">
             <div class="search-label">⚡ Slå fejladresse op</div>
             <div class="search-box">
                 <input type="text" id="fA" placeholder="F.eks. Vestergade 10, Vejen" autocomplete="off" oninput="acInput(this.value)" onkeydown="acKeydown(event)">
@@ -406,25 +474,30 @@
                 <div id="resultsList"></div>
             </div>
         </div>
+
         <div class="tech-list" id="techList">
             <h2>Blæsefolk</h2>
             <div class="filter-bar" id="filterBar"></div>
             <div id="techCards"></div>
         </div>
+
         <div class="history-panel" id="historyPanel">
-            <h2>Historik <span class="history-clear" onclick="clearHistory()">Ryd</span></h2>
+            <h2>Logbog <span class="history-clear" onclick="clearHistory()">Ryd</span></h2>
             <div id="historyList"></div>
         </div>
     </div>
-    <div id="map"><div class="map-controls" id="mapControls"></div></div>
+
+    <div id="map">
+        <div class="map-controls" id="mapControls"></div>
+    </div>
 </div>
 
 <div class="mobile-tabs">
     <div class="bar">
-        <button class="tab-btn" onclick="tab('list')"><span>👷</span>Folk</button>
+        <button class="tab-btn" id="tabList" onclick="tab('list')"><span>👷</span>Folk</button>
         <button class="tab-btn active" id="tabMap" onclick="tab('map')"><span>🗺️</span>Kort</button>
         <button class="tab-btn" id="tabSearch" onclick="tab('search')"><span>🔍</span>Søg</button>
-        <button class="tab-btn" onclick="tab('hist')"><span>📋</span>Log</button>
+        <button class="tab-btn" id="tabHist" onclick="tab('hist')"><span>📋</span>Log</button>
     </div>
 </div>
 
@@ -458,190 +531,480 @@ const TILES={
 'Satellit':L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri',maxZoom:19}),
 'Lyst':L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© CARTO',maxZoom:19,subdomains:'abcd'})
 };
-let activeTile='Standard';TILES[activeTile].addTo(map);
-const mapCtrl=document.getElementById('mapControls');
-Object.keys(TILES).forEach(k=>{const b=document.createElement('button');b.textContent=k;if(k===activeTile)b.classList.add('active');b.onclick=()=>{map.removeLayer(TILES[activeTile]);activeTile=k;TILES[k].addTo(map);mapCtrl.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x.textContent===k))};mapCtrl.appendChild(b)});
+let activeTile='Standard';
+TILES[activeTile].addTo(map);
 
-const MARKERS=[];let faultMarker=null,faultLines=[],currentFaultAddr='';
+const mapCtrl=document.getElementById('mapControls');
+Object.keys(TILES).forEach(k=>{
+    const b=document.createElement('button');
+    b.textContent=k;
+    if(k===activeTile)b.classList.add('active');
+    b.onclick=()=>{
+        map.removeLayer(TILES[activeTile]);
+        activeTile=k;
+        TILES[k].addTo(map);
+        mapCtrl.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x.textContent===k));
+    };
+    mapCtrl.appendChild(b);
+});
+
+const MARKERS=[];
+let faultMarker=null,faultLines=[],currentFaultAddr='';
 const STATUS_COLORS={ledig:'#10b981',optaget:'#ef4444',pvej:'#f59e0b'};
 
 function makeIcon(ini,area,status){
-const bg=area==='Syd'?'#c8102e':'#3b82f6';const ring=STATUS_COLORS[status]||STATUS_COLORS.ledig;
-return L.divIcon({className:'',html:`<div style="background:${bg};border:3px solid ${ring};border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.4);font-family:'DM Sans',sans-serif">${ini}</div>`,iconSize:[30,30],iconAnchor:[15,15],popupAnchor:[0,-19]});
+    const bg=area==='Syd'?'#c8102e':'#3b82f6';
+    const ring=STATUS_COLORS[status]||STATUS_COLORS.ledig;
+    return L.divIcon({
+        className:'',
+        html:`<div style="background:${bg};border:3px solid ${ring};border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.4);font-family:'DM Sans',sans-serif">${ini}</div>`,
+        iconSize:[30,30],iconAnchor:[15,15],popupAnchor:[0,-19]
+    });
 }
 function faultIcon(){
-return L.divIcon({className:'',html:`<div style="background:#ef4444;border:3px solid #fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 10px rgba(239,68,68,.5);animation:fault-pulse 1.5s infinite">⚡</div>`,iconSize:[32,32],iconAnchor:[16,16],popupAnchor:[0,-20]});
+    return L.divIcon({
+        className:'',
+        html:`<div style="background:#ef4444;border:3px solid #fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 10px rgba(239,68,68,.5);animation:fault-pulse 1.5s infinite">⚡</div>`,
+        iconSize:[32,32],iconAnchor:[16,16],popupAnchor:[0,-20]
+    });
 }
 
 async function geocode(q){
-try{const r=await fetch(`https://api.dataforsyningen.dk/adresser?q=${encodeURIComponent(q)}&struktur=mini&per_side=1`);const d=await r.json();if(d.length)return{lat:d[0].y,lng:d[0].x}}catch(e){}
-try{const r=await fetch(`https://api.dataforsyningen.dk/autocomplete?q=${encodeURIComponent(q)}&type=adresse&per_side=1`);const d=await r.json();if(d.length&&d[0].adresse)return{lat:d[0].adresse.y,lng:d[0].adresse.x}}catch(e){}
-try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q+', Denmark')}&countrycodes=dk&limit=1`);const d=await r.json();if(d.length)return{lat:+d[0].lat,lng:+d[0].lon}}catch(e){}
-return null;
+    try{
+        const r=await fetch(`https://api.dataforsyningen.dk/adresser?q=${encodeURIComponent(q)}&struktur=mini&per_side=1`);
+        const d=await r.json();
+        if(d.length)return{lat:d[0].y,lng:d[0].x}
+    }catch(e){}
+    try{
+        const r=await fetch(`https://api.dataforsyningen.dk/autocomplete?q=${encodeURIComponent(q)}&type=adresse&per_side=1`);
+        const d=await r.json();
+        if(d.length&&d[0].adresse)return{lat:d[0].adresse.y,lng:d[0].adresse.x}
+    }catch(e){}
+    try{
+        const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q+', Denmark')}&countrycodes=dk&limit=1`);
+        const d=await r.json();
+        if(d.length)return{lat:+d[0].lat,lng:+d[0].lon}
+    }catch(e){}
+    return null;
 }
 
 async function init(){
-try{const s=JSON.parse(localStorage.getItem('sk_status')||'{}');Object.keys(s).forEach(k=>{const i=CREW.findIndex(c=>c.n===k);if(i>=0)CREW[i].status=s[k]})}catch(e){}
-await Promise.all(CREW.map(async c=>{const p=await geocode(c.dq);if(p){c.lat=p.lat;c.lng=p.lng}}));
-const bounds=L.latLngBounds([]);
-CREW.forEach((c,i)=>{if(!c.lat)return;const ini=c.n.split(' ').map(w=>w[0]).join('').slice(0,2);const m=L.marker([c.lat,c.lng],{icon:makeIcon(ini,c.ar,c.status)}).addTo(map);m.bindPopup(()=>makePopup(i));MARKERS.push(m);bounds.extend([c.lat,c.lng])});
-if(bounds.isValid())map.fitBounds(bounds,{padding:[40,40]});
-buildCards();updateStats();loadHistory();
-document.getElementById('ov').classList.add('h');
-setTimeout(()=>document.getElementById('ov').remove(),700);
-if(window.innerWidth<=768)tab('map');
+    try{
+        const s=JSON.parse(localStorage.getItem('sk_status')||'{}');
+        Object.keys(s).forEach(k=>{
+            const i=CREW.findIndex(c=>c.n===k);
+            if(i>=0)CREW[i].status=s[k];
+        });
+    }catch(e){}
+    await Promise.all(CREW.map(async c=>{
+        const p=await geocode(c.dq);
+        if(p){c.lat=p.lat;c.lng=p.lng}
+    }));
+
+    const bounds=L.latLngBounds([]);
+    CREW.forEach((c,i)=>{
+        if(!c.lat)return;
+        const ini=c.n.split(' ').map(w=>w[0]).join('').slice(0,2);
+        const m=L.marker([c.lat,c.lng],{icon:makeIcon(ini,c.ar,c.status)}).addTo(map);
+        m.bindPopup(()=>makePopup(i));
+        MARKERS.push(m);
+        bounds.extend([c.lat,c.lng]);
+    });
+
+    if(bounds.isValid())map.fitBounds(bounds,{padding:[40,40]});
+    buildCards();
+    updateStats();
+    loadHistory();
+
+    document.getElementById('ov').classList.add('h');
+    setTimeout(()=>document.getElementById('ov').remove(),700);
+
+    if(window.innerWidth<=768)tab('map');
 }
 
 function makePopup(i){
-const c=CREW[i];
-let h=`<div class="popup-name">${c.n}</div><div class="popup-addr">${c.ad}</div>`;
-h+=`<a href="tel:${c.ph}" class="popup-btn call">📞 ${c.ph}</a>`;
-if(c.pp)h+=`<a href="tel:${c.pp}" class="popup-btn private">📱 ${c.pp}</a>`;
-h+=`<a href="#" class="popup-btn sms" onclick="event.preventDefault();openSms(${i})">💬 SMS</a>`;
-if(currentFaultAddr)h+=`<a href="https://www.google.com/maps/dir/${c.lat},${c.lng}/${encodeURIComponent(currentFaultAddr)}" target="_blank" class="popup-btn route">🧭 Rute</a>`;
-return h;
+    const c=CREW[i];
+    let h=`<div class="popup-name">${c.n}</div><div class="popup-addr">${c.ad}</div>`;
+    h+=`<a href="tel:${c.ph}" class="popup-btn call">📞 ${c.ph}</a>`;
+    if(c.pp)h+=`<a href="tel:${c.pp}" class="popup-btn private">📱 ${c.pp}</a>`;
+    h+=`<a href="#" class="popup-btn sms" onclick="event.preventDefault();openSms(${i})">💬 SMS</a>`;
+    if(currentFaultAddr)h+=`<a href="https://www.google.com/maps/dir/${c.lat},${c.lng}/${encodeURIComponent(currentFaultAddr)}" target="_blank" class="popup-btn route">🧭 Rute</a>`;
+    return h;
 }
 
 function updateStats(){
-const a=CREW.filter(c=>c.lat);
-document.getElementById('cntLedig').textContent=a.filter(c=>c.status==='ledig').length;
-document.getElementById('cntOptaget').textContent=a.filter(c=>c.status==='optaget').length;
-document.getElementById('cntPvej').textContent=a.filter(c=>c.status==='pvej').length;
-document.getElementById('cntTotal').textContent=a.length;
+    const a=CREW.filter(c=>c.lat);
+    document.getElementById('cntLedig').textContent=a.filter(c=>c.status==='ledig').length;
+    document.getElementById('cntOptaget').textContent=a.filter(c=>c.status==='optaget').length;
+    document.getElementById('cntPvej').textContent=a.filter(c=>c.status==='pvej').length;
+    document.getElementById('cntTotal').textContent=a.length;
 }
 
 let statusIdx=-1;
 function openStatus(i){
-statusIdx=i;document.getElementById('statusName').textContent=CREW[i].n;
-const o=document.getElementById('statusOpts');o.innerHTML='';
-[{k:'ledig',l:'🟢 Ledig',d:'Klar til at køre ud'},{k:'optaget',l:'🔴 Optaget',d:'På en opgave'},{k:'pvej',l:'🟡 På vej',d:'Er på vej til en fejl'}].forEach(s=>{
-const b=document.createElement('button');b.setAttribute('data-status',s.k);
-b.innerHTML=`${s.l}<br><span style="font-size:.72rem;font-weight:400;color:var(--text-muted)">${s.d}</span>`;
-if(CREW[i].status===s.k)b.classList.add('sel');
-b.onclick=()=>{setStatus(i,s.k);closeStatus()};o.appendChild(b)});
-document.getElementById('statusModal').classList.add('visible');
+    statusIdx=i;
+    document.getElementById('statusName').textContent=CREW[i].n;
+    const o=document.getElementById('statusOpts');
+    o.innerHTML='';
+    [
+        {k:'ledig',l:'🟢 Ledig',d:'Klar til at køre ud'},
+        {k:'optaget',l:'🔴 Optaget',d:'På en opgave'},
+        {k:'pvej',l:'🟡 På vej',d:'Er på vej til en fejl'}
+    ].forEach(s=>{
+        const b=document.createElement('button');
+        b.setAttribute('data-status',s.k);
+        b.innerHTML=`${s.l}<br><span style="font-size:.72rem;font-weight:400;color:var(--text-muted)">${s.d}</span>`;
+        if(CREW[i].status===s.k)b.classList.add('sel');
+        b.onclick=()=>{setStatus(i,s.k);closeStatus()};
+        o.appendChild(b);
+    });
+    document.getElementById('statusModal').classList.add('visible');
 }
-function closeStatus(){document.getElementById('statusModal').classList.remove('visible');statusIdx=-1}
+function closeStatus(){
+    document.getElementById('statusModal').classList.remove('visible');
+    statusIdx=-1;
+}
 function setStatus(i,s){
-CREW[i].status=s;const ini=CREW[i].n.split(' ').map(w=>w[0]).join('').slice(0,2);
-MARKERS[i].setIcon(makeIcon(ini,CREW[i].ar,s));
-const sv={};CREW.forEach(c=>sv[c.n]=c.status);
-try{localStorage.setItem('sk_status',JSON.stringify(sv))}catch(e){}
-buildCards();updateStats();
-showToast(`${CREW[i].n.split(' ')[0]} → ${s==='ledig'?'🟢 Ledig':s==='optaget'?'🔴 Optaget':'🟡 På vej'}`);
+    CREW[i].status=s;
+    const ini=CREW[i].n.split(' ').map(w=>w[0]).join('').slice(0,2);
+    MARKERS[i].setIcon(makeIcon(ini,CREW[i].ar,s));
+    const sv={};
+    CREW.forEach(c=>sv[c.n]=c.status);
+    try{localStorage.setItem('sk_status',JSON.stringify(sv))}catch(e){}
+    buildCards();
+    updateStats();
+    showToast(`${CREW[i].n.split(' ')[0]} → ${s==='ledig'?'🟢 Ledig':s==='optaget'?'🔴 Optaget':'🟡 På vej'}`);
 }
 
 let activeFilter='Alle';
 function buildCards(){
-const container=document.getElementById('techCards');container.innerHTML='';
-const fb=document.getElementById('filterBar');fb.innerHTML='';
-['Alle','Syd','Nord','🟢 Ledig'].forEach(f=>{
-const b=document.createElement('button');b.className='filter-btn'+(f===activeFilter?' active':'');b.textContent=f;
-b.onclick=()=>{activeFilter=f;buildCards()};fb.appendChild(b)});
+    const container=document.getElementById('techCards');
+    container.innerHTML='';
+    const fb=document.getElementById('filterBar');
+    fb.innerHTML='';
 
-let delay=0;
-CREW.forEach((c,i)=>{
-if(!c.lat)return;
-if(activeFilter==='Syd'&&c.ar!=='Syd')return;
-if(activeFilter==='Nord'&&c.ar!=='Nord')return;
-if(activeFilter==='🟢 Ledig'&&c.status!=='ledig')return;
-const d=document.createElement('div');d.className=`tech-card status-${c.status}`;
-d.style.animationDelay=`${delay*30}ms`;delay++;
-d.onclick=()=>{map.setView([c.lat,c.lng],14);MARKERS[i].openPopup();if(window.innerWidth<=768)tab('map')};
-const stL={ledig:'Ledig',optaget:'Optaget',pvej:'På vej'};
-let btns=`<a href="tel:${c.ph}" class="btn-mini call" onclick="event.stopPropagation()">📞 Ring</a>`;
-if(c.pp)btns+=`<a href="tel:${c.pp}" class="btn-mini private" onclick="event.stopPropagation()">📱 Privat</a>`;
-btns+=`<button class="btn-mini sms" onclick="event.stopPropagation();openSms(${i})">💬</button>`;
-btns+=`<button class="btn-mini copy" onclick="event.stopPropagation();copyPhone('${c.ph}')">📋</button>`;
-if(currentFaultAddr)btns+=`<a href="https://www.google.com/maps/dir/${c.lat},${c.lng}/${encodeURIComponent(currentFaultAddr)}" target="_blank" class="btn-mini route" onclick="event.stopPropagation()">🧭</a>`;
-btns+=`<button class="btn-mini locate" onclick="event.stopPropagation();map.setView([${c.lat},${c.lng}],14);MARKERS[${i}].openPopup();if(window.innerWidth<=768)tab('map')">📍</button>`;
-d.innerHTML=`<div class="tech-name">${c.n}<span class="tech-area ${c.ar.toLowerCase()}">${c.ar}</span><button class="status-badge ${c.status}" onclick="event.stopPropagation();openStatus(${i})">${stL[c.status]}</button></div><div class="tech-addr">${c.ad}</div><div class="tech-btns">${btns}</div>`;
-container.appendChild(d)});
+    ['Alle','Syd','Nord','🟢 Ledig'].forEach(f=>{
+        const b=document.createElement('button');
+        b.className='filter-btn'+(f===activeFilter?' active':'');
+        b.textContent=f;
+        b.onclick=()=>{activeFilter=f;buildCards()};
+        fb.appendChild(b);
+    });
+
+    let delay=0;
+    CREW.forEach((c,i)=>{
+        if(!c.lat)return;
+        if(activeFilter==='Syd'&&c.ar!=='Syd')return;
+        if(activeFilter==='Nord'&&c.ar!=='Nord')return;
+        if(activeFilter==='🟢 Ledig'&&c.status!=='ledig')return;
+
+        const d=document.createElement('div');
+        d.className=`tech-card status-${c.status}`;
+        d.style.animationDelay=`${delay*30}ms`;
+        delay++;
+        d.onclick=()=>{
+            map.setView([c.lat,c.lng],14);
+            MARKERS[i].openPopup();
+            if(window.innerWidth<=768)tab('map');
+        };
+
+        const stL={ledig:'Ledig',optaget:'Optaget',pvej:'På vej'};
+        let btns=`<a href="tel:${c.ph}" class="btn-mini call" onclick="event.stopPropagation()">📞 Ring</a>`;
+        if(c.pp)btns+=`<a href="tel:${c.pp}" class="btn-mini private" onclick="event.stopPropagation()">📱 Privat</a>`;
+        btns+=`<button class="btn-mini sms" onclick="event.stopPropagation();openSms(${i})">💬</button>`;
+        btns+=`<button class="btn-mini copy" onclick="event.stopPropagation();copyPhone('${c.ph}')">📋</button>`;
+        if(currentFaultAddr)btns+=`<a href="https://www.google.com/maps/dir/${c.lat},${c.lng}/${encodeURIComponent(currentFaultAddr)}" target="_blank" class="btn-mini route" onclick="event.stopPropagation()">🧭</a>`;
+        btns+=`<button class="btn-mini locate" onclick="event.stopPropagation();map.setView([${c.lat},${c.lng}],14);MARKERS[${i}].openPopup();if(window.innerWidth<=768)tab('map')">📍</button>`;
+
+        d.innerHTML=`<div class="tech-name">${c.n}<span class="tech-area ${c.ar.toLowerCase()}">${c.ar}</span><button class="status-badge ${c.status}" onclick="event.stopPropagation();openStatus(${i})">${stL[c.status]}</button></div><div class="tech-addr">${c.ad}</div><div class="tech-btns">${btns}</div>`;
+        container.appendChild(d);
+    });
 }
 
-function haversine(a,b,c,d){const R=6371,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180,z=Math.sin(x/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(y/2)**2;return R*2*Math.atan2(Math.sqrt(z),Math.sqrt(1-z))}
-function clearFault(){if(faultMarker){map.removeLayer(faultMarker);faultMarker=null}faultLines.forEach(l=>map.removeLayer(l));faultLines=[]}
+function haversine(a,b,c,d){
+    const R=6371,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180,z=Math.sin(x/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(y/2)**2;
+    return R*2*Math.atan2(Math.sqrt(z),Math.sqrt(1-z));
+}
+function clearFault(){
+    if(faultMarker){map.removeLayer(faultMarker);faultMarker=null}
+    faultLines.forEach(l=>map.removeLayer(l));
+    faultLines=[];
+}
 
 let acTimer=null,acData=[],acIndex=-1;
-function acInput(v){if(acTimer)clearTimeout(acTimer);if(v.length<3){document.getElementById('acList').classList.remove('visible');return}acTimer=setTimeout(()=>acFetch(v),200)}
-async function acFetch(q){try{const r=await fetch(`https://api.dataforsyningen.dk/autocomplete?q=${encodeURIComponent(q)}&type=adresse&per_side=6`);acData=await r.json();const l=document.getElementById('acList');if(!acData.length){l.classList.remove('visible');return}l.innerHTML='';acData.forEach((it,i)=>{const d=document.createElement('div');d.className='ac-item';d.textContent=it.tekst;d.onclick=()=>acSelect(i);l.appendChild(d)});l.classList.add('visible');acIndex=-1}catch(e){document.getElementById('acList').classList.remove('visible')}}
-function acSelect(i){document.getElementById('fA').value=acData[i].tekst;document.getElementById('acList').classList.remove('visible');doSearch()}
-function acKeydown(e){const items=document.getElementById('acList').querySelectorAll('.ac-item');if(e.key==='ArrowDown'){e.preventDefault();acIndex=Math.min(acIndex+1,items.length-1);items.forEach((x,j)=>x.classList.toggle('active',j===acIndex))}else if(e.key==='ArrowUp'){e.preventDefault();acIndex=Math.max(acIndex-1,0);items.forEach((x,j)=>x.classList.toggle('active',j===acIndex))}else if(e.key==='Enter'){acIndex>=0&&acIndex<items.length?acSelect(acIndex):doSearch()}}
+function acInput(v){
+    if(acTimer)clearTimeout(acTimer);
+    if(v.length<3){
+        document.getElementById('acList').classList.remove('visible');
+        return;
+    }
+    acTimer=setTimeout(()=>acFetch(v),200);
+}
+async function acFetch(q){
+    try{
+        const r=await fetch(`https://api.dataforsyningen.dk/autocomplete?q=${encodeURIComponent(q)}&type=adresse&per_side=6`);
+        acData=await r.json();
+        const l=document.getElementById('acList');
+        if(!acData.length){
+            l.classList.remove('visible');
+            return;
+        }
+        l.innerHTML='';
+        acData.forEach((it,i)=>{
+            const d=document.createElement('div');
+            d.className='ac-item';
+            d.textContent=it.tekst;
+            d.onclick=()=>acSelect(i);
+            l.appendChild(d);
+        });
+        l.classList.add('visible');
+        acIndex=-1;
+    }catch(e){
+        document.getElementById('acList').classList.remove('visible');
+    }
+}
+function acSelect(i){
+    document.getElementById('fA').value=acData[i].tekst;
+    document.getElementById('acList').classList.remove('visible');
+    doSearch();
+}
+function acKeydown(e){
+    const items=document.getElementById('acList').querySelectorAll('.ac-item');
+    if(e.key==='ArrowDown'){
+        e.preventDefault();
+        acIndex=Math.min(acIndex+1,items.length-1);
+        items.forEach((x,j)=>x.classList.toggle('active',j===acIndex));
+    }else if(e.key==='ArrowUp'){
+        e.preventDefault();
+        acIndex=Math.max(acIndex-1,0);
+        items.forEach((x,j)=>x.classList.toggle('active',j===acIndex));
+    }else if(e.key==='Enter'){
+        acIndex>=0&&acIndex<items.length?acSelect(acIndex):doSearch();
+    }
+}
 
 async function doSearch(){
-const addr=document.getElementById('fA').value.trim();if(!addr)return;
-document.getElementById('acList').classList.remove('visible');
-const ld=document.getElementById('loadingMsg'),er=document.getElementById('errorMsg'),rp=document.getElementById('resultsPanel');
-ld.classList.add('visible');er.classList.remove('visible');rp.classList.remove('visible');clearFault();
-const co=await geocode(addr);ld.classList.remove('visible');
-if(!co){er.textContent='Adressen kunne ikke findes.';er.classList.add('visible');return}
-currentFaultAddr=addr;
-faultMarker=L.marker([co.lat,co.lng],{icon:faultIcon()}).addTo(map).bindPopup(`<div class="popup-name" style="color:#ef4444">⚡ Fejladresse</div><div class="popup-addr">${addr}</div><button class="popup-btn" style="background:#8b5cf6;border:none;cursor:pointer" onclick="navigator.clipboard.writeText('${addr.replace(/'/g,"\\'")}');showToast('📋 Adresse kopieret')">📋 Kopier</button>`).openPopup();
+    const addr=document.getElementById('fA').value.trim();
+    if(!addr)return;
 
-const sorted=CREW.filter(c=>c.lat).map((c,i)=>({...c,idx:i,dist:haversine(co.lat,co.lng,c.lat,c.lng)})).sort((a,b)=>a.dist-b.dist);
-sorted.slice(0,3).forEach(t=>{const ln=L.polyline([[co.lat,co.lng],[t.lat,t.lng]],{color:'#c8102e',weight:2,dashArray:'8,6',opacity:.4}).addTo(map);faultLines.push(ln)});
-const bounds=L.latLngBounds([[co.lat,co.lng]]);sorted.slice(0,3).forEach(t=>bounds.extend([t.lat,t.lng]));map.fitBounds(bounds,{padding:[50,50]});
+    document.getElementById('acList').classList.remove('visible');
+    const ld=document.getElementById('loadingMsg'),
+          er=document.getElementById('errorMsg'),
+          rp=document.getElementById('resultsPanel');
 
-const rl=document.getElementById('resultsList');rl.innerHTML='';
-sorted.forEach((t,rank)=>{
-const d=document.createElement('div');d.className='result-card'+(rank===0?' top-pick':'');
-d.onclick=()=>{map.setView([t.lat,t.lng],14);MARKERS[t.idx].openPopup();if(window.innerWidth<=768)tab('map')};
-const stI={ledig:'🟢',optaget:'🔴',pvej:'🟡'};
-const driveMin=Math.round(t.dist/70*60);
-let btns=`<a href="tel:${t.ph}" class="btn-mini call" onclick="event.stopPropagation()">📞 Ring</a>`;
-if(t.pp)btns+=`<a href="tel:${t.pp}" class="btn-mini private" onclick="event.stopPropagation()">📱 Privat</a>`;
-btns+=`<button class="btn-mini sms" onclick="event.stopPropagation();openSms(${t.idx})">💬 SMS</button>`;
-btns+=`<a href="https://www.google.com/maps/dir/${t.lat},${t.lng}/${encodeURIComponent(addr)}" target="_blank" class="btn-mini route" onclick="event.stopPropagation()">🧭 Rute</a>`;
-btns+=`<button class="btn-mini copy" onclick="event.stopPropagation();copyPhone('${t.ph}')">📋</button>`;
-d.innerHTML=`<div class="result-top"><span class="result-name">${rank===0?'⭐ ':''}${stI[t.status]||'🟢'} ${t.n}</span><span class="result-dist">${t.dist.toFixed(1)} km</span></div><div class="result-addr">${t.ad}</div><div class="result-drive">~${driveMin} min kørsel</div><div class="result-btns">${btns}</div>`;
-rl.appendChild(d)});
-rp.classList.add('visible');buildCards();
-addHistory(addr,sorted[0]?sorted[0].n:'?',sorted[0]?sorted[0].dist:0);
-if(window.innerWidth<=768)tab('search');
+    ld.classList.add('visible');
+    er.classList.remove('visible');
+    rp.classList.remove('visible');
+    clearFault();
+
+    const co=await geocode(addr);
+    ld.classList.remove('visible');
+
+    if(!co){
+        er.textContent='Adressen kunne ikke findes.';
+        er.classList.add('visible');
+        return;
+    }
+
+    currentFaultAddr=addr;
+    faultMarker=L.marker([co.lat,co.lng],{icon:faultIcon()}).addTo(map).bindPopup(`<div class="popup-name" style="color:#ef4444">⚡ Fejladresse</div><div class="popup-addr">${addr}</div><button class="popup-btn" style="background:#8b5cf6;border:none;cursor:pointer" onclick="navigator.clipboard.writeText('${addr.replace(/'/g,"\\'")}');showToast('📋 Adresse kopieret')">📋 Kopier</button>`).openPopup();
+
+    const sorted=CREW.filter(c=>c.lat).map((c,i)=>({...c,idx:i,dist:haversine(co.lat,co.lng,c.lat,c.lng)})).sort((a,b)=>a.dist-b.dist);
+
+    sorted.slice(0,3).forEach(t=>{
+        const ln=L.polyline([[co.lat,co.lng],[t.lat,t.lng]],{color:'#c8102e',weight:2,dashArray:'8,6',opacity:.4}).addTo(map);
+        faultLines.push(ln);
+    });
+
+    const bounds=L.latLngBounds([[co.lat,co.lng]]);
+    sorted.slice(0,3).forEach(t=>bounds.extend([t.lat,t.lng]));
+    map.fitBounds(bounds,{padding:[50,50]});
+
+    const rl=document.getElementById('resultsList');
+    rl.innerHTML='';
+
+    sorted.forEach((t,rank)=>{
+        const d=document.createElement('div');
+        d.className='result-card'+(rank===0?' top-pick':'');
+        d.onclick=()=>{
+            map.setView([t.lat,t.lng],14);
+            MARKERS[t.idx].openPopup();
+            if(window.innerWidth<=768)tab('map');
+        };
+
+        const stI={ledig:'🟢',optaget:'🔴',pvej:'🟡'};
+        const driveMin=Math.round(t.dist/70*60);
+
+        let btns=`<a href="tel:${t.ph}" class="btn-mini call" onclick="event.stopPropagation()">📞 Ring</a>`;
+        if(t.pp)btns+=`<a href="tel:${t.pp}" class="btn-mini private" onclick="event.stopPropagation()">📱 Privat</a>`;
+        btns+=`<button class="btn-mini sms" onclick="event.stopPropagation();openSms(${t.idx})">💬 SMS</button>`;
+        btns+=`<a href="https://www.google.com/maps/dir/${t.lat},${t.lng}/${encodeURIComponent(addr)}" target="_blank" class="btn-mini route" onclick="event.stopPropagation()">🧭 Rute</a>`;
+        btns+=`<button class="btn-mini copy" onclick="event.stopPropagation();copyPhone('${t.ph}')">📋</button>`;
+
+        d.innerHTML=`<div class="result-top"><span class="result-name">${rank===0?'⭐ ':''}${stI[t.status]||'🟢'} ${t.n}</span><span class="result-dist">${t.dist.toFixed(1)} km</span></div><div class="result-addr">${t.ad}</div><div class="result-drive">~${driveMin} min kørsel</div><div class="result-btns">${btns}</div>`;
+        rl.appendChild(d);
+    });
+
+    rp.classList.add('visible');
+    buildCards();
+    addHistory(addr,sorted[0]?sorted[0].n:'?',sorted[0]?sorted[0].dist:0);
+
+    if(window.innerWidth<=768)tab('search');
 }
 
 let hist=[];
-function loadHistory(){try{hist=JSON.parse(localStorage.getItem('sk_hist')||'[]')}catch(e){hist=[]}renderHistory()}
+function loadHistory(){
+    try{hist=JSON.parse(localStorage.getItem('sk_hist')||'[]')}catch(e){hist=[]}
+    renderHistory();
+}
 function addHistory(addr,who,dist){
-const ts=new Date().toLocaleDateString('da-DK',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
-hist.unshift({addr,who,dist:dist.toFixed(1),ts});if(hist.length>50)hist=hist.slice(0,50);
-try{localStorage.setItem('sk_hist',JSON.stringify(hist))}catch(e){}renderHistory();
+    const ts=new Date().toLocaleDateString('da-DK',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    hist.unshift({addr,who,dist:dist.toFixed(1),ts});
+    if(hist.length>50)hist=hist.slice(0,50);
+    try{localStorage.setItem('sk_hist',JSON.stringify(hist))}catch(e){}
+    renderHistory();
 }
 function renderHistory(){
-const hl=document.getElementById('historyList');hl.innerHTML='';
-if(!hist.length){hl.innerHTML='<div style="font-size:.75rem;color:var(--text-muted)">Ingen fejl søgt endnu</div>';return}
-hist.slice(0,20).forEach(h=>{const d=document.createElement('div');d.className='history-item';
-d.innerHTML=`<span class="hi-addr">${h.addr}</span> → <span class="hi-who">${h.who}</span> (${h.dist} km) <span style="float:right">${h.ts}</span>`;
-d.onclick=()=>{document.getElementById('fA').value=h.addr;doSearch()};hl.appendChild(d)});
+    const hl=document.getElementById('historyList');
+    hl.innerHTML='';
+    if(!hist.length){
+        hl.innerHTML='<div style="font-size:.75rem;color:var(--text-muted)">Ingen fejl søgt endnu</div>';
+        return;
+    }
+    hist.slice(0,20).forEach(h=>{
+        const d=document.createElement('div');
+        d.className='history-item';
+        d.innerHTML=`<span class="hi-addr">${h.addr}</span><span><span class="hi-who">${h.who}</span> • ${h.dist} km <span style="float:right">${h.ts}</span></span>`;
+        d.onclick=()=>{
+            document.getElementById('fA').value=h.addr;
+            doSearch();
+        };
+        hl.appendChild(d);
+    });
 }
-function clearHistory(){hist=[];try{localStorage.removeItem('sk_hist')}catch(e){}renderHistory();showToast('Historik ryddet')}
+function clearHistory(){
+    hist=[];
+    try{localStorage.removeItem('sk_hist')}catch(e){}
+    renderHistory();
+    showToast('Historik ryddet');
+}
 
 let smsIdx=-1;
 function openSms(i){
-smsIdx=i;const c=CREW[i];
-document.getElementById('smsTo').textContent=`${c.n} — ${c.pp||c.ph}`;
-const fa=currentFaultAddr||'(ingen fejladresse søgt)';
-document.getElementById('smsTxt').value=`Hej ${c.n.split(' ')[0]},\n\nDer er en kabelfejl på:\n${fa}\n\nKan du køre derud?\n\nMvh`;
-document.getElementById('smsModal').classList.add('visible');
+    smsIdx=i;
+    const c=CREW[i];
+    document.getElementById('smsTo').textContent=`${c.n} — ${c.pp||c.ph}`;
+    const fa=currentFaultAddr||'(ingen fejladresse søgt)';
+    document.getElementById('smsTxt').value=`Hej ${c.n.split(' ')[0]},\n\nDer er en kabelfejl på:\n${fa}\n\nKan du køre derud?\n\nMvh`;
+    document.getElementById('smsModal').classList.add('visible');
 }
-function closeSms(){document.getElementById('smsModal').classList.remove('visible');smsIdx=-1}
-function doSms(){if(smsIdx<0)return;const c=CREW[smsIdx];const num=c.pp||c.ph;const body=encodeURIComponent(document.getElementById('smsTxt').value);window.open(`sms:${num}?body=${body}`,'_self');closeSms()}
+function closeSms(){
+    document.getElementById('smsModal').classList.remove('visible');
+    smsIdx=-1;
+}
+function doSms(){
+    if(smsIdx<0)return;
+    const c=CREW[smsIdx];
+    const num=c.pp||c.ph;
+    const body=encodeURIComponent(document.getElementById('smsTxt').value);
+    window.open(`sms:${num}?body=${body}`,'_self');
+    closeSms();
+}
 
-function copyPhone(num){navigator.clipboard.writeText(num).then(()=>showToast(`📋 ${num} kopieret`))}
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+function copyPhone(num){
+    navigator.clipboard.writeText(num).then(()=>showToast(`📋 ${num} kopieret`));
+}
+function showToast(msg){
+    const t=document.getElementById('toast');
+    t.textContent=msg;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function setMobileSection(section){
+    const panels = {
+        search: document.getElementById('searchPanel'),
+        list: document.getElementById('techList'),
+        hist: document.getElementById('historyPanel')
+    };
+    Object.values(panels).forEach(el=>{
+        el.classList.remove('mobile-only');
+        el.classList.remove('mobile-hidden');
+    });
+    Object.entries(panels).forEach(([key, el])=>{
+        if(key === section){
+            el.classList.add('mobile-only');
+        } else {
+            el.classList.add('mobile-hidden');
+        }
+    });
+}
 
 function tab(t){
-const sb=document.getElementById('sidebar');
-document.querySelectorAll('.mobile-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
-if(t==='map'){sb.classList.add('hidden');document.getElementById('tabMap').classList.add('active');setTimeout(()=>map.invalidateSize(),350)}
-else if(t==='list'){sb.classList.remove('hidden');document.querySelector('.mobile-tabs .tab-btn').classList.add('active');document.getElementById('techList').scrollIntoView()}
-else if(t==='search'){sb.classList.remove('hidden');document.getElementById('tabSearch').classList.add('active');setTimeout(()=>document.getElementById('fA').focus(),400)}
-else if(t==='hist'){sb.classList.remove('hidden');document.querySelectorAll('.mobile-tabs .tab-btn')[3].classList.add('active');document.getElementById('historyPanel').scrollIntoView()}
+    const sb=document.getElementById('sidebar');
+    document.querySelectorAll('.mobile-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+
+    if(t==='map'){
+        sb.classList.add('hidden');
+        document.getElementById('tabMap').classList.add('active');
+        setTimeout(()=>map.invalidateSize(),350);
+        return;
+    }
+
+    sb.classList.remove('hidden');
+
+    if(window.innerWidth<=768){
+        if(t==='list'){
+            setMobileSection('list');
+            document.getElementById('tabList').classList.add('active');
+        }else if(t==='search'){
+            setMobileSection('search');
+            document.getElementById('tabSearch').classList.add('active');
+            setTimeout(()=>document.getElementById('fA').focus(),400);
+        }else if(t==='hist'){
+            setMobileSection('hist');
+            document.getElementById('tabHist').classList.add('active');
+        }
+    } else {
+        document.getElementById('tabMap').classList.add('active');
+    }
 }
 
-document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();document.getElementById('fA').focus();if(window.innerWidth<=768)tab('search')}});
-document.addEventListener('click',e=>{if(!e.target.closest('.search-panel'))document.getElementById('acList').classList.remove('visible')});
-window.addEventListener('resize',()=>map.invalidateSize());
+function resetDesktopPanels(){
+    const els=[
+        document.getElementById('searchPanel'),
+        document.getElementById('techList'),
+        document.getElementById('historyPanel')
+    ];
+    els.forEach(el=>{
+        el.classList.remove('mobile-only');
+        el.classList.remove('mobile-hidden');
+    });
+}
+
+document.addEventListener('keydown',e=>{
+    if((e.metaKey||e.ctrlKey)&&e.key==='k'){
+        e.preventDefault();
+        document.getElementById('fA').focus();
+        if(window.innerWidth<=768)tab('search');
+    }
+});
+document.addEventListener('click',e=>{
+    if(!e.target.closest('.search-panel'))document.getElementById('acList').classList.remove('visible');
+});
+window.addEventListener('resize',()=>{
+    map.invalidateSize();
+    if(window.innerWidth>768){
+        document.getElementById('sidebar').classList.remove('hidden');
+        resetDesktopPanels();
+    } else {
+        const active = document.querySelector('.mobile-tabs .tab-btn.active');
+        if(active?.id==='tabSearch') setMobileSection('search');
+        else if(active?.id==='tabList') setMobileSection('list');
+        else if(active?.id==='tabHist') setMobileSection('hist');
+    }
+});
+
 init();
 </script>
 </body>
