@@ -153,15 +153,18 @@
         .result-dist { font-size:.8rem; color:var(--accent); font-weight:700; font-family:var(--mono); white-space:nowrap }
         .result-addr { font-size:.78rem; color:var(--text-secondary); margin-bottom:10px; line-height:1.4 }
         .result-drive { font-size:.72rem; color:var(--text-muted); margin-bottom:10px }
-        .result-phones { display:flex; flex-direction:column; gap:6px; margin-bottom:10px }
-        .result-phone-row {
-            display:flex; align-items:center; gap:8px; font-size:.8rem;
+        .result-phones { display:flex; flex-direction:column; gap:8px; margin-bottom:10px }
+        .phone-call-btn {
+            display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:12px;
+            text-decoration:none; font-family:var(--mono); font-size:.85rem; font-weight:600;
+            cursor:pointer; transition:var(--transition); border:none;
         }
-        .result-phone-label { color:var(--text-muted); min-width:52px; font-size:.7rem }
-        .result-phone-row a { color:var(--green); text-decoration:none; font-family:var(--mono) }
-        .result-phone-row a:hover { text-decoration:underline }
-        .result-phone-row .privat-label { color:var(--text-muted) }
-        .result-phone-row .privat-num { color:var(--blue) }
+        .phone-call-btn:hover { transform:translateY(-2px); filter:brightness(1.1); box-shadow:0 4px 12px rgba(0,0,0,.25) }
+        .phone-call-btn:active { transform:translateY(0) }
+        .phone-call-btn.work { background:var(--green-dim); color:var(--green); border:1px solid rgba(16,185,129,.3) }
+        .phone-call-btn.private { background:var(--blue-dim); color:var(--blue); border:1px solid rgba(59,130,246,.3) }
+        .phone-call-btn .phone-icon { font-size:1.2rem; flex-shrink:0 }
+        .phone-call-btn .phone-label { display:block; font-size:.65rem; opacity:.95; font-family:var(--font); font-weight:500; margin-bottom:2px }
         .result-actions { display:flex; flex-wrap:wrap; gap:6px }
 
         .btn-mini {
@@ -215,12 +218,7 @@
         .status-badge.optaget { background:var(--red-dim); color:var(--red) }
         .status-badge.pvej { background:var(--yellow-dim); color:var(--yellow) }
         .tech-addr { font-size:.78rem; color:var(--text-secondary); margin-bottom:10px; line-height:1.4 }
-        .tech-phones { display:flex; flex-direction:column; gap:6px; margin-bottom:10px }
-        .tech-phone-row { display:flex; align-items:center; gap:8px; font-size:.8rem }
-        .tech-phone-label { color:var(--text-muted); min-width:52px; font-size:.7rem }
-        .tech-phone-row a { color:var(--green); text-decoration:none; font-family:var(--mono) }
-        .tech-phone-row a:hover { text-decoration:underline }
-        .tech-phone-row .privat-num { color:var(--blue) }
+        .tech-phones { display:flex; flex-direction:column; gap:8px; margin-bottom:10px }
         .tech-actions { display:flex; flex-wrap:wrap; gap:6px }
 
         #map { flex:1; min-height:0; background:var(--bg-primary) }
@@ -298,11 +296,8 @@
         .leaflet-popup-content { margin:14px 16px!important; font-family:var(--font)!important; min-width:200px }
         .popup-name { font-weight:700; font-size:.9rem; color:var(--text-primary); margin-bottom:4px }
         .popup-addr { font-size:.78rem; color:var(--text-secondary); margin-bottom:10px; line-height:1.4 }
-        .popup-phones { margin-bottom:10px }
-        .popup-phone-row { font-size:.8rem; margin-bottom:4px }
-        .popup-phone-label { color:var(--text-muted); font-size:.7rem; margin-right:6px }
-        .popup-phone-row a { color:var(--green); text-decoration:none; font-family:var(--mono) }
-        .popup-phone-row .privat-num { color:var(--blue) }
+        .popup-phones { margin-bottom:10px; display:flex; flex-direction:column; gap:6px }
+        .popup-phone { width:100%; justify-content:flex-start; padding:8px 12px; font-size:.82rem }
         .popup-actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px }
         .popup-btn {
             display:inline-flex; align-items:center; gap:4px; padding:6px 12px; border-radius:var(--radius-sm);
@@ -528,9 +523,8 @@
                 border-radius:16px;
                 min-height:auto;
             }
-            .result-phones, .tech-phones { gap:8px; margin-bottom:12px }
-            .result-phone-row, .tech-phone-row { font-size:.85rem }
-            .result-phone-label, .tech-phone-label { min-width:56px; font-size:.72rem }
+            .result-phones, .tech-phones { gap:10px; margin-bottom:12px }
+            .phone-call-btn { padding:12px 16px; font-size:.9rem }
             .result-card.top-pick {
                 border-width:2px;
                 box-shadow:0 0 0 1px var(--accent);
@@ -972,8 +966,8 @@ function makePopup(i){
     const c=CREW[i];
     let h=`<div class="popup-name">${c.n}</div><div class="popup-addr">${c.ad}</div>`;
     h+=`<div class="popup-phones">`;
-    h+=`<div class="popup-phone-row"><span class="popup-phone-label">Arbejde</span><a href="tel:${c.ph}">${c.ph}</a></div>`;
-    if(c.pp)h+=`<div class="popup-phone-row"><span class="popup-phone-label">Privat</span><a href="tel:${c.pp}" class="privat-num">${c.pp}</a></div>`;
+    h+=`<a href="tel:${c.ph}" class="phone-call-btn work popup-phone"><span class="phone-icon">📞</span><span><span class="phone-label">Arbejde</span><br>${c.ph}</span></a>`;
+    if(c.pp)h+=`<a href="tel:${c.pp}" class="phone-call-btn private popup-phone"><span class="phone-icon">📱</span><span><span class="phone-label">Privat</span><br>${c.pp}</span></a>`;
     h+=`</div><div class="popup-actions">`;
     h+=`<a href="#" class="popup-btn sms" onclick="event.preventDefault();openSms(${i})">💬 SMS</a>`;
     h+=`<button class="popup-btn copy" onclick="navigator.clipboard.writeText('${c.ph}');showToast('📋 Kopieret')">📋 Kopier</button>`;
@@ -1058,8 +1052,8 @@ function buildCards(){
         };
 
         const stL={ledig:'Ledig',optaget:'Optaget',pvej:'På vej'};
-        let phones=`<div class="tech-phones"><div class="tech-phone-row"><span class="tech-phone-label">Arbejde</span><a href="tel:${c.ph}" onclick="event.stopPropagation()">${c.ph}</a></div>`;
-        if(c.pp)phones+=`<div class="tech-phone-row"><span class="tech-phone-label">Privat</span><a href="tel:${c.pp}" class="privat-num" onclick="event.stopPropagation()">${c.pp}</a></div>`;
+        let phones=`<div class="tech-phones"><a href="tel:${c.ph}" class="phone-call-btn work" onclick="event.stopPropagation()"><span class="phone-icon">📞</span><span><span class="phone-label">Arbejde · Klik for at ringe</span><br>${c.ph}</span></a>`;
+        if(c.pp)phones+=`<a href="tel:${c.pp}" class="phone-call-btn private" onclick="event.stopPropagation()"><span class="phone-icon">📱</span><span><span class="phone-label">Privat · Klik for at ringe</span><br>${c.pp}</span></a>`;
         phones+=`</div>`;
         let acts=`<button class="btn-mini sms" onclick="event.stopPropagation();openSms(${i})">💬 SMS</button><button class="btn-mini copy" onclick="event.stopPropagation();copyPhone('${c.ph}')">📋 Kopier tlf</button>`;
         if(currentFaultAddr)acts+=`<a href="https://www.google.com/maps/dir/${c.lat},${c.lng}/${encodeURIComponent(currentFaultAddr)}" target="_blank" class="btn-mini route" onclick="event.stopPropagation()">🧭 Rute</a>`;
@@ -1183,8 +1177,8 @@ async function doSearch(){
 
         const stI={ledig:'🟢',optaget:'🔴',pvej:'🟡'};
         const driveMin=Math.round(t.dist/70*60);
-        let phones=`<div class="result-phones"><div class="result-phone-row"><span class="result-phone-label">Arbejde</span><a href="tel:${t.ph}" onclick="event.stopPropagation()">${t.ph}</a></div>`;
-        if(t.pp)phones+=`<div class="result-phone-row"><span class="result-phone-label">Privat</span><a href="tel:${t.pp}" class="privat-num" onclick="event.stopPropagation()">${t.pp}</a></div>`;
+        let phones=`<div class="result-phones"><a href="tel:${t.ph}" class="phone-call-btn work" onclick="event.stopPropagation()"><span class="phone-icon">📞</span><span><span class="phone-label">Arbejde · Klik for at ringe</span><br>${t.ph}</span></a>`;
+        if(t.pp)phones+=`<a href="tel:${t.pp}" class="phone-call-btn private" onclick="event.stopPropagation()"><span class="phone-icon">📱</span><span><span class="phone-label">Privat · Klik for at ringe</span><br>${t.pp}</span></a>`;
         phones+=`</div>`;
         let acts=`<button class="btn-mini sms" onclick="event.stopPropagation();openSms(${t.idx})">💬 SMS</button><a href="https://www.google.com/maps/dir/${t.lat},${t.lng}/${encodeURIComponent(addr)}" target="_blank" class="btn-mini route" onclick="event.stopPropagation()">🧭 Rute</a><button class="btn-mini copy" onclick="event.stopPropagation();copyPhone('${t.ph}')">📋 Kopier</button>`;
 
