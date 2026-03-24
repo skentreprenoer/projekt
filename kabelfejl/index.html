@@ -139,28 +139,39 @@
 
         .results-panel { margin-top:10px; display:none; max-height:260px; overflow-y:auto }
         .results-panel.visible { display:block }
-        .results-panel h3 { font-size:.6rem; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:2px; font-weight:700 }
+        .results-header { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap }
+        .results-panel h3 { font-size:.6rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:2px; font-weight:700; margin:0 }
         .result-card {
             background:var(--bg-card); border:1.5px solid var(--border); border-radius:var(--radius-md);
-            padding:12px 14px; margin-bottom:6px; cursor:pointer; transition:var(--transition);
+            padding:14px 16px; margin-bottom:8px; cursor:pointer; transition:var(--transition);
         }
         .result-card:hover { border-color:var(--border-hover); background:var(--bg-card-hover); transform:translateY(-1px) }
         .result-card.top-pick { border-color:var(--accent); background:var(--accent-glow) }
         .result-card.top-pick:hover { background:var(--accent-glow-strong) }
-        .result-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:2px; gap:10px }
-        .result-name { font-weight:700; font-size:.85rem; display:flex; align-items:center; gap:5px }
-        .result-dist { font-size:.82rem; color:var(--accent); font-weight:700; font-family:var(--mono); white-space:nowrap }
-        .result-addr { font-size:.73rem; color:var(--text-secondary); margin-bottom:4px }
-        .result-drive { font-size:.7rem; color:var(--text-muted); margin-bottom:6px; font-style:italic }
-        .result-btns { display:flex; flex-wrap:wrap; gap:4px }
+        .result-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:10px }
+        .result-name { font-weight:700; font-size:.9rem; display:flex; align-items:center; gap:6px; flex-wrap:wrap }
+        .result-dist { font-size:.8rem; color:var(--accent); font-weight:700; font-family:var(--mono); white-space:nowrap }
+        .result-addr { font-size:.78rem; color:var(--text-secondary); margin-bottom:10px; line-height:1.4 }
+        .result-drive { font-size:.72rem; color:var(--text-muted); margin-bottom:10px }
+        .result-phones { display:flex; flex-direction:column; gap:6px; margin-bottom:10px }
+        .result-phone-row {
+            display:flex; align-items:center; gap:8px; font-size:.8rem;
+        }
+        .result-phone-label { color:var(--text-muted); min-width:52px; font-size:.7rem }
+        .result-phone-row a { color:var(--green); text-decoration:none; font-family:var(--mono) }
+        .result-phone-row a:hover { text-decoration:underline }
+        .result-phone-row .privat-label { color:var(--text-muted) }
+        .result-phone-row .privat-num { color:var(--blue) }
+        .result-actions { display:flex; flex-wrap:wrap; gap:6px }
 
         .btn-mini {
-            display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:var(--radius-sm);
-            color:#fff; font-size:.7rem; font-weight:600; text-decoration:none; border:none; cursor:pointer;
+            display:inline-flex; align-items:center; gap:5px; padding:6px 12px; border-radius:var(--radius-sm);
+            color:#fff; font-size:.72rem; font-weight:600; text-decoration:none; border:none; cursor:pointer;
             font-family:var(--font); transition:var(--transition);
         }
         .btn-mini:hover { transform:translateY(-1px); filter:brightness(1.15) }
         .btn-mini.call { background:var(--green) }
+        .btn-mini.work { background:var(--green) }
         .btn-mini.private { background:var(--blue) }
         .btn-mini.sms { background:#e67e22 }
         .btn-mini.route { background:#0ea5e9 }
@@ -180,18 +191,19 @@
 
         .tech-card {
             background:var(--bg-card); border:1.5px solid var(--border); border-radius:var(--radius-md);
-            padding:12px 14px; margin-bottom:6px; cursor:pointer; transition:var(--transition);
+            padding:14px 16px; margin-bottom:8px; cursor:pointer; transition:var(--transition);
             position:relative; overflow:hidden; animation:slideUp .3s ease backwards;
         }
         .tech-card::before {
-            content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+            content:''; position:absolute; left:0; top:0; bottom:0; width:4px;
             background:var(--green); transition:var(--transition);
         }
         .tech-card.status-optaget::before { background:var(--red) }
         .tech-card.status-pvej::before { background:var(--yellow) }
         .tech-card:hover { border-color:var(--border-hover); background:var(--bg-card-hover); transform:translateX(2px) }
-        .tech-name { font-weight:700; font-size:.87rem; color:var(--text-primary); display:flex; align-items:center; gap:8px; flex-wrap:wrap }
-        .tech-area { font-size:.55rem; padding:2px 7px; border-radius:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase }
+        .tech-header { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px }
+        .tech-name { font-weight:700; font-size:.9rem; color:var(--text-primary) }
+        .tech-area { font-size:.6rem; padding:3px 8px; border-radius:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase }
         .tech-area.syd { background:var(--red-dim); color:var(--red) }
         .tech-area.nord { background:var(--blue-dim); color:var(--blue) }
         .status-badge {
@@ -202,8 +214,14 @@
         .status-badge.ledig { background:var(--green-dim); color:var(--green) }
         .status-badge.optaget { background:var(--red-dim); color:var(--red) }
         .status-badge.pvej { background:var(--yellow-dim); color:var(--yellow) }
-        .tech-addr { font-size:.75rem; color:var(--text-secondary); margin:3px 0 8px; padding-left:3px }
-        .tech-btns { display:flex; gap:5px; flex-wrap:wrap }
+        .tech-addr { font-size:.78rem; color:var(--text-secondary); margin-bottom:10px; line-height:1.4 }
+        .tech-phones { display:flex; flex-direction:column; gap:6px; margin-bottom:10px }
+        .tech-phone-row { display:flex; align-items:center; gap:8px; font-size:.8rem }
+        .tech-phone-label { color:var(--text-muted); min-width:52px; font-size:.7rem }
+        .tech-phone-row a { color:var(--green); text-decoration:none; font-family:var(--mono) }
+        .tech-phone-row a:hover { text-decoration:underline }
+        .tech-phone-row .privat-num { color:var(--blue) }
+        .tech-actions { display:flex; flex-wrap:wrap; gap:6px }
 
         #map { flex:1; min-height:0; background:var(--bg-primary) }
 
@@ -277,19 +295,26 @@
 
         .leaflet-popup-content-wrapper { background:var(--bg-card)!important; color:var(--text-primary)!important; border-radius:var(--radius-md)!important; border:1.5px solid var(--accent)!important; box-shadow:var(--shadow-lg)!important }
         .leaflet-popup-tip { background:var(--bg-card)!important }
-        .leaflet-popup-content { margin:12px 14px!important; font-family:var(--font)!important }
-        .popup-name { font-weight:700; font-size:.87rem; color:var(--text-primary) }
-        .popup-addr { font-size:.75rem; color:var(--text-secondary); margin:3px 0 8px }
+        .leaflet-popup-content { margin:14px 16px!important; font-family:var(--font)!important; min-width:200px }
+        .popup-name { font-weight:700; font-size:.9rem; color:var(--text-primary); margin-bottom:4px }
+        .popup-addr { font-size:.78rem; color:var(--text-secondary); margin-bottom:10px; line-height:1.4 }
+        .popup-phones { margin-bottom:10px }
+        .popup-phone-row { font-size:.8rem; margin-bottom:4px }
+        .popup-phone-label { color:var(--text-muted); font-size:.7rem; margin-right:6px }
+        .popup-phone-row a { color:var(--green); text-decoration:none; font-family:var(--mono) }
+        .popup-phone-row .privat-num { color:var(--blue) }
+        .popup-actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px }
         .popup-btn {
-            display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:var(--radius-sm);
-            color:#fff; font-weight:600; text-decoration:none; font-size:.74rem; margin:2px;
+            display:inline-flex; align-items:center; gap:4px; padding:6px 12px; border-radius:var(--radius-sm);
+            color:#fff; font-weight:600; text-decoration:none; font-size:.74rem;
             font-family:var(--font); border:none; cursor:pointer; transition:var(--transition);
         }
         .popup-btn:hover { filter:brightness(1.15) }
-        .popup-btn.call { background:var(--green) }
+        .popup-btn.call, .popup-btn.work { background:var(--green) }
         .popup-btn.private { background:var(--blue) }
         .popup-btn.sms { background:#e67e22 }
         .popup-btn.route { background:#0ea5e9 }
+        .popup-btn.copy { background:var(--purple) }
 
         .history-panel { border-top:1px solid var(--border); padding:12px 16px; max-height:180px; overflow-y:auto; flex-shrink:0; background:var(--bg-primary) }
         .history-panel h2 { font-size:.6rem; text-transform:uppercase; letter-spacing:2px; color:var(--accent); margin-bottom:8px; font-weight:700; display:flex; justify-content:space-between; align-items:center }
@@ -357,6 +382,33 @@
             opacity:0; pointer-events:none; transition:all .3s ease;
         }
         .toast.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto }
+
+        /* Shortcuts overlay */
+        .shortcuts-overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(8px);
+            z-index:15000; display:none; align-items:center; justify-content:center; padding:20px;
+        }
+        .shortcuts-overlay.visible { display:flex }
+        .shortcuts-card {
+            background:var(--bg-card); border:1px solid var(--border-hover); border-radius:var(--radius-lg);
+            padding:24px; max-width:340px; width:100%; box-shadow:var(--shadow-lg);
+        }
+        .shortcuts-card h3 { color:var(--text-primary); margin-bottom:16px; font-size:1rem }
+        .shortcuts-card kbd {
+            display:inline-block; padding:3px 8px; border-radius:6px; background:var(--bg-elevated);
+            font-family:var(--mono); font-size:.75rem; border:1px solid var(--border);
+        }
+        .shortcuts-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; font-size:.85rem; color:var(--text-secondary) }
+        .shortcuts-row span:first-child { color:var(--text-primary) }
+
+        /* Success burst */
+        .success-burst {
+            position:fixed; inset:0; pointer-events:none; z-index:12000;
+            display:flex; align-items:center; justify-content:center; opacity:0;
+        }
+        .success-burst.play { animation:successBurst .6s ease forwards }
+        .success-burst .burst-icon { font-size:64px; color:var(--green); filter:drop-shadow(0 0 20px rgba(16,185,129,.5)) }
+        @keyframes successBurst { 0%{opacity:0;transform:scale(0.5)} 30%{opacity:1;transform:scale(1.2)} 70%{opacity:1} 100%{opacity:0;transform:scale(1.2)} }
 
         /* ========== MOBILE REDESIGN ========== */
         @media(max-width:768px) {
@@ -467,17 +519,18 @@
                 margin-top:20px;
                 padding:0 2px;
             }
-            .results-panel h3 {
-                font-size:.65rem;
-                margin-bottom:12px;
-                padding:0 2px;
-            }
+            .results-header { margin-bottom:12px }
+            .results-panel h3 { font-size:.65rem; padding:0 2px }
+            .results-panel .btn-mini#copySummaryBtn { padding:8px 12px; font-size:.72rem }
             .result-card {
                 padding:16px 18px;
                 margin-bottom:10px;
                 border-radius:16px;
                 min-height:auto;
             }
+            .result-phones, .tech-phones { gap:8px; margin-bottom:12px }
+            .result-phone-row, .tech-phone-row { font-size:.85rem }
+            .result-phone-label, .tech-phone-label { min-width:56px; font-size:.72rem }
             .result-card.top-pick {
                 border-width:2px;
                 box-shadow:0 0 0 1px var(--accent);
@@ -679,6 +732,19 @@
 
 <div class="toast" id="toast"></div>
 
+<div class="shortcuts-overlay" id="shortcutsOverlay" onclick="closeShortcuts()">
+    <div class="shortcuts-card" onclick="event.stopPropagation()">
+        <h3>⌨️ Genveje</h3>
+        <div class="shortcuts-row"><span>Søg adresse</span><kbd>⌘</kbd>+<kbd>K</kbd> <span style="font-size:.7rem;color:var(--text-muted)">/ Ctrl+K</span></div>
+        <div class="shortcuts-row"><span>Luk dialog</span><kbd>Esc</kbd></div>
+        <div class="shortcuts-row"><span>Vis genveje</span><kbd>?</kbd></div>
+        <div class="shortcuts-row"><span>Autocomplete ↑↓</span><kbd>Pil op/ned</kbd></div>
+        <div class="shortcuts-row"><span>Vælg fra liste</span><kbd>Enter</kbd></div>
+    </div>
+</div>
+
+<div class="success-burst" id="successBurst"><span class="burst-icon">✓</span></div>
+
 <header>
     <div class="logo-mark">
         <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
@@ -688,6 +754,7 @@
         <div class="sub">Kabelfejl — Blæsekort</div>
     </div>
     <div class="header-actions">
+        <button class="h-btn" onclick="openShortcuts()" title="Genveje">?</button>
         <button class="h-btn" onclick="document.getElementById('fA').focus();if(window.innerWidth<=768)tab('search')">🔍 <span class="d-txt">Søg</span><span class="h-shortcut">⌘K</span></button>
     </div>
 </header>
@@ -715,7 +782,10 @@
                 <div class="search-msg loading" id="loadingMsg">Søger adresse...</div>
                 <div class="search-msg error" id="errorMsg"></div>
                 <div class="results-panel" id="resultsPanel">
-                    <h3>Nærmeste blæsefolk</h3>
+                    <div class="results-header">
+                        <h3>Nærmeste blæsefolk</h3>
+                        <button class="btn-mini copy" id="copySummaryBtn" onclick="copyFaultSummary();event.stopPropagation()" style="display:none" title="Kopier adresse + nærmeste + tlf">📋 Opsummering</button>
+                    </div>
                     <div id="resultsList"></div>
                 </div>
             </div>
@@ -825,7 +895,7 @@ mapStyleToggle.onclick=(e)=>{
 updateMapToggleLabel();
 
 const MARKERS=[];
-let faultMarker=null,faultLines=[],currentFaultAddr='';
+let faultMarker=null,faultLines=[],currentFaultAddr='',lastSorted=[];
 const STATUS_COLORS={ledig:'#10b981',optaget:'#ef4444',pvej:'#f59e0b'};
 
 function makeIcon(ini,area,status){
@@ -901,9 +971,12 @@ async function init(){
 function makePopup(i){
     const c=CREW[i];
     let h=`<div class="popup-name">${c.n}</div><div class="popup-addr">${c.ad}</div>`;
-    h+=`<a href="tel:${c.ph}" class="popup-btn call">📞 ${c.ph}</a>`;
-    if(c.pp)h+=`<a href="tel:${c.pp}" class="popup-btn private">📱 ${c.pp}</a>`;
+    h+=`<div class="popup-phones">`;
+    h+=`<div class="popup-phone-row"><span class="popup-phone-label">Arbejde</span><a href="tel:${c.ph}">${c.ph}</a></div>`;
+    if(c.pp)h+=`<div class="popup-phone-row"><span class="popup-phone-label">Privat</span><a href="tel:${c.pp}" class="privat-num">${c.pp}</a></div>`;
+    h+=`</div><div class="popup-actions">`;
     h+=`<a href="#" class="popup-btn sms" onclick="event.preventDefault();openSms(${i})">💬 SMS</a>`;
+    h+=`<button class="popup-btn copy" onclick="navigator.clipboard.writeText('${c.ph}');showToast('📋 Kopieret')">📋 Kopier</button>`;
     if(currentFaultAddr)h+=`<a href="https://www.google.com/maps/dir/${c.lat},${c.lng}/${encodeURIComponent(currentFaultAddr)}" target="_blank" class="popup-btn route">🧭 Rute</a>`;
     return h;
 }
@@ -985,14 +1058,14 @@ function buildCards(){
         };
 
         const stL={ledig:'Ledig',optaget:'Optaget',pvej:'På vej'};
-        let btns=`<a href="tel:${c.ph}" class="btn-mini call" onclick="event.stopPropagation()">📞 Ring</a>`;
-        if(c.pp)btns+=`<a href="tel:${c.pp}" class="btn-mini private" onclick="event.stopPropagation()">📱 Privat</a>`;
-        btns+=`<button class="btn-mini sms" onclick="event.stopPropagation();openSms(${i})">💬</button>`;
-        btns+=`<button class="btn-mini copy" onclick="event.stopPropagation();copyPhone('${c.ph}')">📋</button>`;
-        if(currentFaultAddr)btns+=`<a href="https://www.google.com/maps/dir/${c.lat},${c.lng}/${encodeURIComponent(currentFaultAddr)}" target="_blank" class="btn-mini route" onclick="event.stopPropagation()">🧭</a>`;
-        btns+=`<button class="btn-mini locate" onclick="event.stopPropagation();map.setView([${c.lat},${c.lng}],14);MARKERS[${i}].openPopup();if(window.innerWidth<=768)tab('map')">📍</button>`;
+        let phones=`<div class="tech-phones"><div class="tech-phone-row"><span class="tech-phone-label">Arbejde</span><a href="tel:${c.ph}" onclick="event.stopPropagation()">${c.ph}</a></div>`;
+        if(c.pp)phones+=`<div class="tech-phone-row"><span class="tech-phone-label">Privat</span><a href="tel:${c.pp}" class="privat-num" onclick="event.stopPropagation()">${c.pp}</a></div>`;
+        phones+=`</div>`;
+        let acts=`<button class="btn-mini sms" onclick="event.stopPropagation();openSms(${i})">💬 SMS</button><button class="btn-mini copy" onclick="event.stopPropagation();copyPhone('${c.ph}')">📋 Kopier tlf</button>`;
+        if(currentFaultAddr)acts+=`<a href="https://www.google.com/maps/dir/${c.lat},${c.lng}/${encodeURIComponent(currentFaultAddr)}" target="_blank" class="btn-mini route" onclick="event.stopPropagation()">🧭 Rute</a>`;
+        acts+=`<button class="btn-mini locate" onclick="event.stopPropagation();map.setView([${c.lat},${c.lng}],14);MARKERS[${i}].openPopup();if(window.innerWidth<=768)tab('map')">📍 Vis på kort</button>`;
 
-        d.innerHTML=`<div class="tech-name">${c.n}<span class="tech-area ${c.ar.toLowerCase()}">${c.ar}</span><button class="status-badge ${c.status}" onclick="event.stopPropagation();openStatus(${i})">${stL[c.status]}</button></div><div class="tech-addr">${c.ad}</div><div class="tech-btns">${btns}</div>`;
+        d.innerHTML=`<div class="tech-header"><span class="tech-name">${c.n}</span><span class="tech-area ${c.ar.toLowerCase()}">${c.ar}</span><button class="status-badge ${c.status}" onclick="event.stopPropagation();openStatus(${i})">${stL[c.status]}</button></div><div class="tech-addr">${c.ad}</div>${phones}<div class="tech-actions">${acts}</div>`;
         container.appendChild(d);
     });
 }
@@ -1110,20 +1183,27 @@ async function doSearch(){
 
         const stI={ledig:'🟢',optaget:'🔴',pvej:'🟡'};
         const driveMin=Math.round(t.dist/70*60);
+        let phones=`<div class="result-phones"><div class="result-phone-row"><span class="result-phone-label">Arbejde</span><a href="tel:${t.ph}" onclick="event.stopPropagation()">${t.ph}</a></div>`;
+        if(t.pp)phones+=`<div class="result-phone-row"><span class="result-phone-label">Privat</span><a href="tel:${t.pp}" class="privat-num" onclick="event.stopPropagation()">${t.pp}</a></div>`;
+        phones+=`</div>`;
+        let acts=`<button class="btn-mini sms" onclick="event.stopPropagation();openSms(${t.idx})">💬 SMS</button><a href="https://www.google.com/maps/dir/${t.lat},${t.lng}/${encodeURIComponent(addr)}" target="_blank" class="btn-mini route" onclick="event.stopPropagation()">🧭 Rute</a><button class="btn-mini copy" onclick="event.stopPropagation();copyPhone('${t.ph}')">📋 Kopier</button>`;
 
-        let btns=`<a href="tel:${t.ph}" class="btn-mini call" onclick="event.stopPropagation()">📞 Ring</a>`;
-        if(t.pp)btns+=`<a href="tel:${t.pp}" class="btn-mini private" onclick="event.stopPropagation()">📱 Privat</a>`;
-        btns+=`<button class="btn-mini sms" onclick="event.stopPropagation();openSms(${t.idx})">💬 SMS</button>`;
-        btns+=`<a href="https://www.google.com/maps/dir/${t.lat},${t.lng}/${encodeURIComponent(addr)}" target="_blank" class="btn-mini route" onclick="event.stopPropagation()">🧭 Rute</a>`;
-        btns+=`<button class="btn-mini copy" onclick="event.stopPropagation();copyPhone('${t.ph}')">📋</button>`;
-
-        d.innerHTML=`<div class="result-top"><span class="result-name">${rank===0?'⭐ ':''}${stI[t.status]||'🟢'} ${t.n}</span><span class="result-dist">${t.dist.toFixed(1)} km</span></div><div class="result-addr">${t.ad}</div><div class="result-drive">~${driveMin} min kørsel</div><div class="result-btns">${btns}</div>`;
+        d.innerHTML=`<div class="result-top"><span class="result-name">${rank===0?'⭐ ':''}${stI[t.status]||'🟢'} ${t.n}</span><span class="result-dist">${t.dist.toFixed(1)} km</span></div><div class="result-addr">${t.ad}</div><div class="result-drive">~${driveMin} min kørsel</div>${phones}<div class="result-actions">${acts}</div>`;
         rl.appendChild(d);
     });
 
+    lastSorted=sorted;
+    document.getElementById('copySummaryBtn').style.display=sorted.length?'inline-flex':'none';
     rp.classList.add('visible');
     buildCards();
     addHistory(addr,sorted[0]?sorted[0].n:'?',sorted[0]?sorted[0].dist:0);
+
+    if(navigator.vibrate)navigator.vibrate(30);
+    const burst=document.getElementById('successBurst');
+    burst.classList.remove('play');
+    burst.offsetHeight;
+    burst.classList.add('play');
+    setTimeout(()=>burst.classList.remove('play'),600);
 
     if(window.innerWidth<=768)tab('search');
 }
@@ -1190,6 +1270,14 @@ function doSms(){
 function copyPhone(num){
     navigator.clipboard.writeText(num).then(()=>showToast(`📋 ${num} kopieret`));
 }
+function copyFaultSummary(){
+    if(!currentFaultAddr)return;
+    const t=lastSorted[0];
+    const txt=t ? `Fejl: ${currentFaultAddr}\nNærmeste: ${t.n} (${t.dist.toFixed(1)} km)\nTlf: ${t.pp||t.ph}` : `Fejl: ${currentFaultAddr}`;
+    navigator.clipboard.writeText(txt).then(()=>showToast('📋 Opsummering kopieret'));
+}
+function openShortcuts(){ document.getElementById('shortcutsOverlay').classList.add('visible') }
+function closeShortcuts(){ document.getElementById('shortcutsOverlay').classList.remove('visible') }
 function showToast(msg){
     const t=document.getElementById('toast');
     t.textContent=msg;
@@ -1257,6 +1345,17 @@ function resetDesktopPanels(){
 }
 
 document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){
+        if(document.getElementById('shortcutsOverlay').classList.contains('visible'))closeShortcuts();
+        else if(document.getElementById('smsModal').classList.contains('visible'))closeSms();
+        else if(document.getElementById('statusModal').classList.contains('visible'))closeStatus();
+        return;
+    }
+    if(e.key==='?'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&document.activeElement?.tagName!=='TEXTAREA'&&document.activeElement?.tagName!=='INPUT'){
+        e.preventDefault();
+        openShortcuts();
+        return;
+    }
     if((e.metaKey||e.ctrlKey)&&e.key==='k'){
         e.preventDefault();
         document.getElementById('fA').focus();
