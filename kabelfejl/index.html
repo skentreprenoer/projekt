@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0f">
     <title>Blæsekort — Søren Knudsen A/S</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -357,117 +358,287 @@
         }
         .toast.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto }
 
+        /* ========== MOBILE REDESIGN ========== */
         @media(max-width:768px) {
-            header { padding:0 10px; height:48px }
-            .header-text h1 { font-size:.8rem }
-            .stats-bar { padding:6px 10px; gap:10px; overflow-x:auto }
-            .stat-item { font-size:.68rem; white-space:nowrap }
-            .main { flex-direction:column }
+            :root {
+                --mobile-nav-h: 72px;
+                --mobile-safe-bottom: env(safe-area-inset-bottom, 0px);
+            }
+
+            header { padding:0 12px; height:50px }
+            .header-text h1 { font-size:.85rem }
+            .header-text .sub { font-size:.58rem }
+
+            .stats-bar {
+                padding:10px 14px;
+                gap:12px;
+                overflow-x:auto;
+                -webkit-overflow-scrolling:touch;
+                scrollbar-width:none;
+            }
+            .stats-bar::-webkit-scrollbar { display:none }
+            .stat-item { font-size:.7rem; white-space:nowrap; flex-shrink:0 }
+            .stat-num { font-size:.75rem }
+
+            .main { flex-direction:column; position:relative }
             .sidebar {
-                width:100%; border-right:none; position:absolute; top:0; left:0; right:0; bottom:0; z-index:500;
-                background:rgba(10,10,15,.94); backdrop-filter:blur(16px);
+                width:100%;
+                height:100%;
+                position:absolute;
+                inset:0;
+                border-right:none;
+                z-index:600;
+                background:var(--bg-primary);
+                transform:none;
+                opacity:1;
+                display:flex;
+                flex-direction:column;
             }
-            .sidebar.hidden { transform:translateX(-100%); pointer-events:none; opacity:0 }
-            #map { position:absolute; top:0; left:0; right:0; bottom:0 }
-            .mobile-tabs { display:block }
-            .h-shortcut { display:none }
-
-            .map-controls {
-                top:8px;
-                right:8px;
+            .sidebar.mobile-map-active {
+                pointer-events:none;
+                visibility:hidden;
+            }
+            #map {
+                position:absolute;
+                inset:0;
+                z-index:1;
             }
 
-            .map-style-toggle {
-                padding:8px 10px;
-                font-size:.7rem;
-            }
-
-            .map-style-menu {
-                min-width:115px;
+            /* Mobile content area - full height with tab bar */
+            .sidebar .mobile-scroll {
+                flex:1;
+                min-height:0;
+                overflow-y:auto;
+                -webkit-overflow-scrolling:touch;
+                padding-bottom:24px;
             }
 
             .search-panel {
-                padding:14px 14px 10px;
+                padding:20px 16px 16px;
                 border-bottom:none;
                 background:transparent;
+                flex:1;
+                display:flex;
+                flex-direction:column;
+                min-height:0;
             }
-            .search-label {
-                font-size:.7rem;
-                margin-bottom:10px;
+            .search-panel .search-label {
+                font-size:.65rem;
+                margin-bottom:12px;
+                letter-spacing:2.5px;
             }
             .search-box {
-                gap:8px;
-                background:rgba(255,255,255,.04);
-                border:1px solid rgba(255,255,255,.08);
-                border-radius:999px;
-                padding:6px;
-                box-shadow:0 8px 28px rgba(0,0,0,.28);
+                gap:0;
+                flex-direction:column;
+                background:var(--bg-card);
+                border:1.5px solid var(--border);
+                border-radius:16px;
+                overflow:hidden;
+                box-shadow:var(--shadow-md);
             }
             .search-box input {
                 background:transparent;
                 border:none;
-                border-radius:999px;
-                padding:12px 14px;
-                font-size:.92rem;
-                min-width:0;
+                border-radius:0;
+                padding:16px 18px;
+                font-size:1rem;
+                min-height:52px;
             }
-            .search-box input:focus {
-                box-shadow:none;
-            }
+            .search-box input:focus { box-shadow:none; border:none }
             .search-btn {
-                border-radius:999px;
-                padding:12px 18px;
-                font-size:.82rem;
-                flex-shrink:0;
+                border-radius:0;
+                padding:14px 18px;
+                font-size:.9rem;
+                min-height:48px;
             }
             .ac-list {
-                left:14px;
-                right:14px;
-                border-radius:18px;
-                overflow:hidden;
+                left:16px;
+                right:16px;
+                border-radius:14px;
+                margin-top:8px;
+                max-height:220px;
+            }
+            .ac-item {
+                padding:14px 18px;
+                font-size:.9rem;
             }
             .results-panel {
                 max-height:none;
-                overflow:visible;
-                margin-top:12px;
+                margin-top:20px;
+                padding:0 2px;
+            }
+            .results-panel h3 {
+                font-size:.65rem;
+                margin-bottom:12px;
+                padding:0 2px;
             }
             .result-card {
+                padding:16px 18px;
+                margin-bottom:10px;
                 border-radius:16px;
-                padding:13px 14px;
+                min-height:auto;
             }
-            .result-btns {
-                gap:6px;
+            .result-card.top-pick {
+                border-width:2px;
+                box-shadow:0 0 0 1px var(--accent);
             }
-
-            .tech-list,
-            .history-panel {
-                padding:14px;
-                border-top:none;
-                background:transparent;
-            }
-
-            .search-panel.mobile-only,
-            .tech-list.mobile-only,
-            .history-panel.mobile-only {
-                display:block;
-                flex:1;
-                overflow-y:auto;
-            }
-            .search-panel.mobile-hidden,
-            .tech-list.mobile-hidden,
-            .history-panel.mobile-hidden {
-                display:none !important;
-            }
-
-            .history-panel {
-                max-height:none;
-            }
-
             .result-top {
-                align-items:flex-start;
                 flex-direction:column;
-                gap:4px;
+                align-items:flex-start;
+                gap:6px;
+                margin-bottom:6px;
             }
+            .result-name { font-size:.95rem }
+            .result-dist { font-size:.9rem }
+            .result-addr { font-size:.8rem; margin-bottom:6px }
+            .result-drive { margin-bottom:10px }
+            .result-btns {
+                gap:8px;
+            }
+            .result-btns .btn-mini {
+                padding:10px 14px;
+                font-size:.78rem;
+                min-height:40px;
+            }
+
+            .tech-list {
+                padding:20px 16px;
+                flex:1;
+                display:flex;
+                flex-direction:column;
+                min-height:0;
+            }
+            .tech-list h2 {
+                font-size:.65rem;
+                margin-bottom:14px;
+            }
+            .filter-bar {
+                margin-bottom:16px;
+                gap:8px;
+            }
+            .filter-btn {
+                padding:10px 16px;
+                font-size:.78rem;
+            }
+            .tech-card {
+                padding:16px 18px;
+                margin-bottom:10px;
+                border-radius:16px;
+            }
+            .tech-name { font-size:.9rem }
+            .tech-addr { font-size:.8rem; margin:6px 0 10px }
+            .tech-btns {
+                gap:8px;
+            }
+            .tech-btns .btn-mini {
+                padding:10px 14px;
+                font-size:.78rem;
+                min-height:40px;
+            }
+
+            .history-panel {
+                padding:20px 16px;
+                border-top:none;
+                flex:1;
+                max-height:none;
+                display:flex;
+                flex-direction:column;
+                min-height:0;
+            }
+            .history-panel h2 {
+                font-size:.65rem;
+                margin-bottom:14px;
+            }
+            .history-item {
+                padding:14px 16px;
+                margin-bottom:6px;
+                border-radius:12px;
+                border:1px solid var(--border);
+                background:var(--bg-card);
+                font-size:.82rem;
+            }
+            .history-item .hi-addr {
+                font-size:.9rem;
+                margin-bottom:4px;
+            }
+
+            /* Floating tab bar */
+            .mobile-tabs {
+                display:block;
+                position:fixed;
+                bottom:0;
+                left:0;
+                right:0;
+                padding:12px 16px;
+                padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+                background:transparent;
+                border-top:none;
+                z-index:700;
+                pointer-events:none;
+            }
+            .mobile-tabs .bar {
+                pointer-events:auto;
+                display:flex;
+                gap:8px;
+                max-width:400px;
+                margin:0 auto;
+                padding:8px;
+                background:rgba(18,18,26,.95);
+                border:1px solid var(--border-hover);
+                border-radius:999px;
+                box-shadow:0 -4px 24px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.2);
+                backdrop-filter:blur(20px);
+            }
+            .mobile-tabs .tab-btn {
+                flex:1;
+                padding:12px 8px;
+                min-height:48px;
+                border-radius:999px;
+                border:none;
+                border-top:none;
+                font-size:.7rem;
+                font-weight:600;
+                color:var(--text-muted);
+                background:transparent;
+                display:flex;
+                flex-direction:column;
+                align-items:center;
+                justify-content:center;
+                gap:2px;
+                transition:var(--transition);
+            }
+            .mobile-tabs .tab-btn span {
+                font-size:1.25rem;
+                margin-bottom:0;
+            }
+            .mobile-tabs .tab-btn.active {
+                color:#fff;
+                background:var(--accent);
+                box-shadow:0 2px 12px rgba(200,16,46,.35);
+            }
+            .mobile-tabs .tab-btn:active {
+                transform:scale(0.97);
+            }
+
+            .map-controls {
+                top:max(12px, env(safe-area-inset-top));
+                right:12px;
+            }
+            .map-style-toggle {
+                padding:10px 14px;
+                font-size:.72rem;
+            }
+
+            /* Toast above tab bar */
+            .toast {
+                bottom:calc(100px + env(safe-area-inset-bottom, 0px));
+            }
+        }
+
+        .search-panel.mobile-hidden,
+        .tech-list.mobile-hidden,
+        .history-panel.mobile-hidden {
+            display:none !important;
         }
 
         @keyframes fault-pulse { 0%{box-shadow:0 0 0 0 rgba(239,68,68,.6)} 70%{box-shadow:0 0 0 18px rgba(239,68,68,0)} 100%{box-shadow:0 0 0 0 rgba(239,68,68,0)} }
@@ -533,30 +704,36 @@
 
 <div class="main">
     <div class="sidebar" id="sidebar">
-        <div class="search-panel" id="searchPanel">
-            <div class="search-label">⚡ Slå fejladresse op</div>
-            <div class="search-box">
-                <input type="text" id="fA" placeholder="F.eks. Vestergade 10, Vejen" autocomplete="off" oninput="acInput(this.value)" onkeydown="acKeydown(event)">
-                <button class="search-btn" onclick="doSearch()">Søg</button>
-            </div>
-            <div class="ac-list" id="acList"></div>
-            <div class="search-msg loading" id="loadingMsg">Søger adresse...</div>
-            <div class="search-msg error" id="errorMsg"></div>
-            <div class="results-panel" id="resultsPanel">
-                <h3>Nærmeste blæsefolk</h3>
-                <div id="resultsList"></div>
+        <div class="search-panel mobile-panel" id="searchPanel">
+            <div class="mobile-scroll">
+                <div class="search-label">⚡ Slå fejladresse op</div>
+                <div class="search-box">
+                    <input type="text" id="fA" placeholder="F.eks. Vestergade 10, Vejen" autocomplete="off" oninput="acInput(this.value)" onkeydown="acKeydown(event)">
+                    <button class="search-btn" onclick="doSearch()">Søg</button>
+                </div>
+                <div class="ac-list" id="acList"></div>
+                <div class="search-msg loading" id="loadingMsg">Søger adresse...</div>
+                <div class="search-msg error" id="errorMsg"></div>
+                <div class="results-panel" id="resultsPanel">
+                    <h3>Nærmeste blæsefolk</h3>
+                    <div id="resultsList"></div>
+                </div>
             </div>
         </div>
 
-        <div class="tech-list" id="techList">
+        <div class="tech-list mobile-panel" id="techList">
             <h2>Blæsefolk</h2>
             <div class="filter-bar" id="filterBar"></div>
-            <div id="techCards"></div>
+            <div class="mobile-scroll">
+                <div id="techCards"></div>
+            </div>
         </div>
 
-        <div class="history-panel" id="historyPanel">
+        <div class="history-panel mobile-panel" id="historyPanel">
             <h2>Logbog <span class="history-clear" onclick="clearHistory()">Ryd</span></h2>
-            <div id="historyList"></div>
+            <div class="mobile-scroll">
+                <div id="historyList"></div>
+            </div>
         </div>
     </div>
 
@@ -1028,15 +1205,13 @@ function setMobileSection(section){
     };
     Object.values(panels).forEach(el=>{
         el.classList.remove('mobile-only');
-        el.classList.remove('mobile-hidden');
+        el.classList.add('mobile-hidden');
     });
-    Object.entries(panels).forEach(([key, el])=>{
-        if(key === section){
-            el.classList.add('mobile-only');
-        } else {
-            el.classList.add('mobile-hidden');
-        }
-    });
+    const active = panels[section];
+    if(active){
+        active.classList.remove('mobile-hidden');
+        active.classList.add('mobile-only');
+    }
 }
 
 function tab(t){
@@ -1044,13 +1219,13 @@ function tab(t){
     document.querySelectorAll('.mobile-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
 
     if(t==='map'){
-        sb.classList.add('hidden');
+        sb.classList.add('mobile-map-active');
         document.getElementById('tabMap').classList.add('active');
-        setTimeout(()=>map.invalidateSize(),350);
+        setTimeout(()=>map.invalidateSize(),100);
         return;
     }
 
-    sb.classList.remove('hidden');
+    sb.classList.remove('mobile-map-active');
 
     if(window.innerWidth<=768){
         if(t==='list'){
@@ -1059,7 +1234,7 @@ function tab(t){
         }else if(t==='search'){
             setMobileSection('search');
             document.getElementById('tabSearch').classList.add('active');
-            setTimeout(()=>document.getElementById('fA').focus(),400);
+            setTimeout(()=>document.getElementById('fA').focus(),300);
         }else if(t==='hist'){
             setMobileSection('hist');
             document.getElementById('tabHist').classList.add('active');
@@ -1099,7 +1274,7 @@ document.addEventListener('click',e=>{
 window.addEventListener('resize',()=>{
     map.invalidateSize();
     if(window.innerWidth>768){
-        document.getElementById('sidebar').classList.remove('hidden');
+        document.getElementById('sidebar').classList.remove('mobile-map-active');
         resetDesktopPanels();
     } else {
         const active = document.querySelector('.mobile-tabs .tab-btn.active');
