@@ -60,7 +60,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .filter-btn.active{background:var(--red);border-color:var(--red);color:#fff}
 
 .content{padding:22px 28px}
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:20px}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;position:relative;overflow:visible}
 .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--red);opacity:0.6;z-index:0}
 .stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:7px;position:relative;z-index:1}
@@ -266,6 +266,7 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
     <div class="nav-item" onclick="showPage(&#39;dso2026&#39;)"><span class="dot" style="background:#e05555"></span>DSO 2026<span class="nav-count" id="cnt-dso2026">—</span></div>
     <div class="nav-item" onclick="showPage(&#39;norlys&#39;)"><span class="dot" style="background:var(--amber)"></span>Norlys Opgaver<span class="nav-count" id="cnt-norlys">—</span></div>
     <div class="nav-item" onclick="showPage(&#39;bb&#39;)"><span class="dot" style="background:#a78bfa"></span>Bredbåndspulje<span class="nav-count" id="cnt-bb">—</span></div>
+    <div class="nav-item" onclick="showPage(&#39;erhverv&#39;)"><span class="dot" style="background:var(--green)"></span>Erhvervskunder<span class="nav-count" id="cnt-erhverv">—</span></div>
     <div class="nav-section">Kode</div>
     <div class="nav-item" onclick="showPage(&#39;gridopt&#39;)"><span class="dot" style="background:var(--cyan)"></span>Gridoptimizer</div>
   </div>
@@ -371,6 +372,30 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
     </div>
   </div>
 
+  <!-- ERHVERVSKUNDER -->
+  <div class="page" id="page-erhverv">
+    <div class="filter-bar" id="filter-erhverv"></div>
+    <div class="content">
+      <div class="stats-row" id="stats-erhverv"></div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">Erhvervskunder</div>
+          <div class="table-info" id="info-erhverv"></div>
+        </div>
+        <div id="loading-erhverv" class="loading-msg"><span class="spinner"></span>Henter data...</div>
+        <div id="err-erhverv" class="err-msg" style="display:none"></div>
+        <table id="table-erhverv" style="display:none">
+          <thead><tr>
+            <th>Sagsnr</th><th>Måned</th><th>Adresse</th><th>Projektleder</th><th>Deadline</th>
+            <th>Udleveret</th><th>LER/GT</th><th>GT slut</th><th>Status</th><th>Landmålt</th><th>Blæst</th><th>Link</th>
+          </tr></thead>
+          <tbody id="tbody-erhverv"></tbody>
+        </table>
+        <div class="no-results" id="nores-erhverv" style="display:none">Ingen resultater</div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
   <!-- MODAL -->
@@ -387,7 +412,7 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
 
 <script>
 const SHEET_ID = "1nAfna80c5NbT5mNhsXey84wu--DZVYct7NFRSRvTZr4";
-const GIDS = { dso2026:"231051019", norlys:"129649262", gridopt:"995508700", bb:"730701596", kontakter:"1115694378" };
+const GIDS = { dso2026:"231051019", norlys:"129649262", gridopt:"995508700", bb:"730701596", kontakter:"1115694378", erhverv:"275893518" };
 const KUNDELISTE_LINKS = {
   sonny:  "https://acrobat.adobe.com/id/urn:aaid:sc:EU:7cc3270a-7739-4831-9242-fce30f490289",
   henrik: "https://acrobat.adobe.com/id/urn:aaid:sc:EU:cba13540-9de4-4c83-9a6f-50a9455e1732"
@@ -762,7 +787,7 @@ function showPage(id) {
     if ((n.getAttribute('onclick')||'').includes("'"+id+"'")) n.classList.add('active');
   });
   currentPage = id;
-  const titles={dashboard:'Dashboard',dso2026:'DSO 2026',norlys:'Norlys Opgaver',gridopt:'Norlys Gridoptimizer',bb:'Bredbåndspulje'};
+  const titles={dashboard:'Dashboard',dso2026:'DSO 2026',norlys:'Norlys Opgaver',gridopt:'Norlys Gridoptimizer',bb:'Bredbåndspulje',erhverv:'Erhvervskunder'};
   document.getElementById('topbar-title').textContent = titles[id]||id;
   const srch=document.getElementById('search');
   srch.style.display = id==='gridopt'?'none':'';
@@ -780,6 +805,7 @@ function renderCurrent() {
   else if (currentPage==='norlys') renderNorlys();
   else if (currentPage==='gridopt') renderGridopt();
   else if (currentPage==='bb') renderBB();
+  else if (currentPage==='erhverv') renderErhverv();
 }
 
 function showTableReady(key) {
@@ -978,6 +1004,56 @@ function renderBB() {
   }
 }
 
+// ERHVERVSKUNDER (same layout as Norlys: Deadline col)
+function renderErhverv() {
+  const d=DATA.erhverv;
+  if(!d){showErr('erhverv','Kunne ikke hente data.');return;}
+  const all=d.rows.filter(r=>isSagsnr(r[0]));
+  const fil=activeFilters.erhverv||'all';
+  let rows=all.filter(r=>fil==='all'||r[3]===fil);
+  rows=filterRows(rows);
+
+  const total=all.length;
+  const udl=all.filter(r=>r[5]&&r[5].trim()).length;
+  const land=all.filter(r=>r[9]&&r[9].trim()).length;
+  const blae=all.filter(r=>r[10]&&r[10].trim()).length;
+
+  document.getElementById('stats-erhverv').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Projekter</div><div class="stat-value">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Udleveret</div><div class="stat-value">${udl}</div><div class="stat-sub">af ${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Landmålt</div><div class="stat-value">${land}</div><div class="stat-sub">af ${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Blæst</div><div class="stat-value">${blae}</div><div class="stat-sub">af ${total}</div></div>`;
+
+  document.getElementById('info-erhverv').textContent=rows.length+' sager';
+  document.getElementById('cnt-erhverv').textContent=all.length;
+  showTableReady('erhverv');
+
+  const tbody=document.getElementById('tbody-erhverv'),nores=document.getElementById('nores-erhverv');
+  if(!rows.length){tbody.innerHTML='';nores.style.display='block';return;}
+  nores.style.display='none';
+  tbody.innerHTML=rows.map(r=>`<tr class="clickable" onclick="openModal('erhverv',${all.indexOf(r)})">
+    <td class="mono">${r[0]}</td><td>${r[1]||'—'}</td>
+    <td class="trunc">${r[2]||'—'}</td><td>${r[3]||'—'}</td>
+    <td>${r[4]||'—'}</td>
+    <td>${checkBadge(r[5])}</td>
+    <td>${lerBadge(r[6])}</td>
+    <td>${checkBadge(r[7])}</td>
+    <td>${statusBadge(r[8])}</td>
+    <td>${checkBadge(r[9])}</td>
+    <td>${checkBadge(r[10])}</td>
+    <td>${linkBtn(r[11])}</td>
+  </tr>`).join('');
+
+  const filterEl=document.getElementById('filter-erhverv');
+  if(!filterEl.dataset.built){
+    filterEl.dataset.built='1';
+    const pls=[...new Set(all.map(r=>r[3]).filter(Boolean))];
+    filterEl.innerHTML='<span class="filter-label">Filter:</span>'+
+      `<button class="filter-btn active" onclick="setFilter('erhverv','all',this)">Alle</button>`+
+      pls.map(p=>`<button class="filter-btn" onclick="setFilter('erhverv','${p}',this)">${p}</button>`).join('');
+  }
+}
+
 function openModalBB(idx) {
   const d = DATA.bb;
   if (!d) return;
@@ -1095,22 +1171,23 @@ function openModal(key, idx) {
   const r=all[idx];
   if(!r) return;
 
-  // Norlys has extra Deadline column (E), so everything shifts +1
-  const isNorlys = key==='norlys';
+  // Norlys and Erhverv have extra Deadline column (E), so everything shifts +1
+  const hasDeadline = key==='norlys' || key==='erhverv';
   const COL = {
-    deadline: isNorlys ? 4 : null,
-    udleveret: isNorlys ? 5 : 4,
-    ler: isNorlys ? 6 : 5,
-    gtslut: isNorlys ? 7 : 6,
-    status: isNorlys ? 8 : 7,
-    landmaalt: isNorlys ? 9 : 8,
-    blaest: isNorlys ? 10 : 9,
-    link: isNorlys ? 11 : 10
+    deadline: hasDeadline ? 4 : null,
+    udleveret: hasDeadline ? 5 : 4,
+    ler: hasDeadline ? 6 : 5,
+    gtslut: hasDeadline ? 7 : 6,
+    status: hasDeadline ? 8 : 7,
+    landmaalt: hasDeadline ? 9 : 8,
+    blaest: hasDeadline ? 10 : 9,
+    link: hasDeadline ? 11 : 10
   };
 
+  const pageNames={dso2026:'DSO 2026',norlys:'Norlys',erhverv:'Erhvervskunder'};
   const adresse = r[2]||'';
   document.getElementById('modal-title').textContent=adresse||'Ukendt adresse';
-  document.getElementById('modal-sub').textContent=`Sagsnr. ${r[0]}  ·  ${key==='dso2026'?'DSO 2026':'Norlys'}`;
+  document.getElementById('modal-sub').textContent=`Sagsnr. ${r[0]}  ·  ${pageNames[key]||key}`;
 
   let body='';
 
@@ -1185,7 +1262,7 @@ function openModal(key, idx) {
   }
 
   // Feltarbejde sektion (Landmålt + Blæst)
-  if(key==='dso2026' || key==='norlys') {
+  if(key==='dso2026' || key==='norlys' || key==='erhverv') {
     body+=`<div class="fieldwork-group"><div class="modal-section-title">Feltarbejde</div>`;
     
     const landmaaltVal = (r[COL.landmaalt]||'').trim();
@@ -1269,15 +1346,17 @@ function setFilter(key,val,btn){
 
 // DASHBOARD
 function buildDashboard() {
-  const d26=DATA.dso2026, dn=DATA.norlys, dg=DATA.gridopt, dbb=DATA.bb;
+  const d26=DATA.dso2026, dn=DATA.norlys, dg=DATA.gridopt, dbb=DATA.bb, de=DATA.erhverv;
   const all26=d26?d26.rows.filter(r=>isSagsnr(r[0])):[];
   const alln=dn?dn.rows.filter(r=>isSagsnr(r[0])):[];
   const allbb=dbb?dbb.rows.filter(r=>(r[2]||'').trim().length>2):[];
+  const alle=de?de.rows.filter(r=>isSagsnr(r[0])):[];
   const gridCount=dg?dg.rows.filter(r=>r[0]&&r[0].trim()&&r[0]!=='MEDARBEJDER').length:0;
 
   document.getElementById('cnt-dso2026').textContent=all26.length;
   document.getElementById('cnt-norlys').textContent=alln.length;
   const elBB=document.getElementById('cnt-bb'); if(elBB) elBB.textContent=allbb.length;
+  const elE=document.getElementById('cnt-erhverv'); if(elE) elE.textContent=alle.length;
 
   // DSO stats
   const dsoUdl=all26.filter(r=>r[4]&&r[4].trim()).length;
@@ -1294,10 +1373,15 @@ function buildDashboard() {
   const bbLand=allbb.filter(r=>r[8]&&r[8].trim()).length;
   const bbBlae=allbb.filter(r=>r[9]&&r[9].trim()).length;
 
+  // Erhverv stats (same layout as Norlys)
+  const erhUdl=alle.filter(r=>r[5]&&r[5].trim()).length;
+  const erhLand=alle.filter(r=>r[9]&&r[9].trim()).length;
+  const erhBlae=alle.filter(r=>r[10]&&r[10].trim()).length;
+
   // Totals
-  const totalAll=all26.length+alln.length+allbb.length;
-  const totalLand=dsoLand+norLand+bbLand;
-  const totalBlae=dsoBlae+norBlae+bbBlae;
+  const totalAll=all26.length+alln.length+allbb.length+alle.length;
+  const totalLand=dsoLand+norLand+bbLand+erhLand;
+  const totalBlae=dsoBlae+norBlae+bbBlae+erhBlae;
 
   function pct(a,b){return b?Math.round(a/b*100):0;}
   function progBar(val,total,color){
@@ -1325,10 +1409,11 @@ function buildDashboard() {
       <div class="stat-sub">projekter</div>
       ${progBar(bbLand,allbb.length,'#a78bfa')}
     </div>
-    <div class="stat-card" style="cursor:pointer" onclick="showPage('gridopt')">
-      <div class="stat-label">Gridoptimizer</div>
-      <div class="stat-value">${gridCount}</div>
-      <div class="stat-sub">medarbejdere</div>
+    <div class="stat-card" style="cursor:pointer" onclick="showPage('erhverv')">
+      <div class="stat-label">Erhvervskunder</div>
+      <div class="stat-value">${alle.length}</div>
+      <div class="stat-sub">sager</div>
+      ${progBar(erhLand,alle.length,'var(--green)')}
     </div>`;
 
   // Charts
@@ -1356,10 +1441,11 @@ function buildDashboard() {
         <div class="bar-track"><div class="bar-fill" style="width:${pct(totalBlae,totalAll)}%;background:var(--cyan)">${totalBlae}</div></div>
         <div class="bar-num">${pct(totalBlae,totalAll)}%</div>
       </div>
-      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;text-align:center">
         <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:'JetBrains Mono'">${dsoLand}/${all26.length}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">DSO landmålt</div></div>
         <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:'JetBrains Mono'">${norLand}/${alln.length}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Norlys landmålt</div></div>
         <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:'JetBrains Mono'">${bbLand}/${allbb.length}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">BB landmålt</div></div>
+        <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:'JetBrains Mono'">${erhLand}/${alle.length}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Erhverv landmålt</div></div>
       </div>
     </div>
     <div class="chart-card"><h3>DSO 2026 — pr. måned</h3>
@@ -1391,6 +1477,11 @@ function buildDashboard() {
         <div class="bar-label">BB</div>
         <div class="bar-track"><div class="bar-fill" style="width:${pct(bbBlae,allbb.length)}%;background:#a78bfa">${bbBlae}</div></div>
         <div class="bar-num">${pct(bbBlae,allbb.length)}%</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">Erhverv</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct(erhBlae,alle.length)}%;background:var(--green)">${erhBlae}</div></div>
+        <div class="bar-num">${pct(erhBlae,alle.length)}%</div>
       </div>
     </div>`;
 }
@@ -1452,7 +1543,7 @@ async function loadWeather() {
 async function loadAll() {
   document.getElementById('sync-dot').classList.add('loading');
   document.getElementById('sync-status').textContent='Henter data...';
-  await Promise.all([fetchSheet('dso2026'),fetchSheet('norlys'),fetchSheet('gridopt'),fetchSheet('bb'),loadDoneStates(),loadKontakter()]);
+  await Promise.all([fetchSheet('dso2026'),fetchSheet('norlys'),fetchSheet('gridopt'),fetchSheet('bb'),fetchSheet('erhverv'),loadDoneStates(),loadKontakter()]);
   buildDashboard();
   renderCurrent();
   document.getElementById('sync-dot').classList.remove('loading');
