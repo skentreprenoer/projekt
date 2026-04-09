@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- saved from url=(0059)file:///C:/Users/tj/Downloads/projekt_oversigt_live_13.html -->
 <html lang="da"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="SK Projekter">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="data:application/json,{%0A  %22name%22:%22S%C3%B8ren%20Knudsen%20A/S%22,%0A  %22short_name%22:%22SK%20Projekter%22,%0A  %22start_url%22:%22.%22,%0A  %22display%22:%22standalone%22,%0A  %22background_color%22:%22%230f0f11%22,%0A  %22theme_color%22:%22%23A51C1C%22,%0A  %22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns=&#39;http://www.w3.org/2000/svg&#39;%20viewBox=&#39;0%200%20100%20100&#39;%3E%3Crect%20width=&#39;100&#39;%20height=&#39;100&#39;%20fill=&#39;%23A51C1C&#39;/%3E%3Ctext%20y=&#39;.9em&#39;%20font-size=&#39;80&#39;%20x=&#39;10&#39;%3ESK%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22any%22,%22type%22:%22image/svg+xml%22}]%0A}">
-<link href="./Søren Knudsen A_S — Projekt Oversigt 3_files/css2" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --red:#A51C1C;--red-dark:#8a1616;--red-light:#bf2020;--red-dim:rgba(165,28,28,0.15);--red-border:rgba(165,28,28,0.35);
@@ -88,8 +87,6 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
 .b-blue{background:rgba(59,130,246,.15);color:#60a5fa}
 .b-cyan{background:rgba(6,182,212,.12);color:#22d3ee}
 .b-red{background:rgba(165,28,28,.2);color:#e05555}
-
-
 
 /* KOMMENTARER */
 .comment-section{margin-top:4px;padding-top:20px;border-top:1px solid var(--border)}
@@ -261,14 +258,14 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
   </div>
   <div class="nav">
     <div class="nav-section">Overblik</div>
-    <div class="nav-item active" onclick="showPage(&#39;dashboard&#39;)"><span class="dot" style="background:var(--red)"></span>Dashboard</div>
+    <div class="nav-item active" onclick="showPage('dashboard')"><span class="dot" style="background:var(--red)"></span>Dashboard</div>
     <div class="nav-section">Arbejde</div>
-    <div class="nav-item" onclick="showPage(&#39;dso2026&#39;)"><span class="dot" style="background:#e05555"></span>DSO 2026<span class="nav-count" id="cnt-dso2026">—</span></div>
-    <div class="nav-item" onclick="showPage(&#39;norlys&#39;)"><span class="dot" style="background:var(--amber)"></span>Norlys Opgaver<span class="nav-count" id="cnt-norlys">—</span></div>
-    <div class="nav-item" onclick="showPage(&#39;bb&#39;)"><span class="dot" style="background:#a78bfa"></span>Bredbåndspulje<span class="nav-count" id="cnt-bb">—</span></div>
-    <div class="nav-item" onclick="showPage(&#39;erhverv&#39;)"><span class="dot" style="background:var(--green)"></span>Erhvervskunder<span class="nav-count" id="cnt-erhverv">—</span></div>
+    <div class="nav-item" onclick="showPage('dso2026')"><span class="dot" style="background:#e05555"></span>DSO 2026<span class="nav-count" id="cnt-dso2026">—</span></div>
+    <div class="nav-item" onclick="showPage('norlys')"><span class="dot" style="background:var(--amber)"></span>Norlys Opgaver<span class="nav-count" id="cnt-norlys">—</span></div>
+    <div class="nav-item" onclick="showPage('bb')"><span class="dot" style="background:#a78bfa"></span>Bredbåndspulje<span class="nav-count" id="cnt-bb">—</span></div>
+    <div class="nav-item" onclick="showPage('erhverv')"><span class="dot" style="background:var(--green)"></span>Erhvervskunder<span class="nav-count" id="cnt-erhverv">—</span></div>
     <div class="nav-section">Kode</div>
-    <div class="nav-item" onclick="showPage(&#39;gridopt&#39;)"><span class="dot" style="background:var(--cyan)"></span>Gridoptimizer</div>
+    <div class="nav-item" onclick="showPage('gridopt')"><span class="dot" style="background:var(--cyan)"></span>Gridoptimizer</div>
   </div>
   <div class="sync-bar"><div class="sync-dot loading" id="sync-dot"></div><span id="sync-status">Henter data...</span></div>
 </nav>
@@ -348,7 +345,7 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
     </div>
   </div>
 
-  <!-- BREDBAAND -->
+  <!-- BREDBAAND — NOW WITH DEADLINE COLUMN -->
   <div class="page" id="page-bb">
     <div class="filter-bar" id="filter-bb"></div>
     <div class="content">
@@ -362,7 +359,7 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
         <div id="err-bb" class="err-msg" style="display:none"></div>
         <table id="table-bb" style="display:none">
           <thead><tr>
-            <th>Sagsnr</th><th>Måned</th><th>Adresse</th><th>Projektleder</th>
+            <th>Sagsnr</th><th>Måned</th><th>Adresse</th><th>Projektleder</th><th>Deadline</th>
             <th>Udleveret</th><th>LER/GT</th><th>GT slut</th><th>Status</th><th>Landmålt</th><th>Blæst</th><th>Link</th>
           </tr></thead>
           <tbody id="tbody-bb"></tbody>
@@ -398,7 +395,7 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
 
 </div>
 
-  <!-- MODAL -->
+<!-- MODAL -->
 <div class="modal-overlay hidden" id="modal-overlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-top">
@@ -417,7 +414,6 @@ const KUNDELISTE_LINKS = {
   sonny:  "https://acrobat.adobe.com/id/urn:aaid:sc:EU:7cc3270a-7739-4831-9242-fce30f490289",
   henrik: "https://acrobat.adobe.com/id/urn:aaid:sc:EU:cba13540-9de4-4c83-9a6f-50a9455e1732"
 };
-// Fallback kontakter — overskrives af "Kontakter" arket i Google Sheet hvis det findes
 let KONTAKTER = {"romsdalvej|5": {"navn": "Henrik Gainor Gormsen", "tlf": "30262259"}, "romsdalvej|9": {"navn": "Morten Hasseriis Gormsen", "tlf": "41727359"}, "sindballevej|32": {"navn": "Daniel Kjær Arentoft", "tlf": "20722232"}, "vestermarksvej|7": {"navn": "Conni Lyngroes", "tlf": "26370900"}, "romsdalvej|19": {"navn": "Jeanette Jørgensen", "tlf": "20817544"}, "sønderkærvej|11": {"navn": "Søren B Laursen", "tlf": "42193399"}, "ølholm kærvej|12": {"navn": "Brian Krøyer", "tlf": "53581938"}, "grejsdalvej|4": {"navn": "Kurt Hauge", "tlf": "40792044"}, "drongstrupvej|1": {"navn": "Kasper Frandsen", "tlf": "53565610"}, "fløjstrupvej|27a": {"navn": "Tor Tobiasen", "tlf": "40209857"}, "plantagevej|5": {"navn": "Aage Jørgensen", "tlf": "30531680"}, "tofthøjvej|20": {"navn": "Frederik Skov", "tlf": "23460606"}, "ejstrupvej|15": {"navn": "Katrine Treldal", "tlf": "28189413"}, "nørholmvej|2": {"navn": "Vagn Nielsen", "tlf": "20153914"}, "sletkærvej|16": {"navn": "Karl Åge Melgård", "tlf": "23950873"}, "brokhøjvej|31": {"navn": "Jeanette Andersen", "tlf": "30133675"}, "fuglrisvej|36": {"navn": "Niels Skovgaard Madsen", "tlf": "20781737"}, "nedervej|44": {"navn": "Maneck Nielsen", "tlf": "22921338"}, "ellingvej|39": {"navn": "Niels Langenge", "tlf": "40268446"}, "ydingvej|62": {"navn": "Mark Don Hansen", "tlf": "61650143"}, "ryvej|51": {"navn": "Flemming Nørgaard", "tlf": "61303896"}, "granlyvej|7": {"navn": "Niels Jørgen Østermark", "tlf": "23305296"}, "velgårdevej|11": {"navn": "Peter M. Andersen", "tlf": "25399306"}, "silkeborgvej|18": {"navn": "Nikita Beck Clausen", "tlf": "42171858"}, "silkeborgvej|22a": {"navn": "Emil Kristensen", "tlf": "53381277"}, "mamrelund|4": {"navn": "Kornetija Gade", "tlf": "42419069"}, "ravnholtlundvej|1": {"navn": "Kenneth Amby Moesgaard Helgesen", "tlf": "27517270"}, "krattet|15": {"navn": "Per Boll Jørgensen", "tlf": "41838128"}, "kiersvej|4": {"navn": "Kaj Jepsen", "tlf": "20873240"}, "herningvej|35": {"navn": "Mikael Nors", "tlf": "20201254"}, "trehøjevej|17": {"navn": "Søren Dueholm", "tlf": "28517851"}, "røddinglundvej|14": {"navn": "Lars Markussen", "tlf": "21472090"}, "hammelvej|52": {"navn": "Troels Lindgren", "tlf": "30200077"}, "thorsøvej|15": {"navn": "Martin Sølvsten", "tlf": "86963912"}, "sejling tværvej|5": {"navn": "Henrik Rønsholdt Basse Larsen", "tlf": "40153376"}, "borgdalsvej|5a": {"navn": "Mik Sørensen", "tlf": "60194514"}, "gjermosevej|24": {"navn": "Henrik Bøgelund Larson", "tlf": "30653053"}, "geddebækvej|9": {"navn": "Karl Pedersen", "tlf": "31521646"}, "geddebækvej|6": {"navn": "Ingrid Bodil Simonsen", "tlf": "30533679"}, "sepstrupvej|8": {"navn": "Susanne Skovgaard", "tlf": "31343135"}, "vinten skovvej|74": {"navn": "Patrick Kristensen", "tlf": "22176413"}, "gammeltoftevej|4": {"navn": "Roald Poulsen", "tlf": "22796909"}, "kirkedalsvej|15": {"navn": "Jan Thøgersen", "tlf": "50459143"}, "hadrupvej|69": {"navn": "Ulla M. Andreasen", "tlf": "29178917"}, "vestergade|60": {"navn": "Sebastian Rosenmeier", "tlf": "91373962"}, "gl kattrupvej|56": {"navn": "Emil Kjær", "tlf": "22128347"}, "hummelbovej|37": {"navn": "Lars Rabøl", "tlf": "21402073"}, "hummelbovej|41": {"navn": "Elisabeth Krag Hansen", "tlf": "25333317"}, "møldrupvej|2": {"navn": "Torben Østergaard", "tlf": "22354950"}, "møldrupvej|3": {"navn": "Dangrow Convenience A/S", "tlf": "75782365"}, "møldrupvej|4": {"navn": "Leon Dam Jensen", "tlf": "51576799"}, "møldrupvej|6": {"navn": "Mathilde Putman Nordtorp", "tlf": "26249504"}, "møldrupvej|8": {"navn": "Christian Guldbrand", "tlf": "51323232"}, "langballe|8": {"navn": "Rikke Hald Jensen", "tlf": "22640678"}, "ulstruphusvej|2": {"navn": "Jette Toftdahl Jensen", "tlf": "40812712"}};
 const MAT_COLS = [
   {idx:12,name:'2 fiber',unit:'m'},
@@ -438,7 +434,6 @@ let currentPage = 'dashboard';
 let searchQuery = '';
 let activeFilters = {};
 
-// ---- Google Apps Script webhook for Landmålt ----
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFrenn_3IXqoEqcVYAqGDVBKlt8ngGJlVLSfkhqER9HI8bypTBdNHAcUbH3CkH-bop9w/exec';
 
 async function markLandmaalt(sagsnr, sheetKey, btnEl) {
@@ -460,7 +455,6 @@ async function markLandmaalt(sagsnr, sheetKey, btnEl) {
       btnEl.innerHTML = '✓ Landmålt registreret';
       btnEl.style.background = 'var(--green)';
       btnEl.style.borderColor = 'var(--green)';
-      // Reload data so table updates
       setTimeout(() => loadAll(), 1500);
     } else {
       btnEl.innerHTML = '⚠️ Fejl: ' + (result.error||'Ukendt');
@@ -487,7 +481,6 @@ async function markBlaest(sagsnr, sheetKey, btnEl, containerId) {
   const container = document.getElementById(containerId);
   const rows = container.querySelectorAll('.blaest-fiber-row');
   const lines = [];
-  let hasError = false;
   
   rows.forEach(row => {
     const meterInput = row.querySelector('.bf-meter');
@@ -501,7 +494,6 @@ async function markBlaest(sagsnr, sheetKey, btnEl, containerId) {
   });
   
   if (!lines.length) {
-    // Highlight first empty meter input
     const first = container.querySelector('.bf-meter');
     if (first) { first.focus(); first.style.borderColor='#ef4444'; }
     return;
@@ -546,7 +538,6 @@ function addBlaestRow(containerId) {
     <select class="bf-fiber">
       <option>2 fiber</option><option>12 fiber</option><option>24 fiber</option>
       <option>48 fiber</option><option>96 fiber</option><option>144 fiber</option>
-      
     </select>
     <button class="bf-remove" onclick="this.parentElement.remove()">✕</button>`;
   rowsDiv.appendChild(row);
@@ -561,7 +552,6 @@ function buildBlaestUI(id, sagsnr, sheetKey) {
         <select class="bf-fiber">
           <option>2 fiber</option><option>12 fiber</option><option>24 fiber</option>
           <option>48 fiber</option><option>96 fiber</option><option>144 fiber</option>
-          
         </select>
         <button class="bf-remove" onclick="this.parentElement.remove()">✕</button>
       </div>
@@ -588,7 +578,6 @@ async function getAllComments() {
   }
 }
 
-// ---- SHARED DONE STATES ----
 let DONE_STATES = {};
 
 async function loadDoneStates() {
@@ -601,9 +590,7 @@ async function loadDoneStates() {
   }
 }
 
-function checkDone(key) {
-  return DONE_STATES[key] === true;
-}
+function checkDone(key) { return DONE_STATES[key] === true; }
 
 async function saveDone(key, done) {
   if (done) { DONE_STATES[key] = true; } else { delete DONE_STATES[key]; }
@@ -616,7 +603,7 @@ async function saveDone(key, done) {
       headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
       body: JSON.stringify(all)
     });
-  } catch(e) { /* offline fallback already saved to localStorage */ }
+  } catch(e) {}
 }
 
 function apiUrl(gid) {
@@ -633,14 +620,12 @@ async function fetchSheet(key) {
     const rows = (json.table.rows || []).map(r =>
       r.c.map(cell => {
         if (!cell || cell.v === null || cell.v === undefined) return '';
-        // Parse Google Viz Date(year,month,day,...) format
         const sv = String(cell.v);
         const dm = sv.match(/^Date\((\d+),(\d+),(\d+)/);
         if (dm) {
           const d = parseInt(dm[3]), m = parseInt(dm[2])+1, y = parseInt(dm[1]);
           return `${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}/${y}`;
         }
-        // Use formatted value if available and looks like a date
         if (cell.f && /\d{1,2}[\/.]\d{1,2}/.test(cell.f)) return cell.f;
         return sv;
       })
@@ -656,8 +641,6 @@ async function fetchSheet(key) {
 
 function isSagsnr(v) { return v && /^\d{6,}/.test(v.trim()); }
 
-// Hent kontakter fra Google Sheet "Kontakter"-ark
-// Forventet format: Kolonne A=Vejnavn, B=Husnr, C=Navn, D=Tlf
 async function loadKontakter() {
   try {
     const ok = await fetchSheet('kontakter');
@@ -665,7 +648,6 @@ async function loadKontakter() {
     const d = DATA.kontakter;
     const rows = d.rows.filter(r => r[0] && r[0].trim() && r[2] && r[2].trim());
     if (!rows.length) return;
-    // Merge sheet data into KONTAKTER (sheet data wins over fallback)
     rows.forEach(r => {
       const vejnavn = (r[0]||'').toLowerCase().trim();
       const husnr = (r[1]||'').toString().toLowerCase().trim();
@@ -712,7 +694,6 @@ function linkBtn(url) {
 
 function findKontakt(adresse) {
   if (!adresse) return null;
-  // Try exact match first: "Vejnavn 12, By" patterns
   const patterns = [
     /^(.+?)\s+(\d+\w*)\s*,/,
     /^(.+?)\s+(\d+\w*)\s+\d{4}/,
@@ -730,7 +711,6 @@ function findKontakt(adresse) {
   return null;
 }
 
-// Find ALL kontaktpersoner matching a project/road name (for BB where address is e.g. "Hummelbovej 6960 Hvide Sande")
 function findKontakterBB(adresse) {
   if (!adresse) return [];
   const lo = adresse.toLowerCase();
@@ -738,13 +718,11 @@ function findKontakterBB(adresse) {
   for (const [key, val] of Object.entries(KONTAKTER)) {
     const vejnavn = key.split('|')[0];
     const husnr = key.split('|')[1];
-    // Match full vejnavn, or strip suffix (vej/gade/stræde) for project-level names like "Ulstruphus" vs "Ulstruphusvej"
     const vejBase = vejnavn.replace(/(vej|gade|stræde|sti|allé|alle|parken|plads)$/i, '');
     if (lo.includes(vejnavn) || (vejBase.length >= 4 && lo.includes(vejBase))) {
       matches.push(Object.assign({adresse: vejnavn.charAt(0).toUpperCase()+vejnavn.slice(1)+' '+husnr}, val));
     }
   }
-  // Sort by house number
   matches.sort((a,b) => {
     const na = parseInt(a.adresse.match(/\d+/)?.[0]||'0');
     const nb = parseInt(b.adresse.match(/\d+/)?.[0]||'0');
@@ -939,14 +917,13 @@ function copyCode(code,i){
   });
 }
 
-
-
-
+// ===== BREDBÅNDSPULJE — FIXED: Now with Deadline column (same layout as Norlys/Erhverv) =====
+// Column mapping: 0=Sagsnr, 1=Måned, 2=Adresse, 3=Projektleder, 4=Deadline,
+//                 5=Udleveret, 6=LER/GT, 7=GT slut, 8=Status, 9=Landmålt, 10=Blæst, 11=Link
 function renderBB() {
   const d = DATA.bb;
   if (!d) { showErr('bb','Kunne ikke hente data.'); return; }
 
-  // Keep rows where any of first 10 cols has content, skip pure header rows
   const all = d.rows.filter(r => {
     const addr = (r[2]||'').trim();
     return addr.length > 2;
@@ -957,9 +934,9 @@ function renderBB() {
   rows = filterRows(rows);
 
   const total = all.length;
-  const udl   = all.filter(r => r[4] && r[4].trim()).length;
-  const land  = all.filter(r => r[8] && r[8].trim()).length;
-  const blae  = all.filter(r => r[9] && r[9].trim()).length;
+  const udl   = all.filter(r => r[5] && r[5].trim()).length;
+  const land  = all.filter(r => r[9] && r[9].trim()).length;
+  const blae  = all.filter(r => r[10] && r[10].trim()).length;
 
   document.getElementById('stats-bb').innerHTML = `
     <div class="stat-card"><div class="stat-label">Projekter</div><div class="stat-value">${total}</div></div>
@@ -981,13 +958,14 @@ function renderBB() {
     <td>${r[1]||'—'}</td>
     <td class="trunc">${r[2]||'—'}</td>
     <td>${r[3]||'—'}</td>
-    <td>${checkBadge(r[4])}</td>
-    <td>${lerBadge(r[5])}</td>
-    <td>${checkBadge(r[6])}</td>
-    <td>${statusBadge(r[7])}</td>
-    <td>${checkBadge(r[8])}</td>
+    <td>${r[4]||'—'}</td>
+    <td>${checkBadge(r[5])}</td>
+    <td>${lerBadge(r[6])}</td>
+    <td>${checkBadge(r[7])}</td>
+    <td>${statusBadge(r[8])}</td>
     <td>${checkBadge(r[9])}</td>
-    <td>${linkBtn(r[10])}</td>
+    <td>${checkBadge(r[10])}</td>
+    <td>${linkBtn(r[11])}</td>
   </tr>`).join('');
 
   const filterEl = document.getElementById('filter-bb');
@@ -1054,6 +1032,9 @@ function renderErhverv() {
   }
 }
 
+// ===== openModalBB — FIXED for Deadline column =====
+// Column mapping: 0=Sagsnr, 1=Måned, 2=Adresse, 3=Projektleder, 4=Deadline,
+//                 5=Udleveret, 6=LER/GT, 7=GT slut, 8=Status, 9=Landmålt, 10=Blæst, 11=Link
 function openModalBB(idx) {
   const d = DATA.bb;
   if (!d) return;
@@ -1067,13 +1048,11 @@ function openModalBB(idx) {
 
   let body = '';
 
-  // Kontaktpersoner (alle der matcher projektet)
   body += kontaktHTML(findKontakterBB(adresse));
 
-  // Maps + projektplan
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adresse)}`;
-  const projektLink = r[10];
-  const lerLink = r[5] && r[5].startsWith('http') ? r[5] : null;
+  const projektLink = r[11];
+  const lerLink = r[6] && r[6].startsWith('http') ? r[6] : null;
 
   body += `<div class="modal-section"><div class="modal-section-title">Links</div>
     <div style="display:flex;flex-direction:column;gap:10px">
@@ -1086,8 +1065,7 @@ function openModalBB(idx) {
     </div>
   </div>`;
 
-  // Detaljer
-  const fields = [['Måned',r[1]],['Projektleder',r[3]],['Udleveret til',r[4]],['GT slut',r[6]],['Status',r[7]],['Landmålt',r[8]],['Blæst',r[9]]].filter(([,v])=>v&&v.trim());
+  const fields = [['Måned',r[1]],['Projektleder',r[3]],['Deadline',r[4]],['Udleveret til',r[5]],['GT slut',r[7]],['Status',r[8]],['Landmålt',r[9]],['Blæst',r[10]]].filter(([,v])=>v&&v.trim());
   if (fields.length) {
     body += `<div class="modal-section"><div class="modal-section-title">Detaljer</div>`;
     fields.forEach(([k,v]) => { body += `<div class="modal-row"><span class="modal-key">${k}</span><span class="modal-val">${v}</span></div>`; });
@@ -1099,7 +1077,7 @@ function openModalBB(idx) {
   if(bbSagsnr) {
     body+=`<div class="fieldwork-group"><div class="modal-section-title">Feltarbejde</div>`;
 
-    const landmaaltValBB = (r[8]||'').trim();
+    const landmaaltValBB = (r[9]||'').trim();
     if(landmaaltValBB) {
       body+=`<button class="landmaalt-btn landmaalt-done" disabled>✓ Landmålt: ${landmaaltValBB}</button>`;
     } else {
@@ -1108,7 +1086,7 @@ function openModalBB(idx) {
 
     body+=`<div class="fieldwork-divider"></div>`;
 
-    const blaestValBB = (r[9]||'').trim();
+    const blaestValBB = (r[10]||'').trim();
     if(blaestValBB) {
       body+=`<div class="blaest-done"><div class="blaest-done-title">💨 Blæst registreret</div>${blaestValBB}</div>`;
     } else {
@@ -1163,7 +1141,7 @@ async function toggleDoneBB(idx, wrap) {
   await saveDone(key, !wasDone);
 }
 
-// MODAL
+// MODAL (DSO2026, Norlys, Erhverv)
 function openModal(key, idx) {
   const d=DATA[key];
   if(!d) return;
@@ -1171,7 +1149,6 @@ function openModal(key, idx) {
   const r=all[idx];
   if(!r) return;
 
-  // Norlys and Erhverv have extra Deadline column (E), so everything shifts +1
   const hasDeadline = key==='norlys' || key==='erhverv';
   const COL = {
     deadline: hasDeadline ? 4 : null,
@@ -1191,10 +1168,8 @@ function openModal(key, idx) {
 
   let body='';
 
-  // Kontaktperson
   body += kontaktHTML(findKontakt(adresse));
 
-  // HURTIGE LINKS — Maps + Projektplan
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adresse)}`;
   const projektLink = r[COL.link];
 
@@ -1213,7 +1188,6 @@ function openModal(key, idx) {
     </div>
   </div>`;
 
-  // LER link
   const lerVal = r[COL.ler]||'';
   const lerLink = lerVal.startsWith('http') ? lerVal : null;
 
@@ -1227,7 +1201,6 @@ function openModal(key, idx) {
     </div>`;
   }
 
-  // Detaljer
   const fields=[
     ['Måned',r[1]],['Projektleder',r[3]],
     COL.deadline!==null ? ['Deadline',r[COL.deadline]] : null,
@@ -1242,7 +1215,6 @@ function openModal(key, idx) {
     body+='</div>';
   }
 
-  // Materialer (kun DSO 2026)
   if(key==='dso2026') {
     const mats=MAT_COLS.filter(m=>r[m.idx]&&parseFloat(r[m.idx])>0);
     if(mats.length) {
@@ -1261,7 +1233,6 @@ function openModal(key, idx) {
     }
   }
 
-  // Feltarbejde sektion (Landmålt + Blæst)
   if(key==='dso2026' || key==='norlys' || key==='erhverv') {
     body+=`<div class="fieldwork-group"><div class="modal-section-title">Feltarbejde</div>`;
     
@@ -1283,7 +1254,6 @@ function openModal(key, idx) {
     body+=`</div>`;
   }
 
-  // Færdig checkbox
   const doneKey = 'done_' + r[0];
   const isDoneM = checkDone(doneKey);
   body+=`<div class="done-wrap${isDoneM?' checked':''}" onclick="toggleDone('${r[0]}',this)" id="done-wrap-${r[0]}">
@@ -1292,7 +1262,6 @@ function openModal(key, idx) {
     <span class="done-undo">Klik for at fortryde</span>
   </div>`;
 
-  // Kommentar sektion
   const savedAuthor = localStorage.getItem('comment_author')||'';
   body+=`<div class="modal-section comment-section">
     <div class="modal-section-title">Kommentarer</div>
@@ -1308,8 +1277,6 @@ function openModal(key, idx) {
 
   document.getElementById('modal-body').innerHTML=body;
   document.getElementById('modal-overlay').classList.remove('hidden');
-
-  // Load comments async after modal is shown
   getComments(r[0]).then(comments => renderComments(r[0], comments));
 }
 
@@ -1329,11 +1296,6 @@ async function toggleDone(sagsnr, wrap) {
   renderCurrent();
 }
 
-
-
-
-
-
 function closeModal(){document.getElementById('modal-overlay').classList.add('hidden');}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
@@ -1344,7 +1306,7 @@ function setFilter(key,val,btn){
   renderCurrent();
 }
 
-// DASHBOARD
+// DASHBOARD — FIXED: BB stats now use correct column indices
 function buildDashboard() {
   const d26=DATA.dso2026, dn=DATA.norlys, dg=DATA.gridopt, dbb=DATA.bb, de=DATA.erhverv;
   const all26=d26?d26.rows.filter(r=>isSagsnr(r[0])):[];
@@ -1358,27 +1320,23 @@ function buildDashboard() {
   const elBB=document.getElementById('cnt-bb'); if(elBB) elBB.textContent=allbb.length;
   const elE=document.getElementById('cnt-erhverv'); if(elE) elE.textContent=alle.length;
 
-  // DSO stats
   const dsoUdl=all26.filter(r=>r[4]&&r[4].trim()).length;
   const dsoLand=all26.filter(r=>r[8]&&r[8].trim()).length;
   const dsoBlae=all26.filter(r=>r[9]&&r[9].trim()).length;
 
-  // Norlys stats (Norlys has Deadline col so indices are +1)
   const norUdl=alln.filter(r=>r[5]&&r[5].trim()).length;
   const norLand=alln.filter(r=>r[9]&&r[9].trim()).length;
   const norBlae=alln.filter(r=>r[10]&&r[10].trim()).length;
 
-  // BB stats
-  const bbUdl=allbb.filter(r=>r[4]&&r[4].trim()).length;
-  const bbLand=allbb.filter(r=>r[8]&&r[8].trim()).length;
-  const bbBlae=allbb.filter(r=>r[9]&&r[9].trim()).length;
+  // BB stats — FIXED: shifted +1 for Deadline column
+  const bbUdl=allbb.filter(r=>r[5]&&r[5].trim()).length;
+  const bbLand=allbb.filter(r=>r[9]&&r[9].trim()).length;
+  const bbBlae=allbb.filter(r=>r[10]&&r[10].trim()).length;
 
-  // Erhverv stats (same layout as Norlys)
   const erhUdl=alle.filter(r=>r[5]&&r[5].trim()).length;
   const erhLand=alle.filter(r=>r[9]&&r[9].trim()).length;
   const erhBlae=alle.filter(r=>r[10]&&r[10].trim()).length;
 
-  // Totals
   const totalAll=all26.length+alln.length+allbb.length+alle.length;
   const totalLand=dsoLand+norLand+bbLand+erhLand;
   const totalBlae=dsoBlae+norBlae+bbBlae+erhBlae;
@@ -1389,7 +1347,6 @@ function buildDashboard() {
     return `<div style="margin-top:8px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px"><span>${val} af ${total}</span><span>${p}%</span></div><div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden"><div style="height:100%;width:${p}%;background:${color};border-radius:3px;transition:width .6s"></div></div></div>`;
   }
 
-  // Clickable stat cards
   document.getElementById('dash-stats').innerHTML=`
     <div class="stat-card" style="cursor:pointer" onclick="showPage('dso2026')">
       <div class="stat-label">DSO 2026</div>
@@ -1416,7 +1373,6 @@ function buildDashboard() {
       ${progBar(erhLand,alle.length,'var(--green)')}
     </div>`;
 
-  // Charts
   const mc={};
   all26.forEach(r=>{mc[r[1]]=(mc[r[1]]||0)+1;});
   const mo=['Januar','Februar','Marts','April','Maj','Juni','Juli','August','September','Oktober','November','December'];
@@ -1486,13 +1442,12 @@ function buildDashboard() {
     </div>`;
 }
 
-// WEATHER — Open-Meteo API (free, no key needed)
+// WEATHER
 const WMO_ICONS = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌧️',55:'🌧️',56:'🌨️',57:'🌨️',61:'🌧️',63:'🌧️',65:'🌧️',66:'🌨️',67:'🌨️',71:'🌨️',73:'❄️',75:'❄️',77:'❄️',80:'🌦️',81:'🌧️',82:'🌧️',85:'❄️',86:'❄️',95:'⛈️',96:'⛈️',99:'⛈️'};
 const WMO_DESC = {0:'Klart vejr',1:'Overvejende klart',2:'Delvist skyet',3:'Overskyet',45:'Tåget',48:'Rimtåge',51:'Let støvregn',53:'Støvregn',55:'Kraftig støvregn',61:'Let regn',63:'Regn',65:'Kraftig regn',66:'Let isslag',67:'Isslag',71:'Let sne',73:'Sne',75:'Kraftig sne',80:'Lette byger',81:'Byger',82:'Kraftige byger',85:'Snebyger',86:'Kraftige snebyger',95:'Tordenvejr',96:'Torden m. hagl',99:'Kraftig torden'};
 
 async function loadWeather() {
   try {
-    // Jylland/Midtjylland area
     const lat=55.86, lon=9.84;
     const resp = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&hourly=temperature_2m,weather_code&timezone=Europe/Copenhagen&forecast_days=1`);
     const d = await resp.json();
@@ -1503,7 +1458,6 @@ async function loadWeather() {
     const wind = Math.round(c.wind_speed_10m);
     const hum = c.relative_humidity_2m;
 
-    // Next 6 hours forecast
     const nowH = new Date().getHours();
     let forecast = '';
     for (let i=0; i<6; i++) {
@@ -1554,7 +1508,7 @@ async function loadAll() {
 loadAll();
 loadWeather();
 setInterval(loadAll,5*60*1000);
-setInterval(loadWeather,30*60*1000); // Opdater vejr hvert 30. min
+setInterval(loadWeather,30*60*1000);
 </script>
 
 <div id="pwa-banner" style="display:none;position:fixed;bottom:16px;right:16px;z-index:300;background:var(--surface);border:1px solid var(--red-border);border-radius:12px;padding:14px 18px;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.5)">
@@ -1562,11 +1516,10 @@ setInterval(loadWeather,30*60*1000); // Opdater vejr hvert 30. min
   <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Tilføj til hjemmeskærm for hurtig adgang</div>
   <div style="display:flex;gap:8px">
     <button onclick="installPWA()" style="flex:1;background:var(--red);border:none;color:#fff;padding:8px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Installer</button>
-    <button onclick="document.getElementById(&#39;pwa-banner&#39;).style.display=&#39;none&#39;" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:8px 12px;border-radius:7px;font-size:13px;cursor:pointer;font-family:inherit">Senere</button>
+    <button onclick="document.getElementById('pwa-banner').style.display='none'" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:8px 12px;border-radius:7px;font-size:13px;cursor:pointer;font-family:inherit">Senere</button>
   </div>
 </div>
 <script>
-
 async function getComments(sagsnr) {
   const all = await getAllComments();
   return all[sagsnr] || [];
@@ -1644,7 +1597,6 @@ async function handleSubmitComment(sagsnr) {
   if(!text) return;
   btn.disabled = true;
   btn.textContent = 'Gemmer...';
-  // Save name to localStorage for convenience
   if(name) localStorage.setItem('comment_author', name);
   const comments = await saveComment(sagsnr, name||'Anonym', text);
   textEl.value = '';
@@ -1667,6 +1619,5 @@ window.addEventListener('appinstalled', () => {
   document.getElementById('pwa-banner').style.display='none';
 });
 </script>
-
 
 </body></html>
