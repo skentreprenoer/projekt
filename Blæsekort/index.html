@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Minuba Blæst — Søren Knudsen A/S</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sk-red: #9B1B1B;
+  --sk-red-light: #B52A2A;
+  --sk-red-dark: #7A1515;
+  --sk-charcoal: #2D2D2D;
+  --sk-charcoal-light: #3D3D3D;
+  --green: #1B8C3A;
+  --green-light: #22A847;
+  --amber: #D4860A;
+  --amber-light: #E8A020;
+  --bg: #F5F2EE;
+  --bg-card: #FFFFFF;
+  --text: #1A1A1A;
+  --text-muted: #6B6560;
+  --border: #E2DDD7;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  height: 100dvh;
+  width: 100vw;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--sk-charcoal);
+  color: white;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 1000;
+  position: relative;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+}
+.header-logo {
+  width: 36px; height: 36px;
+  background: var(--sk-red);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.header-logo svg { width: 22px; height: 22px; }
+.header-title {
+  font-size: 16px; font-weight: 700; letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.header-subtitle {
+  font-size: 11px; color: rgba(255,255,255,0.5);
+  font-family: 'JetBrains Mono', monospace;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* ── LAYOUT ── */
+.app-container {
+  display: flex;
+  height: calc(100dvh - 60px);
+  position: relative;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 380px;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 500;
+  flex-shrink: 0;
+}
+.sidebar-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.filter-row {
+  display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;
+}
+.filter-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; gap: 5px;
+}
+.filter-btn:hover { border-color: var(--text-muted); }
+.filter-btn.active-red {
+  background: var(--sk-red); color: white; border-color: var(--sk-red);
+}
+.filter-btn.active-green {
+  background: var(--green); color: white; border-color: var(--green);
+}
+.filter-btn .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.filter-btn .dot.red { background: var(--sk-red); }
+.filter-btn .dot.green { background: var(--green); }
+.filter-btn.active-red .dot, .filter-btn.active-green .dot { background: white; }
+
+.stats-row {
+  display: flex; gap: 8px; margin-top: 10px;
+}
+.stat-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--bg);
+}
+.stat-chip.urgent { color: var(--sk-red); font-weight: 600; }
+
+.task-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px;
+}
+.task-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.task-card::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px;
+}
+.task-card.status-red::before { background: var(--sk-red); }
+.task-card.status-green::before { background: var(--green); }
+.task-card:hover {
+  box-shadow: var(--shadow);
+  border-color: transparent;
+  transform: translateY(-1px);
+}
+.task-card.selected {
+  border-color: var(--sk-red);
+  box-shadow: 0 0 0 2px rgba(155,27,27,0.15);
+}
+.task-sag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.task-addr {
+  font-size: 14px; font-weight: 600;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.task-meta {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.task-deadline {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+.task-deadline.overdue { background: rgba(155,27,27,0.1); color: var(--sk-red); font-weight: 600; }
+.task-deadline.soon { background: rgba(212,134,10,0.1); color: var(--amber); font-weight: 600; }
+.task-deadline.ok { background: rgba(27,140,58,0.1); color: var(--green); }
+
+.task-status-badge {
+  font-size: 11px; font-weight: 600;
+  padding: 3px 8px; border-radius: 4px;
+}
+.task-status-badge.ikke-blaest { background: rgba(155,27,27,0.1); color: var(--sk-red); }
+.task-status-badge.er-blaest { background: rgba(27,140,58,0.1); color: var(--green); }
+
+.task-days {
+  font-size: 11px; color: var(--text-muted);
+  margin-left: auto;
+}
+
+/* ── MAP ── */
+.map-container {
+  flex: 1;
+  position: relative;
+}
+#map { width: 100%; height: 100%; }
+
+/* Leaflet overrides */
+.leaflet-popup-content-wrapper {
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-lg) !important;
+  font-family: 'DM Sans', sans-serif !important;
+}
+.leaflet-popup-content { margin: 14px 16px !important; }
+.popup-sag { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+.popup-addr { font-size: 14px; font-weight: 600; margin: 4px 0; }
+.popup-deadline { font-size: 12px; }
+.popup-status { font-size: 12px; font-weight: 600; margin-top: 4px; }
+
+/* ── ROUTE PANEL ── */
+.route-panel {
+  position: absolute;
+  bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 16px 20px;
+  z-index: 600;
+  display: none;
+  min-width: 300px;
+  max-width: 90vw;
+  border: 1px solid var(--border);
+}
+.route-panel.visible { display: block; }
+.route-title {
+  font-size: 14px; font-weight: 700; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.route-title svg { color: var(--sk-red); }
+.route-stops {
+  font-size: 13px; line-height: 1.6;
+}
+.route-stop { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
+.route-stop-num {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--sk-red); color: white;
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.route-close {
+  position: absolute; top: 10px; right: 12px;
+  background: none; border: none; font-size: 18px;
+  cursor: pointer; color: var(--text-muted);
+  padding: 4px;
+}
+.route-btn {
+  margin-top: 10px;
+  background: var(--sk-red); color: white;
+  border: none; border-radius: var(--radius-sm);
+  padding: 8px 16px; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  width: 100%;
+  transition: background 0.2s;
+}
+.route-btn:hover { background: var(--sk-red-light); }
+
+/* ── MOBILE TOGGLE ── */
+.mobile-toggle {
+  display: none;
+  position: absolute;
+  top: 12px; left: 12px;
+  z-index: 700;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600;
+  display: none;
+  align-items: center; gap: 6px;
+}
+
+/* ── LEGEND (on map) ── */
+.map-legend {
+  position: absolute;
+  top: 12px; right: 12px;
+  z-index: 600;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  box-shadow: var(--shadow);
+  font-size: 12px;
+  border: 1px solid var(--border);
+}
+.legend-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 3px 0;
+}
+.legend-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+
+/* ── NO DATA ── */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+}
+.empty-state svg { margin-bottom: 12px; opacity: 0.4; }
+.empty-state p { font-size: 14px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .sidebar {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 100%;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 800;
+  }
+  .sidebar.open { transform: translateX(0); }
+  .mobile-toggle { display: flex; }
+  .header-subtitle { display: none; }
+  .map-legend { top: 60px; }
+  .route-panel { bottom: 12px; min-width: auto; width: calc(100% - 24px); }
+  .sidebar-close {
+    display: block;
+    position: absolute; top: 12px; right: 12px;
+    background: none; border: none;
+    font-size: 22px; cursor: pointer; color: var(--text-muted);
+  }
+}
+@media (min-width: 769px) {
+  .sidebar-close { display: none; }
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.task-card { animation: fadeInUp 0.3s ease forwards; }
+.task-card:nth-child(2) { animation-delay: 0.05s; }
+.task-card:nth-child(3) { animation-delay: 0.1s; }
+.task-card:nth-child(4) { animation-delay: 0.15s; }
+.task-card:nth-child(5) { animation-delay: 0.2s; }
+
+/* Scrollbar */
+.task-list::-webkit-scrollbar { width: 6px; }
+.task-list::-webkit-scrollbar-track { background: transparent; }
+.task-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">
+    <svg viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="4" width="18" height="3" rx="1" fill="white"/>
+      <rect x="3" y="9" width="12" height="2.5" rx="1" fill="white"/>
+      <rect x="3" y="13" width="15" height="2.5" rx="1" fill="white"/>
+      <rect x="3" y="17" width="10" height="2.5" rx="1" fill="white"/>
+    </svg>
+  </div>
+  <div>
+    <div class="header-title">Minuba Blæst</div>
+  </div>
+  <div class="header-subtitle">SØREN KNUDSEN A/S</div>
+</div>
+
+<div class="app-container">
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+    <div class="sidebar-header">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div style="font-size:15px; font-weight:700;">Opgaver</div>
+        <div class="stat-chip urgent" id="urgentCount"></div>
+      </div>
+      <div class="filter-row">
+        <button class="filter-btn active-red" data-filter="ikke-blaest" onclick="toggleFilter(this)">
+          <span class="dot red"></span> Ikke blæst
+        </button>
+        <button class="filter-btn active-green" data-filter="er-blaest" onclick="toggleFilter(this)">
+          <span class="dot green"></span> Er blæst
+        </button>
+      </div>
+      <div class="stats-row" id="statsRow"></div>
+    </div>
+    <div class="task-list" id="taskList"></div>
+  </div>
+
+  <!-- Map -->
+  <div class="map-container">
+    <button class="mobile-toggle" id="mobileToggle" onclick="toggleSidebar()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect y="2" width="16" height="2" rx="1" fill="currentColor"/><rect y="7" width="16" height="2" rx="1" fill="currentColor"/><rect y="12" width="16" height="2" rx="1" fill="currentColor"/></svg>
+      Opgaver
+    </button>
+    <div class="map-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--sk-red)"></div> Ikke blæst</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Er blæst</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--amber); width:10px;height:10px;border:2px solid var(--amber);background:transparent;"></div> Deadline ≤ 3 dage</div>
+    </div>
+    <div id="map"></div>
+    <div class="route-panel" id="routePanel">
+      <button class="route-close" onclick="closeRoute()">✕</button>
+      <div class="route-title">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a5.5 5.5 0 00-5.5 5.5C2.5 9.625 8 16 8 16s5.5-6.375 5.5-10.5A5.5 5.5 0 008 0zm0 7.5a2 2 0 110-4 2 2 0 010 4z"/></svg>
+        Ruteforslag
+      </div>
+      <div class="route-stops" id="routeStops"></div>
+      <button class="route-btn" onclick="openInMaps()">Åbn i Google Maps</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ═══════════════════════════════════════════
+// CONFIG & DATA
+// ═══════════════════════════════════════════
+
+const SHEET_ID = '1nAfna80c5NbT5mNhsXey84wu--DZVYct7NFRSRvTZr4';
+const GID = '321811896'; // Minuba blæst tab
+const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}`;
+
+// Geocoding cache + known addresses (hardcoded fallback for demo)
+const GEOCODE_CACHE = {};
+
+// Danish geocoding via Dataforsyningen (DAWA)
+async function geocodeAddress(address) {
+  if (GEOCODE_CACHE[address]) return GEOCODE_CACHE[address];
+  
+  try {
+    // Extract parts - typical format: "Street Nr, Zip City"
+    const cleaned = address.replace(/\s+/g, ' ').trim();
+    const resp = await fetch(`https://api.dataforsyningen.dk/adresser?q=${encodeURIComponent(cleaned)}&struktur=mini&per_side=1`);
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data.length > 0 && data[0].x && data[0].y) {
+        const result = { lat: data[0].y, lng: data[0].x };
+        GEOCODE_CACHE[address] = result;
+        return result;
+      }
+    }
+    // Fallback: try with only street + zip
+    const match = cleaned.match(/^(.+?),?\s*(\d{4})\s+(.+)$/);
+    if (match) {
+      const resp2 = await fetch(`https://api.dataforsyningen.dk/adresser?q=${encodeURIComponent(match[1] + ', ' + match[2] + ' ' + match[3])}&struktur=mini&per_side=1`);
+      if (resp2.ok) {
+        const data2 = await resp2.json();
+        if (data2.length > 0 && data2[0].x && data2[0].y) {
+          const result = { lat: data2[0].y, lng: data2[0].x };
+          GEOCODE_CACHE[address] = result;
+          return result;
+        }
+      }
+    }
+  } catch(e) {
+    console.warn('Geocode failed for:', address, e);
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+
+let tasks = [];
+let markers = {};
+let filters = { 'ikke-blaest': true, 'er-blaest': true };
+let selectedTask = null;
+let routeTasks = [];
+let map, markerGroup;
+
+// ═══════════════════════════════════════════
+// PARSE CSV
+// ═══════════════════════════════════════════
+
+function parseCSV(csv) {
+  const lines = csv.split('\n');
+  if (lines.length < 2) return [];
+  
+  // Parse header
+  const headers = parseCSVLine(lines[0]).map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
+  
+  const result = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const values = parseCSVLine(lines[i]);
+    const row = {};
+    headers.forEach((h, idx) => {
+      row[h] = (values[idx] || '').replace(/^"|"$/g, '').trim();
+    });
+    result.push(row);
+  }
+  return result;
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i+1] === '"') { current += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current); current = '';
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
+// ═══════════════════════════════════════════
+// LOAD DATA
+// ═══════════════════════════════════════════
+
+async function loadData() {
+  try {
+    const resp = await fetch(CSV_URL);
+    const csv = await resp.text();
+    const rows = parseCSV(csv);
+    
+    tasks = [];
+    for (const row of rows) {
+      const sagsnummer = row['sagsnummer'] || row['sagsnr'] || '';
+      const adresse = row['adresse'] || '';
+      const deadlineRaw = row['deadline'] || '';
+      const statusRaw = (row['status'] || '').toLowerCase();
+      
+      if (!sagsnummer && !adresse) continue;
+      
+      // Skip "Er sendt til Tenna"
+      if (statusRaw.includes('tenna')) continue;
+      
+      // Parse deadline (DD/MM/YYYY)
+      let deadline = null;
+      if (deadlineRaw) {
+        const parts = deadlineRaw.split('/');
+        if (parts.length === 3) {
+          deadline = new Date(parts[2], parts[1]-1, parts[0]);
+        }
+      }
+      
+      const status = statusRaw.includes('ikke') || statusRaw === '' ? 'ikke-blaest' : 'er-blaest';
+      
+      tasks.push({
+        id: sagsnummer || 'UNKNOWN',
+        sagsnummer,
+        adresse,
+        deadline,
+        deadlineRaw,
+        status,
+        coords: null
+      });
+    }
+    
+    // Geocode all
+    const geocodePromises = tasks.map(async (t) => {
+      if (t.adresse) {
+        t.coords = await geocodeAddress(t.adresse);
+      }
+    });
+    await Promise.all(geocodePromises);
+    
+    renderAll();
+  } catch(e) {
+    console.error('Failed to load data:', e);
+    // Show demo data
+    loadDemoData();
+  }
+}
+
+function loadDemoData() {
+  tasks = [
+    { id: '1534132', sagsnummer: '1534132', adresse: 'Buevej 17, 5685 Søby Ærø', deadline: new Date(2026,3,1), deadlineRaw: '01/04/2026', status: 'ikke-blaest', coords: { lat: 54.9357, lng: 10.2531 } },
+    { id: '1540244', sagsnummer: '1540244', adresse: 'Reberbanen 14, 5960 Marstal', deadline: new Date(2026,3,9), deadlineRaw: '09/04/2026', status: 'ikke-blaest', coords: { lat: 54.8561, lng: 10.5128 } },
+    { id: '000789M', sagsnummer: '000789M', adresse: 'Odinsvej 16, 7200 Grindsted', deadline: new Date(2026,3,14), deadlineRaw: '14/04/2026', status: 'ikke-blaest', coords: { lat: 55.7587, lng: 8.9253 } },
+  ];
+  renderAll();
+}
+
+// ═══════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════
+
+function renderAll() {
+  renderTaskList();
+  renderMarkers();
+  updateStats();
+  checkRouteSuggestion();
+}
+
+function daysUntil(date) {
+  if (!date) return Infinity;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const d = new Date(date);
+  d.setHours(0,0,0,0);
+  return Math.ceil((d - today) / (1000*60*60*24));
+}
+
+function deadlineClass(days) {
+  if (days < 0) return 'overdue';
+  if (days <= 3) return 'soon';
+  return 'ok';
+}
+
+function deadlineLabel(days) {
+  if (days < 0) return `${Math.abs(days)} dage overskredet`;
+  if (days === 0) return 'I dag!';
+  if (days === 1) return 'I morgen';
+  return `${days} dage`;
+}
+
+function getVisibleTasks() {
+  return tasks.filter(t => filters[t.status]);
+}
+
+function renderTaskList() {
+  const list = document.getElementById('taskList');
+  const visible = getVisibleTasks();
+  
+  // Sort by deadline (most urgent first)
+  visible.sort((a,b) => {
+    const da = a.deadline ? a.deadline.getTime() : Infinity;
+    const db = b.deadline ? b.deadline.getTime() : Infinity;
+    return da - db;
+  });
+  
+  if (visible.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/></svg>
+        <p>Ingen opgaver matcher filtrene</p>
+      </div>`;
+    return;
+  }
+  
+  list.innerHTML = visible.map(t => {
+    const days = daysUntil(t.deadline);
+    const dc = deadlineClass(days);
+    const dl = deadlineLabel(days);
+    const sel = selectedTask === t.id ? 'selected' : '';
+    return `
+      <div class="task-card status-${t.status === 'ikke-blaest' ? 'red' : 'green'} ${sel}" 
+           onclick="selectTask('${t.id}')" data-id="${t.id}">
+        <div class="task-sag">#${t.sagsnummer}</div>
+        <div class="task-addr">${t.adresse}</div>
+        <div class="task-meta">
+          <span class="task-status-badge ${t.status}">${t.status === 'ikke-blaest' ? 'Ikke blæst' : 'Er blæst'}</span>
+          ${t.deadline ? `<span class="task-deadline ${dc}">${t.deadlineRaw}</span>` : ''}
+          ${t.deadline ? `<span class="task-days">${dl}</span>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderMarkers() {
+  if (markerGroup) markerGroup.clearLayers();
+  
+  const visible = getVisibleTasks();
+  const bounds = [];
+  
+  visible.forEach(t => {
+    if (!t.coords) return;
+    
+    const days = daysUntil(t.deadline);
+    const isUrgent = days <= 3;
+    const color = t.status === 'ikke-blaest' ? '#9B1B1B' : '#1B8C3A';
+    const size = isUrgent ? 14 : 10;
+    const pulse = isUrgent && t.status === 'ikke-blaest' ? 
+      `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:${size+10}px;height:${size+10}px;border-radius:50%;border:2px solid ${color};opacity:0.5;animation:pulse 2s infinite;"></div>` : '';
+    
+    const icon = L.divIcon({
+      className: 'custom-marker',
+      html: `<div style="position:relative;width:${size}px;height:${size}px;">
+        ${pulse}
+        <div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);position:relative;z-index:2;"></div>
+      </div>`,
+      iconSize: [size+10, size+10],
+      iconAnchor: [(size+10)/2, (size+10)/2]
+    });
+    
+    const marker = L.marker([t.coords.lat, t.coords.lng], { icon })
+      .addTo(markerGroup)
+      .bindPopup(`
+        <div class="popup-sag">#${t.sagsnummer}</div>
+        <div class="popup-addr">${t.adresse}</div>
+        <div class="popup-deadline">Deadline: ${t.deadlineRaw || 'Ingen'}</div>
+        <div class="popup-status" style="color:${color}">${t.status === 'ikke-blaest' ? '● Ikke blæst' : '● Er blæst'}</div>
+      `);
+    
+    marker.on('click', () => selectTask(t.id));
+    markers[t.id] = marker;
+    bounds.push([t.coords.lat, t.coords.lng]);
+  });
+  
+  if (bounds.length > 0) {
+    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 10 });
+  }
+}
+
+function updateStats() {
+  const visible = getVisibleTasks();
+  const overdue = visible.filter(t => daysUntil(t.deadline) < 0).length;
+  const urgent = visible.filter(t => { const d = daysUntil(t.deadline); return d >= 0 && d <= 3; }).length;
+  const total = visible.length;
+  
+  document.getElementById('urgentCount').textContent = 
+    overdue > 0 ? `${overdue} overskredet!` : 
+    urgent > 0 ? `${urgent} haster` : 
+    `${total} opgaver`;
+  
+  const stats = document.getElementById('statsRow');
+  stats.innerHTML = `
+    <span class="stat-chip">Total: ${tasks.filter(t => filters[t.status]).length}</span>
+    <span class="stat-chip" style="color:var(--sk-red)">Ikke blæst: ${tasks.filter(t => t.status === 'ikke-blaest').length}</span>
+    <span class="stat-chip" style="color:var(--green)">Er blæst: ${tasks.filter(t => t.status === 'er-blaest').length}</span>
+  `;
+}
+
+// ═══════════════════════════════════════════
+// INTERACTIONS
+// ═══════════════════════════════════════════
+
+function toggleFilter(btn) {
+  const filter = btn.dataset.filter;
+  filters[filter] = !filters[filter];
+  
+  if (filter === 'ikke-blaest') {
+    btn.classList.toggle('active-red', filters[filter]);
+  } else {
+    btn.classList.toggle('active-green', filters[filter]);
+  }
+  
+  renderAll();
+}
+
+function selectTask(id) {
+  selectedTask = selectedTask === id ? null : id;
+  renderTaskList();
+  
+  if (selectedTask && markers[selectedTask]) {
+    const task = tasks.find(t => t.id === id);
+    if (task && task.coords) {
+      map.setView([task.coords.lat, task.coords.lng], 12, { animate: true });
+      markers[selectedTask].openPopup();
+    }
+  }
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════
+// ROUTE SUGGESTION
+// ═══════════════════════════════════════════
+
+function haversine(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function checkRouteSuggestion() {
+  // Find clusters of "ikke-blaest" tasks within 50km
+  const pending = tasks.filter(t => t.status === 'ikke-blaest' && t.coords);
+  if (pending.length < 2) { closeRoute(); return; }
+  
+  const clusters = [];
+  const used = new Set();
+  
+  for (let i = 0; i < pending.length; i++) {
+    if (used.has(i)) continue;
+    const cluster = [pending[i]];
+    used.add(i);
+    
+    for (let j = i + 1; j < pending.length; j++) {
+      if (used.has(j)) continue;
+      const dist = haversine(pending[i].coords.lat, pending[i].coords.lng, pending[j].coords.lat, pending[j].coords.lng);
+      if (dist < 50) {
+        cluster.push(pending[j]);
+        used.add(j);
+      }
+    }
+    if (cluster.length >= 2) clusters.push(cluster);
+  }
+  
+  if (clusters.length > 0) {
+    // Pick largest cluster
+    const best = clusters.sort((a,b) => b.length - a.length)[0];
+    // Sort by deadline
+    best.sort((a,b) => (a.deadline||Infinity) - (b.deadline||Infinity));
+    showRoute(best);
+  } else {
+    closeRoute();
+  }
+}
+
+function showRoute(taskCluster) {
+  routeTasks = taskCluster;
+  const panel = document.getElementById('routePanel');
+  const stops = document.getElementById('routeStops');
+  
+  stops.innerHTML = taskCluster.map((t, i) => {
+    const days = daysUntil(t.deadline);
+    return `<div class="route-stop">
+      <span class="route-stop-num">${i+1}</span>
+      <span>${t.adresse} <span style="color:var(--text-muted);font-size:11px;">(${deadlineLabel(days)})</span></span>
+    </div>`;
+  }).join('');
+  
+  panel.classList.add('visible');
+  
+  // Draw line on map
+  if (window.routeLine) map.removeLayer(window.routeLine);
+  const coords = taskCluster.filter(t => t.coords).map(t => [t.coords.lat, t.coords.lng]);
+  if (coords.length >= 2) {
+    window.routeLine = L.polyline(coords, {
+      color: '#9B1B1B', weight: 3, opacity: 0.6,
+      dashArray: '8, 8'
+    }).addTo(map);
+  }
+}
+
+function closeRoute() {
+  document.getElementById('routePanel').classList.remove('visible');
+  if (window.routeLine) { map.removeLayer(window.routeLine); window.routeLine = null; }
+}
+
+function openInMaps() {
+  if (routeTasks.length === 0) return;
+  const waypoints = routeTasks.filter(t => t.coords).map(t => `${t.coords.lat},${t.coords.lng}`);
+  if (waypoints.length === 0) return;
+  
+  const origin = waypoints[0];
+  const dest = waypoints[waypoints.length - 1];
+  const middle = waypoints.slice(1, -1).join('|');
+  
+  let url = `https://www.google.com/maps/dir/${waypoints.join('/')}`;
+  window.open(url, '_blank');
+}
+
+// ═══════════════════════════════════════════
+// INIT MAP
+// ═══════════════════════════════════════════
+
+function initMap() {
+  map = L.map('map', {
+    center: [56.0, 10.0],
+    zoom: 7,
+    zoomControl: true
+  });
+  
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    maxZoom: 19
+  }).addTo(map);
+  
+  markerGroup = L.layerGroup().addTo(map);
+  
+  // Add pulse animation
+  const style = document.createElement('style');
+  style.textContent = `@keyframes pulse { 0% { transform: translate(-50%,-50%) scale(1); opacity: 0.5; } 100% { transform: translate(-50%,-50%) scale(2); opacity: 0; } }`;
+  document.head.appendChild(style);
+}
+
+// ═══════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+  initMap();
+  loadData();
+  
+  // Auto-refresh every 2 min
+  setInterval(loadData, 120000);
+});
+</script>
+</body>
+</html>
