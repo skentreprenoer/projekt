@@ -39,6 +39,44 @@ body {
   width: 100vw;
 }
 
+/* ── ALERT BANNER ── */
+.alert-banner {
+  background: linear-gradient(135deg, #7A1515, #9B1B1B);
+  color: white;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  animation: alertPulse 3s ease-in-out infinite;
+}
+.alert-banner.visible { display: flex; }
+.alert-banner .alert-icon {
+  font-size: 18px;
+  animation: shake 1s ease-in-out infinite;
+}
+.alert-banner .alert-count {
+  background: white;
+  color: var(--sk-red);
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 12px;
+  margin-left: auto;
+}
+@keyframes alertPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+@keyframes shake {
+  0%, 100% { transform: rotate(0deg); }
+  10%, 30% { transform: rotate(-8deg); }
+  20%, 40% { transform: rotate(8deg); }
+  50% { transform: rotate(0deg); }
+}
+
 /* ── HEADER ── */
 .header {
   background: var(--sk-charcoal);
@@ -59,305 +97,246 @@ body {
   flex-shrink: 0;
 }
 .header-logo svg { width: 22px; height: 22px; }
-.header-title {
-  font-size: 16px; font-weight: 700; letter-spacing: -0.02em;
-  white-space: nowrap;
-}
+.header-title { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; white-space: nowrap; }
 .header-subtitle {
   font-size: 11px; color: rgba(255,255,255,0.5);
   font-family: 'JetBrains Mono', monospace;
-  margin-left: auto;
-  white-space: nowrap;
+  margin-left: auto; white-space: nowrap;
 }
 
 /* ── LAYOUT ── */
-.app-container {
-  display: flex;
-  height: calc(100dvh - 60px);
-  position: relative;
-}
+.app-container { display: flex; height: calc(100dvh - 60px); position: relative; }
+.app-container.has-alert { height: calc(100dvh - 60px - 40px); }
 
 /* ── SIDEBAR ── */
 .sidebar {
-  width: 380px;
-  background: var(--bg-card);
+  width: 400px; background: var(--bg-card);
   border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  z-index: 500;
-  flex-shrink: 0;
+  display: flex; flex-direction: column;
+  z-index: 500; flex-shrink: 0;
 }
-.sidebar-header {
-  padding: 16px 20px 12px;
-  border-bottom: 1px solid var(--border);
-}
-.filter-row {
-  display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;
-}
+.sidebar-header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); }
+.filter-row { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
 .filter-btn {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px; font-weight: 500;
-  padding: 6px 12px;
-  border-radius: 20px;
-  border: 1.5px solid var(--border);
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+  padding: 6px 12px; border-radius: 20px;
+  border: 1.5px solid var(--border); background: transparent;
+  color: var(--text-muted); cursor: pointer; transition: all 0.2s;
   display: flex; align-items: center; gap: 5px;
 }
 .filter-btn:hover { border-color: var(--text-muted); }
-.filter-btn.active-red {
-  background: var(--sk-red); color: white; border-color: var(--sk-red);
-}
-.filter-btn.active-green {
-  background: var(--green); color: white; border-color: var(--green);
-}
-.filter-btn .dot {
-  width: 8px; height: 8px; border-radius: 50%;
-}
+.filter-btn.active-red { background: var(--sk-red); color: white; border-color: var(--sk-red); }
+.filter-btn.active-green { background: var(--green); color: white; border-color: var(--green); }
+.filter-btn .dot { width: 8px; height: 8px; border-radius: 50%; }
 .filter-btn .dot.red { background: var(--sk-red); }
 .filter-btn .dot.green { background: var(--green); }
 .filter-btn.active-red .dot, .filter-btn.active-green .dot { background: white; }
-
-.stats-row {
-  display: flex; gap: 8px; margin-top: 10px;
-}
+.stats-row { display: flex; gap: 8px; margin-top: 10px; }
 .stat-chip {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  background: var(--bg);
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  padding: 4px 10px; border-radius: 6px; background: var(--bg);
 }
 .stat-chip.urgent { color: var(--sk-red); font-weight: 600; }
+.task-list { flex: 1; overflow-y: auto; padding: 8px 12px; }
 
-.task-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px 12px;
-}
+/* ── TASK CARDS ── */
 .task-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-  position: relative;
-  overflow: hidden;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px 16px;
+  margin-bottom: 8px; cursor: pointer; transition: all 0.2s;
+  position: relative; overflow: hidden;
 }
 .task-card::before {
-  content: '';
-  position: absolute; left: 0; top: 0; bottom: 0;
-  width: 4px;
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
 }
 .task-card.status-red::before { background: var(--sk-red); }
 .task-card.status-green::before { background: var(--green); }
-.task-card:hover {
-  box-shadow: var(--shadow);
-  border-color: transparent;
-  transform: translateY(-1px);
-}
-.task-card.selected {
-  border-color: var(--sk-red);
-  box-shadow: 0 0 0 2px rgba(155,27,27,0.15);
-}
-.task-sag {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px; color: var(--text-muted);
-  margin-bottom: 4px;
-}
-.task-addr {
-  font-size: 14px; font-weight: 600;
-  margin-bottom: 6px;
-  letter-spacing: -0.01em;
-}
-.task-meta {
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-}
-.task-deadline {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 4px;
-}
-.task-deadline.overdue { background: rgba(155,27,27,0.1); color: var(--sk-red); font-weight: 600; }
-.task-deadline.soon { background: rgba(212,134,10,0.1); color: var(--amber); font-weight: 600; }
-.task-deadline.ok { background: rgba(27,140,58,0.1); color: var(--green); }
 
-.task-status-badge {
-  font-size: 11px; font-weight: 600;
-  padding: 3px 8px; border-radius: 4px;
+/* OVERDUE cards */
+.task-card.overdue-card {
+  background: #FDF0F0; border: 2px solid var(--sk-red);
 }
+.task-card.overdue-card::before {
+  width: 6px; background: var(--sk-red);
+  animation: overduePulse 1.5s ease-in-out infinite;
+}
+.task-card.overdue-card .task-addr { color: var(--sk-red-dark); }
+.overdue-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--sk-red); color: white;
+  font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  animation: overdueBlink 2s ease-in-out infinite;
+}
+
+/* SOON cards */
+.task-card.soon-card { background: #FFF9F0; border-color: var(--amber); }
+.task-card.soon-card::before { width: 5px; background: var(--amber); }
+.soon-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--amber); color: white;
+  font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+@keyframes overduePulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+@keyframes overdueBlink { 0%,100% { opacity:1; } 50% { opacity:0.7; } }
+
+.task-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+.task-card.selected { border-color: var(--sk-red) !important; box-shadow: 0 0 0 3px rgba(155,27,27,0.2); }
+.task-sag { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+.task-addr { font-size: 14px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; }
+.task-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.task-deadline { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 3px 8px; border-radius: 4px; }
+.task-deadline.ok { background: rgba(27,140,58,0.1); color: var(--green); }
+.task-status-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
 .task-status-badge.ikke-blaest { background: rgba(155,27,27,0.1); color: var(--sk-red); }
 .task-status-badge.er-blaest { background: rgba(27,140,58,0.1); color: var(--green); }
-
-.task-days {
-  font-size: 11px; color: var(--text-muted);
-  margin-left: auto;
-}
+.task-days { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+.geocode-fail { font-size: 10px; color: var(--amber); margin-top: 4px; font-style: italic; }
 
 /* ── MAP ── */
-.map-container {
-  flex: 1;
-  position: relative;
-}
+.map-container { flex: 1; position: relative; }
 #map { width: 100%; height: 100%; }
-
-/* Leaflet overrides */
-.leaflet-popup-content-wrapper {
-  border-radius: var(--radius-sm) !important;
-  box-shadow: var(--shadow-lg) !important;
-  font-family: 'DM Sans', sans-serif !important;
-}
-.leaflet-popup-content { margin: 14px 16px !important; }
+.leaflet-popup-content-wrapper { border-radius: var(--radius-sm) !important; box-shadow: var(--shadow-lg) !important; font-family: 'DM Sans', sans-serif !important; }
+.leaflet-popup-content { margin: 14px 16px !important; min-width: 200px !important; }
 .popup-sag { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
 .popup-addr { font-size: 14px; font-weight: 600; margin: 4px 0; }
 .popup-deadline { font-size: 12px; }
 .popup-status { font-size: 12px; font-weight: 600; margin-top: 4px; }
+.popup-overdue {
+  background: var(--sk-red); color: white; padding: 4px 8px; border-radius: 4px;
+  font-size: 11px; font-weight: 700; margin-top: 6px; display: inline-block;
+}
 
 /* ── ROUTE PANEL ── */
 .route-panel {
-  position: absolute;
-  bottom: 20px; left: 50%;
-  transform: translateX(-50%);
-  background: var(--bg-card);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-  padding: 16px 20px;
-  z-index: 600;
-  display: none;
-  min-width: 300px;
-  max-width: 90vw;
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: var(--bg-card); border-radius: var(--radius);
+  box-shadow: var(--shadow-lg); padding: 16px 20px;
+  z-index: 600; display: none; min-width: 340px; max-width: 90vw;
   border: 1px solid var(--border);
 }
 .route-panel.visible { display: block; }
-.route-title {
-  font-size: 14px; font-weight: 700; margin-bottom: 8px;
-  display: flex; align-items: center; gap: 8px;
-}
+.route-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
 .route-title svg { color: var(--sk-red); }
-.route-stops {
-  font-size: 13px; line-height: 1.6;
+.route-explanation {
+  font-size: 11px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.5;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border);
 }
-.route-stop { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
+.route-explanation strong { color: var(--text); }
+.route-stops { font-size: 13px; line-height: 1.6; }
+.route-stop { display: flex; align-items: flex-start; gap: 8px; padding: 4px 0; }
 .route-stop-num {
-  width: 20px; height: 20px; border-radius: 50%;
+  width: 22px; height: 22px; border-radius: 50%;
   background: var(--sk-red); color: white;
   font-size: 10px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+  flex-shrink: 0; margin-top: 1px;
 }
-.route-close {
-  position: absolute; top: 10px; right: 12px;
-  background: none; border: none; font-size: 18px;
-  cursor: pointer; color: var(--text-muted);
-  padding: 4px;
+.route-stop-info { flex: 1; }
+.route-stop-addr { font-weight: 600; font-size: 13px; }
+.route-stop-meta { font-size: 11px; color: var(--text-muted); }
+.route-stop-dist {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted);
+  margin: 2px 0 2px 30px; display: flex; align-items: center; gap: 4px;
 }
+.route-close { position: absolute; top: 10px; right: 12px; background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-muted); padding: 4px; }
 .route-btn {
-  margin-top: 10px;
-  background: var(--sk-red); color: white;
+  margin-top: 10px; background: var(--sk-red); color: white;
   border: none; border-radius: var(--radius-sm);
-  padding: 8px 16px; font-family: 'DM Sans', sans-serif;
-  font-size: 13px; font-weight: 600; cursor: pointer;
-  width: 100%;
-  transition: background 0.2s;
+  padding: 10px 16px; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600; cursor: pointer; width: 100%;
+  transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
 }
 .route-btn:hover { background: var(--sk-red-light); }
 
-/* ── MOBILE TOGGLE ── */
+/* ── INFO ── */
+.info-btn {
+  position: absolute; bottom: 20px; right: 20px; z-index: 600;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 50%;
+  width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: var(--shadow); font-size: 16px; font-weight: 700;
+  color: var(--text-muted); transition: all 0.2s;
+}
+.info-btn:hover { background: var(--sk-red); color: white; border-color: var(--sk-red); }
+.info-modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 2000;
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.info-modal-overlay.visible { display: flex; }
+.info-modal {
+  background: var(--bg-card); border-radius: var(--radius); padding: 28px 24px;
+  max-width: 480px; width: 100%; box-shadow: var(--shadow-lg);
+  max-height: 80vh; overflow-y: auto; position: relative;
+}
+.info-modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--sk-charcoal); }
+.info-modal h3 { font-size: 14px; font-weight: 700; margin: 16px 0 6px; color: var(--sk-charcoal); display: flex; align-items: center; gap: 6px; }
+.info-modal p { font-size: 13px; line-height: 1.6; color: var(--text-muted); margin-bottom: 8px; }
+.info-modal .color-key { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; }
+.info-modal .color-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.info-modal-close { position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); }
+
+/* ── MOBILE ── */
 .mobile-toggle {
-  display: none;
-  position: absolute;
-  top: 12px; left: 12px;
-  z-index: 700;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  box-shadow: var(--shadow);
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px; font-weight: 600;
-  display: none;
+  display: none; position: absolute; top: 12px; left: 12px; z-index: 700;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 10px 14px; box-shadow: var(--shadow); cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
   align-items: center; gap: 6px;
 }
-
-/* ── LEGEND (on map) ── */
 .map-legend {
-  position: absolute;
-  top: 12px; right: 12px;
-  z-index: 600;
-  background: var(--bg-card);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  box-shadow: var(--shadow);
-  font-size: 12px;
+  position: absolute; top: 12px; right: 12px; z-index: 600;
+  background: var(--bg-card); border-radius: var(--radius-sm);
+  padding: 10px 14px; box-shadow: var(--shadow); font-size: 12px;
   border: 1px solid var(--border);
 }
-.legend-item {
-  display: flex; align-items: center; gap: 8px;
-  padding: 3px 0;
-}
-.legend-dot {
-  width: 10px; height: 10px; border-radius: 50%;
-}
+.legend-item { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
 
-/* ── NO DATA ── */
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--text-muted);
-}
-.empty-state svg { margin-bottom: 12px; opacity: 0.4; }
-.empty-state p { font-size: 14px; }
-
-/* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   .sidebar {
-    position: absolute;
-    top: 0; left: 0; bottom: 0;
-    width: 100%;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    z-index: 800;
+    position: absolute; top: 0; left: 0; bottom: 0; width: 100%;
+    transform: translateX(-100%); transition: transform 0.3s ease; z-index: 800;
   }
   .sidebar.open { transform: translateX(0); }
-  .mobile-toggle { display: flex; }
+  .mobile-toggle { display: flex !important; }
   .header-subtitle { display: none; }
   .map-legend { top: 60px; }
   .route-panel { bottom: 12px; min-width: auto; width: calc(100% - 24px); }
+  .info-btn { bottom: 12px; right: 12px; }
   .sidebar-close {
-    display: block;
-    position: absolute; top: 12px; right: 12px;
-    background: none; border: none;
-    font-size: 22px; cursor: pointer; color: var(--text-muted);
+    display: block; position: absolute; top: 12px; right: 12px;
+    background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted);
   }
 }
 @media (min-width: 769px) {
   .sidebar-close { display: none; }
+  .mobile-toggle { display: none !important; }
 }
 
-/* ── ANIMATIONS ── */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes fadeInUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 .task-card { animation: fadeInUp 0.3s ease forwards; }
 .task-card:nth-child(2) { animation-delay: 0.05s; }
 .task-card:nth-child(3) { animation-delay: 0.1s; }
 .task-card:nth-child(4) { animation-delay: 0.15s; }
-.task-card:nth-child(5) { animation-delay: 0.2s; }
+@keyframes pulse { 0% { transform:translate(-50%,-50%) scale(1); opacity:0.6; } 100% { transform:translate(-50%,-50%) scale(2.5); opacity:0; } }
 
-/* Scrollbar */
 .task-list::-webkit-scrollbar { width: 6px; }
 .task-list::-webkit-scrollbar-track { background: transparent; }
 .task-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+.empty-state svg { margin-bottom: 12px; opacity: 0.4; }
+.empty-state p { font-size: 14px; }
 </style>
 </head>
 <body>
+
+<div class="alert-banner" id="alertBanner">
+  <span class="alert-icon">⚠️</span>
+  <span id="alertText"></span>
+  <span class="alert-count" id="alertCount"></span>
+</div>
 
 <div class="header">
   <div class="header-logo">
@@ -368,19 +347,16 @@ body {
       <rect x="3" y="17" width="10" height="2.5" rx="1" fill="white"/>
     </svg>
   </div>
-  <div>
-    <div class="header-title">Minuba Blæst</div>
-  </div>
+  <div><div class="header-title">Minuba Blæst</div></div>
   <div class="header-subtitle">SØREN KNUDSEN A/S</div>
 </div>
 
-<div class="app-container">
-  <!-- Sidebar -->
+<div class="app-container" id="appContainer">
   <div class="sidebar" id="sidebar">
     <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
     <div class="sidebar-header">
-      <div style="display:flex; align-items:center; justify-content:space-between;">
-        <div style="font-size:15px; font-weight:700;">Opgaver</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:15px;font-weight:700;">Opgaver</div>
         <div class="stat-chip urgent" id="urgentCount"></div>
       </div>
       <div class="filter-row">
@@ -396,7 +372,6 @@ body {
     <div class="task-list" id="taskList"></div>
   </div>
 
-  <!-- Map -->
   <div class="map-container">
     <button class="mobile-toggle" id="mobileToggle" onclick="toggleSidebar()">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect y="2" width="16" height="2" rx="1" fill="currentColor"/><rect y="7" width="16" height="2" rx="1" fill="currentColor"/><rect y="12" width="16" height="2" rx="1" fill="currentColor"/></svg>
@@ -405,7 +380,8 @@ body {
     <div class="map-legend">
       <div class="legend-item"><div class="legend-dot" style="background:var(--sk-red)"></div> Ikke blæst</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Er blæst</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--amber); width:10px;height:10px;border:2px solid var(--amber);background:transparent;"></div> Deadline ≤ 3 dage</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div> Haster (≤ 3 dage)</div>
+      <div class="legend-item" style="margin-top:2px;padding-top:4px;border-top:1px solid var(--border);"><span style="width:10px;font-size:9px;text-align:center;">💀</span> Overskredet</div>
     </div>
     <div id="map"></div>
     <div class="route-panel" id="routePanel">
@@ -414,483 +390,361 @@ body {
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a5.5 5.5 0 00-5.5 5.5C2.5 9.625 8 16 8 16s5.5-6.375 5.5-10.5A5.5 5.5 0 008 0zm0 7.5a2 2 0 110-4 2 2 0 010 4z"/></svg>
         Ruteforslag
       </div>
+      <div class="route-explanation" id="routeExplanation"></div>
       <div class="route-stops" id="routeStops"></div>
-      <button class="route-btn" onclick="openInMaps()">Åbn i Google Maps</button>
+      <button class="route-btn" onclick="openInMaps()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8L22 12L18 16"/><path d="M2 12H22"/></svg>
+        Åbn rute i Google Maps
+      </button>
     </div>
+    <button class="info-btn" onclick="showInfo()">?</button>
+  </div>
+</div>
+
+<div class="info-modal-overlay" id="infoModal" onclick="if(event.target===this)closeInfo()">
+  <div class="info-modal">
+    <button class="info-modal-close" onclick="closeInfo()">✕</button>
+    <h2>Sådan virker kortet</h2>
+    <h3>Farvekoder</h3>
+    <div class="color-key"><div class="color-dot" style="background:var(--sk-red)"></div><span><strong>Rød</strong> — Ikke blæst endnu</span></div>
+    <div class="color-key"><div class="color-dot" style="background:var(--green)"></div><span><strong>Grøn</strong> — Er blæst, afventer Tenna</span></div>
+    <div class="color-key"><div class="color-dot" style="background:var(--amber)"></div><span><strong>Orange</strong> — Deadline inden for 3 dage</span></div>
+    <div class="color-key"><div class="color-dot" style="background:#333"></div><span><strong>💀 Skull</strong> — Deadline overskredet!</span></div>
+    <p>Opgaver med "Er sendt til Tenna" fjernes automatisk fra kortet.</p>
+    <h3>Ruteforslag</h3>
+    <p>Appen finder automatisk opgaver der ligger <strong>inden for 50 km</strong> af hinanden. Når 2+ opgaver er tæt nok, foreslås en rute sorteret efter <strong>deadline</strong> — mest presserende først.</p>
+    <p>Afstande mellem stop vises i km (luftlinje). "Åbn i Google Maps" giver dig kørevejledning med alle stop.</p>
+    <h3>Adresser</h3>
+    <p>Adresser slås op via <strong>Dataforsyningens DAWA API</strong> (Danmarks officielle adresseregister). Appen prøver 5 forskellige søgemetoder — direkte søgning, adgangsadresser, datavask, struktureret søgning og autocomplete.</p>
+    <p>Hvis en adresse ikke kan findes, vises opgaven i listen men uden prik på kortet.</p>
+    <h3>Opdatering</h3>
+    <p>Data hentes live fra Google Sheet og opdateres hvert 2. minut.</p>
   </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ═══════════════════════════════════════════
-// CONFIG & DATA
-// ═══════════════════════════════════════════
-
 const SHEET_ID = '1nAfna80c5NbT5mNhsXey84wu--DZVYct7NFRSRvTZr4';
-const GID = '321811896'; // Minuba blæst tab
+const GID = '321811896';
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}`;
-
-// Geocoding cache + known addresses (hardcoded fallback for demo)
 const GEOCODE_CACHE = {};
 
-// Danish geocoding via Dataforsyningen (DAWA)
+// ── GEOCODING (5 strategies) ──
 async function geocodeAddress(address) {
   if (GEOCODE_CACHE[address]) return GEOCODE_CACHE[address];
-  
+  const cleaned = address.replace(/\s+/g, ' ').trim();
+
+  // 1: adgangsadresser search
+  let r = await tryGeocode(`https://api.dataforsyningen.dk/adgangsadresser?q=${encodeURIComponent(cleaned)}&struktur=mini&per_side=1`);
+  if (r) { GEOCODE_CACHE[address] = r; return r; }
+
+  // 2: adresser search
+  r = await tryGeocode(`https://api.dataforsyningen.dk/adresser?q=${encodeURIComponent(cleaned)}&struktur=mini&per_side=1`);
+  if (r) { GEOCODE_CACHE[address] = r; return r; }
+
+  // 3: datavask (address washing)
   try {
-    // Extract parts - typical format: "Street Nr, Zip City"
-    const cleaned = address.replace(/\s+/g, ' ').trim();
-    const resp = await fetch(`https://api.dataforsyningen.dk/adresser?q=${encodeURIComponent(cleaned)}&struktur=mini&per_side=1`);
+    const resp = await fetch(`https://api.dataforsyningen.dk/datavask/adgangsadresser?betegnelse=${encodeURIComponent(cleaned)}`);
     if (resp.ok) {
       const data = await resp.json();
-      if (data.length > 0 && data[0].x && data[0].y) {
-        const result = { lat: data[0].y, lng: data[0].x };
-        GEOCODE_CACHE[address] = result;
-        return result;
+      if (data.resultater && data.resultater.length > 0) {
+        const best = data.resultater[0];
+        if (best.adresse && best.adresse.adgangspunkt && best.adresse.adgangspunkt.koordinater) {
+          r = { lat: best.adresse.adgangspunkt.koordinater[1], lng: best.adresse.adgangspunkt.koordinater[0] };
+          GEOCODE_CACHE[address] = r; return r;
+        }
       }
-    }
-    // Fallback: try with only street + zip
-    const match = cleaned.match(/^(.+?),?\s*(\d{4})\s+(.+)$/);
-    if (match) {
-      const resp2 = await fetch(`https://api.dataforsyningen.dk/adresser?q=${encodeURIComponent(match[1] + ', ' + match[2] + ' ' + match[3])}&struktur=mini&per_side=1`);
-      if (resp2.ok) {
-        const data2 = await resp2.json();
-        if (data2.length > 0 && data2[0].x && data2[0].y) {
-          const result = { lat: data2[0].y, lng: data2[0].x };
-          GEOCODE_CACHE[address] = result;
-          return result;
+      if (data.aktueladresse) {
+        const adg = data.aktueladresse.adgangsadresse || data.aktueladresse;
+        if (adg.adgangspunkt && adg.adgangspunkt.koordinater) {
+          r = { lat: adg.adgangspunkt.koordinater[1], lng: adg.adgangspunkt.koordinater[0] };
+          GEOCODE_CACHE[address] = r; return r;
         }
       }
     }
-  } catch(e) {
-    console.warn('Geocode failed for:', address, e);
+  } catch(e) {}
+
+  // 4: structured params
+  const match = cleaned.match(/^(.+?)\s*,?\s*(\d{4})\s+(.+)$/);
+  if (match) {
+    const street = match[1].trim();
+    const zip = match[2];
+    r = await tryGeocode(`https://api.dataforsyningen.dk/adgangsadresser?q=${encodeURIComponent(street)}&postnr=${zip}&struktur=mini&per_side=1`);
+    if (r) { GEOCODE_CACHE[address] = r; return r; }
+    const sm = street.match(/^(.+?)\s+(\d+\w?)$/);
+    if (sm) {
+      r = await tryGeocode(`https://api.dataforsyningen.dk/adgangsadresser?vejnavn=${encodeURIComponent(sm[1])}&husnr=${encodeURIComponent(sm[2])}&postnr=${zip}&struktur=mini&per_side=1`);
+      if (r) { GEOCODE_CACHE[address] = r; return r; }
+    }
   }
+
+  // 5: autocomplete
+  try {
+    const resp = await fetch(`https://api.dataforsyningen.dk/adgangsadresser/autocomplete?q=${encodeURIComponent(cleaned)}&per_side=1`);
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data.length > 0 && data[0].adgangsadresse) {
+        const adg = data[0].adgangsadresse;
+        if (adg.adgangspunkt && adg.adgangspunkt.koordinater) {
+          r = { lat: adg.adgangspunkt.koordinater[1], lng: adg.adgangspunkt.koordinater[0] };
+          GEOCODE_CACHE[address] = r; return r;
+        }
+        if (adg.x && adg.y) { r = { lat: adg.y, lng: adg.x }; GEOCODE_CACHE[address] = r; return r; }
+      }
+    }
+  } catch(e) {}
+
+  console.warn('Geocode failed:', address);
   return null;
 }
 
-// ═══════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════
+async function tryGeocode(url) {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (data.length > 0) {
+      if (data[0].x && data[0].y) return { lat: data[0].y, lng: data[0].x };
+      if (data[0].adgangspunkt && data[0].adgangspunkt.koordinater)
+        return { lat: data[0].adgangspunkt.koordinater[1], lng: data[0].adgangspunkt.koordinater[0] };
+    }
+  } catch(e) {}
+  return null;
+}
 
-let tasks = [];
-let markers = {};
-let filters = { 'ikke-blaest': true, 'er-blaest': true };
-let selectedTask = null;
-let routeTasks = [];
-let map, markerGroup;
+// ── STATE ──
+let tasks = [], markers = {}, filters = { 'ikke-blaest': true, 'er-blaest': true };
+let selectedTask = null, routeTasks = [], map, markerGroup;
 
-// ═══════════════════════════════════════════
-// PARSE CSV
-// ═══════════════════════════════════════════
-
+// ── CSV ──
 function parseCSV(csv) {
-  const lines = csv.split('\n');
-  if (lines.length < 2) return [];
-  
-  // Parse header
+  const lines = csv.split('\n'); if (lines.length < 2) return [];
   const headers = parseCSVLine(lines[0]).map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
-  
   const result = [];
   for (let i = 1; i < lines.length; i++) {
     if (!lines[i].trim()) continue;
-    const values = parseCSVLine(lines[i]);
-    const row = {};
-    headers.forEach((h, idx) => {
-      row[h] = (values[idx] || '').replace(/^"|"$/g, '').trim();
-    });
+    const vals = parseCSVLine(lines[i]); const row = {};
+    headers.forEach((h, idx) => { row[h] = (vals[idx]||'').replace(/^"|"$/g,'').trim(); });
     result.push(row);
   }
   return result;
 }
-
 function parseCSVLine(line) {
-  const result = [];
-  let current = '';
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') {
-      if (inQuotes && line[i+1] === '"') { current += '"'; i++; }
-      else inQuotes = !inQuotes;
-    } else if (ch === ',' && !inQuotes) {
-      result.push(current); current = '';
-    } else {
-      current += ch;
-    }
+  const r=[]; let c='', q=false;
+  for (let i=0; i<line.length; i++) {
+    const ch=line[i];
+    if (ch==='"') { if (q&&line[i+1]==='"'){c+='"';i++;} else q=!q; }
+    else if (ch===','&&!q) { r.push(c); c=''; }
+    else c+=ch;
   }
-  result.push(current);
-  return result;
+  r.push(c); return r;
 }
 
-// ═══════════════════════════════════════════
-// LOAD DATA
-// ═══════════════════════════════════════════
-
+// ── LOAD ──
 async function loadData() {
   try {
-    const resp = await fetch(CSV_URL);
-    const csv = await resp.text();
-    const rows = parseCSV(csv);
-    
+    const resp = await fetch(CSV_URL); const csv = await resp.text(); const rows = parseCSV(csv);
     tasks = [];
     for (const row of rows) {
-      const sagsnummer = row['sagsnummer'] || row['sagsnr'] || '';
-      const adresse = row['adresse'] || '';
-      const deadlineRaw = row['deadline'] || '';
-      const statusRaw = (row['status'] || '').toLowerCase();
-      
-      if (!sagsnummer && !adresse) continue;
-      
-      // Skip "Er sendt til Tenna"
-      if (statusRaw.includes('tenna')) continue;
-      
-      // Parse deadline (DD/MM/YYYY)
-      let deadline = null;
-      if (deadlineRaw) {
-        const parts = deadlineRaw.split('/');
-        if (parts.length === 3) {
-          deadline = new Date(parts[2], parts[1]-1, parts[0]);
-        }
-      }
-      
-      const status = statusRaw.includes('ikke') || statusRaw === '' ? 'ikke-blaest' : 'er-blaest';
-      
-      tasks.push({
-        id: sagsnummer || 'UNKNOWN',
-        sagsnummer,
-        adresse,
-        deadline,
-        deadlineRaw,
-        status,
-        coords: null
-      });
+      const sag = row['sagsnummer']||row['sagsnr']||'';
+      const adr = row['adresse']||'';
+      const dlRaw = row['deadline']||'';
+      const stRaw = (row['status']||'').toLowerCase();
+      if (!sag && !adr) continue;
+      if (stRaw.includes('tenna')) continue;
+      let dl = null;
+      if (dlRaw) { const p=dlRaw.split('/'); if (p.length===3) dl=new Date(p[2],p[1]-1,p[0]); }
+      const st = stRaw.includes('er bl') ? 'er-blaest' : 'ikke-blaest';
+      tasks.push({ id: sag||`UNK_${tasks.length}`, sagsnummer:sag, adresse:adr, deadline:dl, deadlineRaw:dlRaw, status:st, coords:null });
     }
-    
-    // Geocode all
-    const geocodePromises = tasks.map(async (t) => {
-      if (t.adresse) {
-        t.coords = await geocodeAddress(t.adresse);
-      }
-    });
-    await Promise.all(geocodePromises);
-    
+    await Promise.all(tasks.map(async t => { if (t.adresse) t.coords = await geocodeAddress(t.adresse); }));
     renderAll();
-  } catch(e) {
-    console.error('Failed to load data:', e);
-    // Show demo data
-    loadDemoData();
-  }
+  } catch(e) { console.error('Load failed:', e); loadDemoData(); }
 }
 
 function loadDemoData() {
   tasks = [
-    { id: '1534132', sagsnummer: '1534132', adresse: 'Buevej 17, 5685 Søby Ærø', deadline: new Date(2026,3,1), deadlineRaw: '01/04/2026', status: 'ikke-blaest', coords: { lat: 54.9357, lng: 10.2531 } },
-    { id: '1540244', sagsnummer: '1540244', adresse: 'Reberbanen 14, 5960 Marstal', deadline: new Date(2026,3,9), deadlineRaw: '09/04/2026', status: 'ikke-blaest', coords: { lat: 54.8561, lng: 10.5128 } },
-    { id: '000789M', sagsnummer: '000789M', adresse: 'Odinsvej 16, 7200 Grindsted', deadline: new Date(2026,3,14), deadlineRaw: '14/04/2026', status: 'ikke-blaest', coords: { lat: 55.7587, lng: 8.9253 } },
+    { id:'1534132', sagsnummer:'1534132', adresse:'Buevej 17, 5685 Søby', deadline:new Date(2026,3,1), deadlineRaw:'01/04/2026', status:'ikke-blaest', coords:{lat:54.9357,lng:10.2531} },
+    { id:'1540244', sagsnummer:'1540244', adresse:'Reberbanen 14, 5960 Marstal', deadline:new Date(2026,3,9), deadlineRaw:'09/04/2026', status:'ikke-blaest', coords:{lat:54.8561,lng:10.5128} },
+    { id:'000789M', sagsnummer:'000789M', adresse:'Odinsvej 16, 7200 Grindsted', deadline:new Date(2026,3,14), deadlineRaw:'14/04/2026', status:'ikke-blaest', coords:{lat:55.7587,lng:8.9253} },
   ];
   renderAll();
 }
 
-// ═══════════════════════════════════════════
-// RENDER
-// ═══════════════════════════════════════════
+// ── HELPERS ──
+function daysUntil(d) { if(!d)return Infinity; const t=new Date();t.setHours(0,0,0,0); const x=new Date(d);x.setHours(0,0,0,0); return Math.ceil((x-t)/864e5); }
+function deadlineClass(d) { if(d<0)return'overdue'; if(d<=3)return'soon'; return'ok'; }
+function deadlineLabel(d) { if(d<-1)return`${Math.abs(d)} dage overskredet!`; if(d===-1)return'Overskredet i går!'; if(d===0)return'DEADLINE I DAG!'; if(d===1)return'I morgen!'; return`Om ${d} dage`; }
+function getVisibleTasks() { return tasks.filter(t=>filters[t.status]); }
+function haversine(a,b,c,d) { const R=6371,dL=(c-a)*Math.PI/180,dG=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dG/2)**2; return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)); }
 
-function renderAll() {
-  renderTaskList();
-  renderMarkers();
-  updateStats();
-  checkRouteSuggestion();
-}
+// ── RENDER ──
+function renderAll() { renderAlertBanner(); renderTaskList(); renderMarkers(); updateStats(); checkRouteSuggestion(); }
 
-function daysUntil(date) {
-  if (!date) return Infinity;
-  const today = new Date();
-  today.setHours(0,0,0,0);
-  const d = new Date(date);
-  d.setHours(0,0,0,0);
-  return Math.ceil((d - today) / (1000*60*60*24));
-}
-
-function deadlineClass(days) {
-  if (days < 0) return 'overdue';
-  if (days <= 3) return 'soon';
-  return 'ok';
-}
-
-function deadlineLabel(days) {
-  if (days < 0) return `${Math.abs(days)} dage overskredet`;
-  if (days === 0) return 'I dag!';
-  if (days === 1) return 'I morgen';
-  return `${days} dage`;
-}
-
-function getVisibleTasks() {
-  return tasks.filter(t => filters[t.status]);
+function renderAlertBanner() {
+  const overdue = tasks.filter(t => t.status==='ikke-blaest' && daysUntil(t.deadline)<0);
+  const banner = document.getElementById('alertBanner');
+  const container = document.getElementById('appContainer');
+  if (overdue.length > 0) {
+    banner.classList.add('visible'); container.classList.add('has-alert');
+    const worst = Math.max(...overdue.map(t=>Math.abs(daysUntil(t.deadline))));
+    document.getElementById('alertText').textContent = overdue.length===1
+      ? `1 opgave overskredet med ${worst} dage — kræver handling!`
+      : `${overdue.length} opgaver overskredet med op til ${worst} dage — kræver handling!`;
+    document.getElementById('alertCount').textContent = `${overdue.length} OVERSKREDET`;
+  } else { banner.classList.remove('visible'); container.classList.remove('has-alert'); }
 }
 
 function renderTaskList() {
   const list = document.getElementById('taskList');
   const visible = getVisibleTasks();
-  
-  // Sort by deadline (most urgent first)
-  visible.sort((a,b) => {
-    const da = a.deadline ? a.deadline.getTime() : Infinity;
-    const db = b.deadline ? b.deadline.getTime() : Infinity;
-    return da - db;
-  });
-  
-  if (visible.length === 0) {
-    list.innerHTML = `
-      <div class="empty-state">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/></svg>
-        <p>Ingen opgaver matcher filtrene</p>
-      </div>`;
-    return;
+  visible.sort((a,b) => (a.deadline?a.deadline.getTime():Infinity) - (b.deadline?b.deadline.getTime():Infinity));
+
+  if (!visible.length) {
+    list.innerHTML = '<div class="empty-state"><p>Ingen opgaver matcher filtrene</p></div>'; return;
   }
-  
+
   list.innerHTML = visible.map(t => {
-    const days = daysUntil(t.deadline);
-    const dc = deadlineClass(days);
-    const dl = deadlineLabel(days);
-    const sel = selectedTask === t.id ? 'selected' : '';
-    return `
-      <div class="task-card status-${t.status === 'ikke-blaest' ? 'red' : 'green'} ${sel}" 
-           onclick="selectTask('${t.id}')" data-id="${t.id}">
-        <div class="task-sag">#${t.sagsnummer}</div>
-        <div class="task-addr">${t.adresse}</div>
-        <div class="task-meta">
-          <span class="task-status-badge ${t.status}">${t.status === 'ikke-blaest' ? 'Ikke blæst' : 'Er blæst'}</span>
-          ${t.deadline ? `<span class="task-deadline ${dc}">${t.deadlineRaw}</span>` : ''}
-          ${t.deadline ? `<span class="task-days">${dl}</span>` : ''}
-        </div>
-      </div>`;
+    const days = daysUntil(t.deadline), dc = deadlineClass(days), dl = deadlineLabel(days);
+    const sel = selectedTask===t.id ? 'selected' : '';
+    const isOD = dc==='overdue', isS = dc==='soon';
+    const cc = isOD ? 'overdue-card' : isS ? 'soon-card' : '';
+    const sc = t.status==='ikke-blaest' ? 'red' : 'green';
+    let badge = '';
+    if (isOD) badge = `<span class="overdue-badge">💀 ${dl}</span>`;
+    else if (isS) badge = `<span class="soon-badge">⏰ ${dl}</span>`;
+    else if (t.deadline) badge = `<span class="task-deadline ok">${dl}</span>`;
+    const gf = t.adresse && !t.coords ? '<div class="geocode-fail">⚠ Adresse ikke fundet på kort</div>' : '';
+    return `<div class="task-card status-${sc} ${cc} ${sel}" onclick="selectTask('${t.id}')">
+      <div class="task-sag">#${t.sagsnummer}</div>
+      <div class="task-addr">${t.adresse}</div>
+      <div class="task-meta">
+        <span class="task-status-badge ${t.status}">${t.status==='ikke-blaest'?'Ikke blæst':'Er blæst'}</span>
+        ${t.deadline && !isOD ? `<span class="task-deadline ok">${t.deadlineRaw}</span>` : ''}
+        ${isOD ? `<span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sk-red);">${t.deadlineRaw}</span>` : ''}
+        ${badge}
+      </div>${gf}</div>`;
   }).join('');
 }
 
 function renderMarkers() {
-  if (markerGroup) markerGroup.clearLayers();
-  
-  const visible = getVisibleTasks();
-  const bounds = [];
-  
+  if (markerGroup) markerGroup.clearLayers(); markers = {};
+  const visible = getVisibleTasks(), bounds = [];
   visible.forEach(t => {
     if (!t.coords) return;
-    
-    const days = daysUntil(t.deadline);
-    const isUrgent = days <= 3;
-    const color = t.status === 'ikke-blaest' ? '#9B1B1B' : '#1B8C3A';
-    const size = isUrgent ? 14 : 10;
-    const pulse = isUrgent && t.status === 'ikke-blaest' ? 
-      `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:${size+10}px;height:${size+10}px;border-radius:50%;border:2px solid ${color};opacity:0.5;animation:pulse 2s infinite;"></div>` : '';
-    
-    const icon = L.divIcon({
-      className: 'custom-marker',
-      html: `<div style="position:relative;width:${size}px;height:${size}px;">
-        ${pulse}
-        <div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);position:relative;z-index:2;"></div>
-      </div>`,
-      iconSize: [size+10, size+10],
-      iconAnchor: [(size+10)/2, (size+10)/2]
-    });
-    
-    const marker = L.marker([t.coords.lat, t.coords.lng], { icon })
-      .addTo(markerGroup)
-      .bindPopup(`
-        <div class="popup-sag">#${t.sagsnummer}</div>
-        <div class="popup-addr">${t.adresse}</div>
-        <div class="popup-deadline">Deadline: ${t.deadlineRaw || 'Ingen'}</div>
-        <div class="popup-status" style="color:${color}">${t.status === 'ikke-blaest' ? '● Ikke blæst' : '● Er blæst'}</div>
-      `);
-    
-    marker.on('click', () => selectTask(t.id));
-    markers[t.id] = marker;
-    bounds.push([t.coords.lat, t.coords.lng]);
+    const days = daysUntil(t.deadline), isOD = days<0, isS = days>=0&&days<=3;
+    let color, size, html;
+    if (isOD && t.status==='ikke-blaest') {
+      color='#9B1B1B'; size=20;
+      html=`<div style="position:relative;width:${size}px;height:${size}px;">
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;border-radius:50%;background:rgba(155,27,27,0.2);animation:pulse 1.5s infinite;"></div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;background:rgba(155,27,27,0.3);animation:pulse 1.5s .3s infinite;"></div>
+        <div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 2px 10px rgba(155,27,27,0.5);position:relative;z-index:2;display:flex;align-items:center;justify-content:center;font-size:11px;">💀</div></div>`;
+    } else if (isS && t.status==='ikke-blaest') {
+      color='#D4860A'; size=16;
+      html=`<div style="position:relative;width:${size}px;height:${size}px;">
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;border:2px solid ${color};opacity:.5;animation:pulse 2s infinite;"></div>
+        <div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 2px 8px rgba(212,134,10,0.4);position:relative;z-index:2;"></div></div>`;
+    } else {
+      color = t.status==='ikke-blaest'?'#9B1B1B':'#1B8C3A'; size=12;
+      html=`<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.3);"></div>`;
+    }
+    const icon = L.divIcon({ className:'custom-marker', html, iconSize:[44,44], iconAnchor:[22,22] });
+    let popExtra = '';
+    if (isOD) popExtra = `<div class="popup-overdue">💀 ${Math.abs(days)} dage overskredet!</div>`;
+    else if (isS) popExtra = `<div style="background:var(--amber);color:white;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:700;margin-top:6px;display:inline-block;">⏰ ${deadlineLabel(days)}</div>`;
+    const marker = L.marker([t.coords.lat,t.coords.lng],{icon}).addTo(markerGroup)
+      .bindPopup(`<div class="popup-sag">#${t.sagsnummer}</div><div class="popup-addr">${t.adresse}</div><div class="popup-deadline">Deadline: ${t.deadlineRaw||'Ingen'}</div><div class="popup-status" style="color:${t.status==='ikke-blaest'?'#9B1B1B':'#1B8C3A'}">${t.status==='ikke-blaest'?'● Ikke blæst':'● Er blæst'}</div>${popExtra}`);
+    marker.on('click', ()=>selectTask(t.id));
+    markers[t.id]=marker; bounds.push([t.coords.lat,t.coords.lng]);
   });
-  
-  if (bounds.length > 0) {
-    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 10 });
-  }
+  if (bounds.length) map.fitBounds(bounds, {padding:[50,50], maxZoom:10});
 }
 
 function updateStats() {
-  const visible = getVisibleTasks();
-  const overdue = visible.filter(t => daysUntil(t.deadline) < 0).length;
-  const urgent = visible.filter(t => { const d = daysUntil(t.deadline); return d >= 0 && d <= 3; }).length;
-  const total = visible.length;
-  
-  document.getElementById('urgentCount').textContent = 
-    overdue > 0 ? `${overdue} overskredet!` : 
-    urgent > 0 ? `${urgent} haster` : 
-    `${total} opgaver`;
-  
-  const stats = document.getElementById('statsRow');
-  stats.innerHTML = `
-    <span class="stat-chip">Total: ${tasks.filter(t => filters[t.status]).length}</span>
-    <span class="stat-chip" style="color:var(--sk-red)">Ikke blæst: ${tasks.filter(t => t.status === 'ikke-blaest').length}</span>
-    <span class="stat-chip" style="color:var(--green)">Er blæst: ${tasks.filter(t => t.status === 'er-blaest').length}</span>
-  `;
+  const overdue = tasks.filter(t=>t.status==='ikke-blaest'&&daysUntil(t.deadline)<0).length;
+  const urgent = tasks.filter(t=>{const d=daysUntil(t.deadline);return t.status==='ikke-blaest'&&d>=0&&d<=3;}).length;
+  const el = document.getElementById('urgentCount');
+  if (overdue) { el.textContent=`💀 ${overdue} overskredet!`; el.style.background='var(--sk-red)'; el.style.color='white'; }
+  else if (urgent) { el.textContent=`⏰ ${urgent} haster`; el.style.background='rgba(212,134,10,.15)'; el.style.color='var(--amber)'; }
+  else { el.textContent=`${getVisibleTasks().length} opgaver`; el.style.background=''; el.style.color=''; }
+  document.getElementById('statsRow').innerHTML = `
+    <span class="stat-chip">Total: ${tasks.length}</span>
+    <span class="stat-chip" style="color:var(--sk-red)">Ikke blæst: ${tasks.filter(t=>t.status==='ikke-blaest').length}</span>
+    <span class="stat-chip" style="color:var(--green)">Er blæst: ${tasks.filter(t=>t.status==='er-blaest').length}</span>`;
 }
 
-// ═══════════════════════════════════════════
-// INTERACTIONS
-// ═══════════════════════════════════════════
-
+// ── INTERACTIONS ──
 function toggleFilter(btn) {
-  const filter = btn.dataset.filter;
-  filters[filter] = !filters[filter];
-  
-  if (filter === 'ikke-blaest') {
-    btn.classList.toggle('active-red', filters[filter]);
-  } else {
-    btn.classList.toggle('active-green', filters[filter]);
-  }
-  
-  renderAll();
+  const f=btn.dataset.filter; filters[f]=!filters[f];
+  btn.classList.toggle(f==='ikke-blaest'?'active-red':'active-green', filters[f]); renderAll();
 }
-
 function selectTask(id) {
-  selectedTask = selectedTask === id ? null : id;
-  renderTaskList();
-  
+  selectedTask = selectedTask===id ? null : id; renderTaskList();
   if (selectedTask && markers[selectedTask]) {
-    const task = tasks.find(t => t.id === id);
-    if (task && task.coords) {
-      map.setView([task.coords.lat, task.coords.lng], 12, { animate: true });
-      markers[selectedTask].openPopup();
-    }
+    const t=tasks.find(x=>x.id===id);
+    if (t&&t.coords) { map.setView([t.coords.lat,t.coords.lng],12,{animate:true}); markers[selectedTask].openPopup(); }
   }
 }
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function showInfo() { document.getElementById('infoModal').classList.add('visible'); }
+function closeInfo() { document.getElementById('infoModal').classList.remove('visible'); }
 
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-}
-
-// ═══════════════════════════════════════════
-// ROUTE SUGGESTION
-// ═══════════════════════════════════════════
-
-function haversine(lat1, lng1, lat2, lng2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
+// ── ROUTE ──
 function checkRouteSuggestion() {
-  // Find clusters of "ikke-blaest" tasks within 50km
-  const pending = tasks.filter(t => t.status === 'ikke-blaest' && t.coords);
-  if (pending.length < 2) { closeRoute(); return; }
-  
-  const clusters = [];
-  const used = new Set();
-  
-  for (let i = 0; i < pending.length; i++) {
-    if (used.has(i)) continue;
-    const cluster = [pending[i]];
-    used.add(i);
-    
-    for (let j = i + 1; j < pending.length; j++) {
+  const pending = tasks.filter(t=>t.status==='ikke-blaest'&&t.coords);
+  if (pending.length<2) { closeRoute(); return; }
+  const clusters=[], used=new Set();
+  for (let i=0;i<pending.length;i++) {
+    if (used.has(i)) continue; const cl=[pending[i]]; used.add(i);
+    for (let j=i+1;j<pending.length;j++) {
       if (used.has(j)) continue;
-      const dist = haversine(pending[i].coords.lat, pending[i].coords.lng, pending[j].coords.lat, pending[j].coords.lng);
-      if (dist < 50) {
-        cluster.push(pending[j]);
-        used.add(j);
-      }
+      if (cl.some(c=>haversine(c.coords.lat,c.coords.lng,pending[j].coords.lat,pending[j].coords.lng)<50))
+        { cl.push(pending[j]); used.add(j); }
     }
-    if (cluster.length >= 2) clusters.push(cluster);
+    if (cl.length>=2) clusters.push(cl);
   }
-  
-  if (clusters.length > 0) {
-    // Pick largest cluster
-    const best = clusters.sort((a,b) => b.length - a.length)[0];
-    // Sort by deadline
-    best.sort((a,b) => (a.deadline||Infinity) - (b.deadline||Infinity));
+  if (clusters.length) {
+    const best=clusters.sort((a,b)=>b.length-a.length)[0];
+    best.sort((a,b)=>(a.deadline?a.deadline.getTime():Infinity)-(b.deadline?b.deadline.getTime():Infinity));
     showRoute(best);
-  } else {
-    closeRoute();
-  }
+  } else closeRoute();
 }
 
-function showRoute(taskCluster) {
-  routeTasks = taskCluster;
-  const panel = document.getElementById('routePanel');
-  const stops = document.getElementById('routeStops');
-  
-  stops.innerHTML = taskCluster.map((t, i) => {
-    const days = daysUntil(t.deadline);
-    return `<div class="route-stop">
-      <span class="route-stop-num">${i+1}</span>
-      <span>${t.adresse} <span style="color:var(--text-muted);font-size:11px;">(${deadlineLabel(days)})</span></span>
-    </div>`;
-  }).join('');
-  
-  panel.classList.add('visible');
-  
-  // Draw line on map
-  if (window.routeLine) map.removeLayer(window.routeLine);
-  const coords = taskCluster.filter(t => t.coords).map(t => [t.coords.lat, t.coords.lng]);
-  if (coords.length >= 2) {
-    window.routeLine = L.polyline(coords, {
-      color: '#9B1B1B', weight: 3, opacity: 0.6,
-      dashArray: '8, 8'
-    }).addTo(map);
-  }
-}
-
-function closeRoute() {
-  document.getElementById('routePanel').classList.remove('visible');
-  if (window.routeLine) { map.removeLayer(window.routeLine); window.routeLine = null; }
-}
-
-function openInMaps() {
-  if (routeTasks.length === 0) return;
-  const waypoints = routeTasks.filter(t => t.coords).map(t => `${t.coords.lat},${t.coords.lng}`);
-  if (waypoints.length === 0) return;
-  
-  const origin = waypoints[0];
-  const dest = waypoints[waypoints.length - 1];
-  const middle = waypoints.slice(1, -1).join('|');
-  
-  let url = `https://www.google.com/maps/dir/${waypoints.join('/')}`;
-  window.open(url, '_blank');
-}
-
-// ═══════════════════════════════════════════
-// INIT MAP
-// ═══════════════════════════════════════════
-
-function initMap() {
-  map = L.map('map', {
-    center: [56.0, 10.0],
-    zoom: 7,
-    zoomControl: true
+function showRoute(tc) {
+  routeTasks=tc;
+  const dists=[];
+  for (let i=1;i<tc.length;i++) dists.push(haversine(tc[i-1].coords.lat,tc[i-1].coords.lng,tc[i].coords.lat,tc[i].coords.lng));
+  const totalKm=dists.reduce((a,b)=>a+b,0);
+  document.getElementById('routeExplanation').innerHTML =
+    `Disse <strong>${tc.length} opgaver</strong> ligger inden for <strong>50 km</strong> af hinanden (ca. ${totalKm.toFixed(0)} km total). Sorteret efter deadline — mest presserende først.`;
+  let h='';
+  tc.forEach((t,i) => {
+    const d=daysUntil(t.deadline), dc=deadlineClass(d), dl=deadlineLabel(d);
+    const ico = dc==='overdue'?'💀':dc==='soon'?'⏰':'📍';
+    h+=`<div class="route-stop"><span class="route-stop-num">${i+1}</span><div class="route-stop-info"><div class="route-stop-addr">${t.adresse}</div><div class="route-stop-meta">${ico} ${dl} · ${t.deadlineRaw}</div></div></div>`;
+    if (i<tc.length-1) h+=`<div class="route-stop-dist">↓ ${dists[i].toFixed(1)} km</div>`;
   });
-  
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
-    maxZoom: 19
-  }).addTo(map);
-  
-  markerGroup = L.layerGroup().addTo(map);
-  
-  // Add pulse animation
-  const style = document.createElement('style');
-  style.textContent = `@keyframes pulse { 0% { transform: translate(-50%,-50%) scale(1); opacity: 0.5; } 100% { transform: translate(-50%,-50%) scale(2); opacity: 0; } }`;
-  document.head.appendChild(style);
+  document.getElementById('routeStops').innerHTML=h;
+  document.getElementById('routePanel').classList.add('visible');
+  if (window.routeLine) map.removeLayer(window.routeLine);
+  const coords=tc.filter(t=>t.coords).map(t=>[t.coords.lat,t.coords.lng]);
+  if (coords.length>=2) window.routeLine=L.polyline(coords,{color:'#9B1B1B',weight:3,opacity:.6,dashArray:'8, 8'}).addTo(map);
+}
+function closeRoute() { document.getElementById('routePanel').classList.remove('visible'); if(window.routeLine){map.removeLayer(window.routeLine);window.routeLine=null;} }
+function openInMaps() {
+  if(!routeTasks.length)return;
+  const wp=routeTasks.filter(t=>t.coords).map(t=>`${t.coords.lat},${t.coords.lng}`);
+  if(wp.length) window.open(`https://www.google.com/maps/dir/${wp.join('/')}`,'_blank');
 }
 
-// ═══════════════════════════════════════════
-// BOOT
-// ═══════════════════════════════════════════
-
-document.addEventListener('DOMContentLoaded', () => {
-  initMap();
-  loadData();
-  
-  // Auto-refresh every 2 min
-  setInterval(loadData, 120000);
-});
+// ── INIT ──
+function initMap() {
+  map=L.map('map',{center:[56,10],zoom:7,zoomControl:true});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:19}).addTo(map);
+  markerGroup=L.layerGroup().addTo(map);
+}
+document.addEventListener('DOMContentLoaded',()=>{ initMap(); loadData(); setInterval(loadData,120000); });
 </script>
 </body>
 </html>
