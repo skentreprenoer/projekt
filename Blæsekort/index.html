@@ -601,6 +601,7 @@ body {
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <script>
 const SHEET_ID = '1nAfna80c5NbT5mNhsXey84wu--DZVYct7NFRSRvTZr4';
 const GID = '321811896';
@@ -1117,6 +1118,7 @@ function renderSavedRoutes() {
       <div class="saved-route-actions">
         <button class="sr-btn-show" onclick="showSavedRoute('${r.id}')">Vis på kort</button>
         <button class="sr-btn-maps" onclick="openSavedRouteInMaps('${r.id}')">Google Maps</button>
+        <button class="sr-btn-show" onclick="exportRoutePDF('${r.id}')" style="flex:0;padding:7px 10px;" title="Eksportér PDF">📄</button>
         <button class="sr-btn-delete" onclick="deleteSavedRoute('${r.id}')">✕</button>
       </div>
     </div>`;
@@ -1219,6 +1221,210 @@ function openInMaps() {
   if(!routeTasks.length)return;
   const wp=routeTasks.filter(t=>t.coords).map(t=>`${t.coords.lat},${t.coords.lng}`);
   if(wp.length) window.open(`https://www.google.com/maps/dir/${wp.join('/')}`,'_blank');
+}
+
+// ── PDF EXPORT ──
+function exportRoutePDF(routeId) {
+  const r = savedRoutes.find(x => x.id === routeId);
+  if (!r) return;
+  
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = 210, H = 297;
+  const ML = 20, MR = 20, MT = 20;
+  let y = MT;
+  
+  // Colors
+  const RED = [155, 27, 27];
+  const CHARCOAL = [45, 45, 45];
+  const GRAY = [107, 101, 96];
+  const LIGHT = [242, 238, 234];
+  const GREEN = [27, 140, 58];
+  const AMBER = [212, 134, 10];
+  
+  // ── Header bar ──
+  doc.setFillColor(...CHARCOAL);
+  doc.rect(0, 0, W, 22, 'F');
+  doc.setFillColor(...RED);
+  doc.roundedRect(ML, 5, 12, 12, 2, 2, 'F');
+  // SK icon lines
+  doc.setDrawColor(255, 255, 255);
+  doc.setLineWidth(0.8);
+  doc.line(ML+2, 8, ML+10, 8);
+  doc.line(ML+2, 10.5, ML+7, 10.5);
+  doc.line(ML+2, 13, ML+8.5, 13);
+  
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text(r.name, ML + 16, 13);
+  
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text('SØREN KNUDSEN A/S', W - MR, 13, { align: 'right' });
+  
+  y = 32;
+  
+  // ── Route summary ──
+  let totalDist = 0;
+  const dists = [];
+  for (let i = 1; i < r.stops.length; i++) {
+    const d = haversine(r.stops[i-1].lat, r.stops[i-1].lng, r.stops[i].lat, r.stops[i].lng);
+    dists.push(d);
+    totalDist += d;
+  }
+  
+  doc.setFillColor(...LIGHT);
+  doc.roundedRect(ML, y, W - ML - MR, 16, 3, 3, 'F');
+  doc.setTextColor(...CHARCOAL);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`${r.stops.length} stop`, ML + 6, y + 7);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`·  ca. ${totalDist.toFixed(1)} km total  ·  Oprettet ${r.created}`, ML + 24, y + 7);
+  
+  doc.setFontSize(8);
+  doc.setTextColor(...GRAY);
+  doc.text('Udskrevet: ' + new Date().toLocaleDateString('da-DK') + ' ' + new Date().toLocaleTimeString('da-DK', {hour:'2-digit',minute:'2-digit'}), ML + 6, y + 13);
+  
+  y += 24;
+  
+  // ── Stops ──
+  r.stops.forEach((s, i) => {
+    // Check page break
+    if (y > H - 50) {
+      doc.addPage();
+      y = MT;
+    }
+    
+    const task = tasks.find(t => t.id === s.id);
+    const days = task ? daysUntil(task.deadline) : null;
+    const dc = days !== null ? deadlineClass(days) : 'ok';
+    
+    // Stop number circle
+    doc.setFillColor(...RED);
+    doc.circle(ML + 5, y + 5, 4, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${i + 1}`, ML + 5, y + 6.5, { align: 'center' });
+    
+    // Address
+    doc.setTextColor(...CHARCOAL);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text(s.adresse, ML + 14, y + 4);
+    
+    // Sagsnr + deadline
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...GRAY);
+    let metaText = `Sagsnr: ${s.sagsnummer || '-'}`;
+    if (s.deadlineRaw) metaText += `  ·  Deadline: ${s.deadlineRaw}`;
+    doc.text(metaText, ML + 14, y + 9);
+    
+    // Status indicator
+    if (dc === 'overdue') {
+      doc.setTextColor(...RED);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`OVERSKREDET (${Math.abs(days)} dage)`, ML + 14, y + 14);
+    } else if (dc === 'soon') {
+      doc.setTextColor(...AMBER);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`HASTER (${deadlineLabel(days)})`, ML + 14, y + 14);
+    }
+    
+    // Status badge
+    if (task) {
+      const statusText = task.status === 'ikke-blaest' ? 'Ikke blæst' : 'Er blæst';
+      const statusColor = task.status === 'ikke-blaest' ? RED : GREEN;
+      const stX = W - MR - 22;
+      doc.setFillColor(...statusColor);
+      doc.roundedRect(stX, y, 22, 6, 1.5, 1.5, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(6);
+      doc.setFont('helvetica', 'bold');
+      doc.text(statusText, stX + 11, y + 4.2, { align: 'center' });
+    }
+    
+    y += (dc === 'overdue' || dc === 'soon') ? 19 : 15;
+    
+    // Distance to next stop
+    if (i < r.stops.length - 1) {
+      // Dashed line
+      doc.setDrawColor(...GRAY);
+      doc.setLineWidth(0.3);
+      const dashY = y - 2;
+      for (let dx = ML + 5; dx < ML + 5; dx += 3) {
+        doc.line(dx, dashY, dx + 1.5, dashY);
+      }
+      // Vertical connector dots
+      doc.setFillColor(200, 195, 190);
+      doc.circle(ML + 5, y - 3, 0.6, 'F');
+      doc.circle(ML + 5, y - 1, 0.6, 'F');
+      doc.circle(ML + 5, y + 1, 0.6, 'F');
+      
+      // Distance label
+      doc.setTextColor(...GRAY);
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`↓ ${dists[i].toFixed(1)} km`, ML + 14, y);
+      
+      y += 6;
+    }
+  });
+  
+  // ── Google Maps link ──
+  y += 8;
+  if (y > H - 30) { doc.addPage(); y = MT; }
+  
+  doc.setFillColor(...RED);
+  doc.roundedRect(ML, y, W - ML - MR, 12, 2, 2, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  const mapsUrl = `google.com/maps/dir/${r.stops.map(s=>`${s.lat},${s.lng}`).join('/')}`;
+  doc.text('Google Maps rute: ' + mapsUrl, ML + 4, y + 7.5);
+  // Make it clickable
+  doc.link(ML, y, W - ML - MR, 12, { url: `https://www.${mapsUrl}` });
+  
+  y += 20;
+  
+  // ── Notes section ──
+  if (y > H - 60) { doc.addPage(); y = MT; }
+  
+  doc.setTextColor(...CHARCOAL);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Noter', ML, y);
+  y += 4;
+  
+  doc.setDrawColor(200, 195, 190);
+  doc.setLineWidth(0.3);
+  for (let line = 0; line < 8; line++) {
+    y += 8;
+    if (y > H - 15) break;
+    doc.line(ML, y, W - MR, y);
+  }
+  
+  // ── Footer ──
+  const pages = doc.getNumberOfPages();
+  for (let p = 1; p <= pages; p++) {
+    doc.setPage(p);
+    doc.setFontSize(7);
+    doc.setTextColor(...GRAY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Søren Knudsen A/S — Minuba Blæst`, ML, H - 8);
+    doc.text(`Side ${p}/${pages}`, W - MR, H - 8, { align: 'right' });
+    // Red bottom line
+    doc.setDrawColor(...RED);
+    doc.setLineWidth(0.5);
+    doc.line(ML, H - 12, W - MR, H - 12);
+  }
+  
+  // Save
+  const fileName = r.name.replace(/[^a-zA-Z0-9æøåÆØÅ\s-]/g, '').replace(/\s+/g, '_');
+  doc.save(`Rute_${fileName}.pdf`);
 }
 
 // ── INIT ──
