@@ -329,6 +329,144 @@ body {
 .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
 .empty-state svg { margin-bottom: 12px; opacity: 0.4; }
 .empty-state p { font-size: 14px; }
+
+/* ── SIDEBAR TABS ── */
+.sidebar-tabs {
+  display: flex; border-bottom: 1px solid var(--border);
+}
+.sidebar-tab {
+  flex: 1; padding: 10px 12px; text-align: center;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); position: relative;
+  transition: color 0.2s;
+}
+.sidebar-tab:hover { color: var(--text); }
+.sidebar-tab.active { color: var(--sk-red); }
+.sidebar-tab.active::after {
+  content: ''; position: absolute; bottom: -1px; left: 12px; right: 12px;
+  height: 2px; background: var(--sk-red); border-radius: 1px;
+}
+.sidebar-tab .tab-count {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  background: var(--bg); padding: 1px 6px; border-radius: 8px; margin-left: 4px;
+}
+.sidebar-tab.active .tab-count { background: rgba(155,27,27,0.1); color: var(--sk-red); }
+.tab-content { display: none; flex: 1; overflow-y: auto; flex-direction: column; }
+.tab-content.active { display: flex; }
+
+/* ── ROUTE BUILDER ── */
+.route-builder-bar {
+  display: none; align-items: center; gap: 8px;
+  padding: 10px 16px; background: rgba(155,27,27,0.06);
+  border-bottom: 1px solid rgba(155,27,27,0.15);
+}
+.route-builder-bar.active { display: flex; }
+.route-builder-bar .rb-label {
+  font-size: 12px; font-weight: 600; color: var(--sk-red);
+  display: flex; align-items: center; gap: 4px;
+}
+.route-builder-bar .rb-count {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  background: var(--sk-red); color: white; padding: 1px 8px; border-radius: 10px;
+}
+.route-builder-bar .rb-cancel {
+  margin-left: auto; font-family: 'DM Sans', sans-serif;
+  font-size: 11px; background: none; border: 1px solid var(--border);
+  padding: 4px 10px; border-radius: 6px; cursor: pointer; color: var(--text-muted);
+}
+.route-builder-bar .rb-cancel:hover { border-color: var(--sk-red); color: var(--sk-red); }
+
+.rb-new-btn {
+  margin: 12px 16px; padding: 10px 16px;
+  background: var(--sk-red); color: white; border: none; border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background 0.2s;
+}
+.rb-new-btn:hover { background: var(--sk-red-light); }
+
+/* ── SAVED ROUTES LIST ── */
+.saved-routes { padding: 8px 12px; flex: 1; overflow-y: auto; }
+.saved-route-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 8px;
+  position: relative; overflow: hidden;
+  animation: fadeInUp 0.3s ease forwards;
+}
+.saved-route-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px; background: var(--sk-red);
+}
+.saved-route-name {
+  font-size: 14px; font-weight: 700; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 6px;
+}
+.saved-route-meta {
+  font-size: 12px; color: var(--text-muted); margin-bottom: 8px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.saved-route-stops {
+  font-size: 12px; line-height: 1.7; margin-bottom: 10px;
+}
+.saved-route-stop {
+  display: flex; align-items: center; gap: 6px; padding: 1px 0;
+}
+.saved-route-stop-num {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--sk-red); color: white; font-size: 9px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.saved-route-actions { display: flex; gap: 6px; }
+.saved-route-actions button {
+  flex: 1; padding: 7px 12px; border-radius: 6px;
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; border: none;
+}
+.sr-btn-maps { background: var(--sk-red); color: white; }
+.sr-btn-maps:hover { background: var(--sk-red-light); }
+.sr-btn-show { background: var(--bg); color: var(--text); border: 1px solid var(--border) !important; }
+.sr-btn-show:hover { border-color: var(--sk-red) !important; color: var(--sk-red); }
+.sr-btn-delete { background: none; color: var(--text-muted); border: 1px solid var(--border) !important; flex: 0; padding: 7px 10px; }
+.sr-btn-delete:hover { color: var(--sk-red); border-color: var(--sk-red) !important; }
+.no-routes { text-align: center; padding: 30px 20px; color: var(--text-muted); font-size: 13px; }
+
+/* ── ROUTE BUILDER SAVE MODAL ── */
+.rb-save-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 2000;
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.rb-save-overlay.visible { display: flex; }
+.rb-save-modal {
+  background: var(--bg-card); border-radius: var(--radius); padding: 24px;
+  max-width: 400px; width: 100%; box-shadow: var(--shadow-lg); position: relative;
+}
+.rb-save-modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+.rb-save-modal input {
+  width: 100%; padding: 10px 14px; border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif;
+  font-size: 14px; margin-bottom: 12px; outline: none;
+  transition: border-color 0.2s;
+}
+.rb-save-modal input:focus { border-color: var(--sk-red); }
+.rb-save-modal .rb-save-stops { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.6; }
+.rb-save-modal .rb-modal-actions { display: flex; gap: 8px; }
+.rb-save-modal .rb-modal-actions button {
+  flex: 1; padding: 10px; border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.rb-btn-confirm { background: var(--sk-red); color: white; border: none; }
+.rb-btn-confirm:hover { background: var(--sk-red-light); }
+.rb-btn-cancel-modal { background: none; border: 1px solid var(--border); color: var(--text-muted); }
+
+/* Task card in build mode */
+.task-card.in-route { border-color: var(--sk-red); background: rgba(155,27,27,0.04); }
+.task-card .route-order {
+  position: absolute; top: 8px; right: 8px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--sk-red); color: white; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
 </style>
 </head>
 <body>
@@ -357,7 +495,7 @@ body {
     <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
     <div class="sidebar-header">
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div style="font-size:15px;font-weight:700;">Opgaver</div>
+        <div style="font-size:15px;font-weight:700;">Minuba Blæst</div>
         <div class="stat-chip urgent" id="urgentCount"></div>
       </div>
       <div class="filter-row">
@@ -370,7 +508,33 @@ body {
       </div>
       <div class="stats-row" id="statsRow"></div>
     </div>
-    <div class="task-list" id="taskList"></div>
+    
+    <!-- Tabs -->
+    <div class="sidebar-tabs">
+      <button class="sidebar-tab active" onclick="switchTab('tasks')" id="tabTasks">Opgaver</button>
+      <button class="sidebar-tab" onclick="switchTab('routes')" id="tabRoutes">Mine Ruter <span class="tab-count" id="routeTabCount">0</span></button>
+    </div>
+    
+    <!-- Route builder bar (shown when building) -->
+    <div class="route-builder-bar" id="rbBar">
+      <div class="rb-label">🛣️ Byg rute</div>
+      <div class="rb-count" id="rbCount">0 stop</div>
+      <button class="rb-cancel" onclick="cancelRouteBuild()">Annuller</button>
+    </div>
+    
+    <!-- Tab: Tasks -->
+    <div class="tab-content active" id="tabContentTasks">
+      <div class="task-list" id="taskList"></div>
+    </div>
+    
+    <!-- Tab: Routes -->
+    <div class="tab-content" id="tabContentRoutes">
+      <button class="rb-new-btn" onclick="startRouteBuild()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Opret ny rute
+      </button>
+      <div class="saved-routes" id="savedRoutesList"></div>
+    </div>
   </div>
 
   <div class="map-container">
@@ -420,6 +584,19 @@ body {
     <p>Hvis en adresse ikke kan findes, vises opgaven i listen men uden prik på kortet.</p>
     <h3>Opdatering</h3>
     <p>Data hentes live fra Google Sheet og opdateres hvert 2. minut.</p>
+  </div>
+</div>
+
+<!-- Route save modal -->
+<div class="rb-save-overlay" id="rbSaveModal" onclick="if(event.target===this)closeRbSave()">
+  <div class="rb-save-modal">
+    <h3>Gem rute</h3>
+    <input type="text" id="rbRouteName" placeholder="Navngiv ruten, fx 'Ærø tirsdag'" autofocus />
+    <div class="rb-save-stops" id="rbSaveStops"></div>
+    <div class="rb-modal-actions">
+      <button class="rb-btn-cancel-modal" onclick="closeRbSave()">Annuller</button>
+      <button class="rb-btn-confirm" onclick="confirmSaveRoute()">Gem rute</button>
+    </div>
   </div>
 </div>
 
@@ -709,7 +886,17 @@ function renderTaskList() {
     else if (isS) badge = `<span class="soon-badge">⏰ ${dl}</span>`;
     else if (t.deadline) badge = `<span class="task-deadline ok">${dl}</span>`;
     const gf = t.adresse && !t.coords ? '<div class="geocode-fail">⚠ Adresse ikke fundet på kort</div>' : '';
-    return `<div class="task-card status-${sc} ${cc} ${sel}" onclick="selectTask('${t.id}')">
+    
+    // Build mode: show route order number, highlight selected
+    const buildIdx = buildMode ? buildStops.findIndex(s => s.id === t.id) : -1;
+    const inRoute = buildIdx >= 0 ? 'in-route' : '';
+    const orderBadge = buildIdx >= 0 ? `<div class="route-order">${buildIdx + 1}</div>` : '';
+    const noCoords = buildMode && !t.coords ? ' style="opacity:0.4;pointer-events:none;"' : '';
+    
+    const clickAction = buildMode ? `toggleTaskInRoute('${t.id}')` : `selectTask('${t.id}')`;
+    
+    return `<div class="task-card status-${sc} ${cc} ${sel} ${inRoute}" onclick="${clickAction}"${noCoords}>
+      ${orderBadge}
       <div class="task-sag">#${t.sagsnummer}</div>
       <div class="task-addr">${t.adresse}</div>
       <div class="task-meta">
@@ -719,6 +906,14 @@ function renderTaskList() {
         ${badge}
       </div>${gf}</div>`;
   }).join('');
+  
+  // Show save button at bottom when in build mode with 2+ stops
+  if (buildMode && buildStops.length >= 2) {
+    list.innerHTML += `<div style="padding:8px 4px;"><button class="rb-new-btn" onclick="openSaveRouteModal()" style="margin:0;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+      Gem rute (${buildStops.length} stop)
+    </button></div>`;
+  }
 }
 
 function renderMarkers() {
@@ -760,7 +955,7 @@ function renderMarkers() {
     else if (isS) popExtra = `<div style="background:var(--amber);color:white;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:700;margin-top:6px;display:inline-block;">⏰ ${deadlineLabel(days)}</div>`;
     const marker = L.marker([t.coords.lat,t.coords.lng],{icon}).addTo(markerGroup)
       .bindPopup(`<div class="popup-sag">#${t.sagsnummer}</div><div class="popup-addr">${t.adresse}</div><div class="popup-deadline">Deadline: ${t.deadlineRaw||'Ingen'}</div><div class="popup-status" style="color:${t.status==='ikke-blaest'?'#9B1B1B':'#1B8C3A'}">${t.status==='ikke-blaest'?'● Ikke blæst':'● Er blæst'}</div>${popExtra}`);
-    marker.on('click', ()=>selectTask(t.id));
+    marker.on('click', ()=>{ if(buildMode) toggleTaskInRoute(t.id); else selectTask(t.id); });
     markers[t.id]=marker; bounds.push([t.coords.lat,t.coords.lng]);
   });
   if (bounds.length) map.fitBounds(bounds, {padding:[50,50], maxZoom:10});
@@ -794,6 +989,165 @@ function selectTask(id) {
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 function showInfo() { document.getElementById('infoModal').classList.add('visible'); }
 function closeInfo() { document.getElementById('infoModal').classList.remove('visible'); }
+
+// ── TABS ──
+let activeTab = 'tasks';
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('tabTasks').classList.toggle('active', tab==='tasks');
+  document.getElementById('tabRoutes').classList.toggle('active', tab==='routes');
+  document.getElementById('tabContentTasks').classList.toggle('active', tab==='tasks');
+  document.getElementById('tabContentRoutes').classList.toggle('active', tab==='routes');
+  if (tab === 'routes') renderSavedRoutes();
+}
+
+// ── ROUTE BUILDER ──
+let buildMode = false;
+let buildStops = []; // array of task objects
+let savedRoutes = JSON.parse(localStorage.getItem('sk_saved_routes') || '[]');
+let activeRouteLineCustom = null;
+
+function startRouteBuild() {
+  buildMode = true;
+  buildStops = [];
+  switchTab('tasks');
+  document.getElementById('rbBar').classList.add('active');
+  updateBuildBar();
+  renderTaskList(); // re-render to show clickable state
+  renderMarkers();
+}
+
+function cancelRouteBuild() {
+  buildMode = false;
+  buildStops = [];
+  document.getElementById('rbBar').classList.remove('active');
+  if (activeRouteLineCustom) { map.removeLayer(activeRouteLineCustom); activeRouteLineCustom = null; }
+  renderTaskList();
+  renderMarkers();
+}
+
+function toggleTaskInRoute(taskId) {
+  const idx = buildStops.findIndex(s => s.id === taskId);
+  if (idx >= 0) {
+    buildStops.splice(idx, 1);
+  } else {
+    const t = tasks.find(x => x.id === taskId);
+    if (t && t.coords) buildStops.push(t);
+  }
+  updateBuildBar();
+  renderTaskList();
+  drawBuildRoute();
+}
+
+function updateBuildBar() {
+  document.getElementById('rbCount').textContent = `${buildStops.length} stop`;
+}
+
+function drawBuildRoute() {
+  if (activeRouteLineCustom) { map.removeLayer(activeRouteLineCustom); activeRouteLineCustom = null; }
+  if (buildStops.length >= 2) {
+    const coords = buildStops.map(t => [t.coords.lat, t.coords.lng]);
+    activeRouteLineCustom = L.polyline(coords, { color: '#9B1B1B', weight: 3, opacity: 0.7, dashArray: '10, 6' }).addTo(map);
+  }
+}
+
+function openSaveRouteModal() {
+  if (buildStops.length < 2) return;
+  const modal = document.getElementById('rbSaveModal');
+  document.getElementById('rbRouteName').value = '';
+  
+  let totalDist = 0;
+  const stopsHtml = buildStops.map((t, i) => {
+    let distStr = '';
+    if (i > 0) {
+      const d = haversine(buildStops[i-1].coords.lat, buildStops[i-1].coords.lng, t.coords.lat, t.coords.lng);
+      totalDist += d;
+      distStr = ` (${d.toFixed(1)} km)`;
+    }
+    return `${i+1}. ${t.adresse}${distStr}`;
+  }).join('<br>');
+  
+  document.getElementById('rbSaveStops').innerHTML = `${stopsHtml}<br><strong>Total: ca. ${totalDist.toFixed(0)} km</strong>`;
+  modal.classList.add('visible');
+  setTimeout(() => document.getElementById('rbRouteName').focus(), 100);
+}
+
+function closeRbSave() {
+  document.getElementById('rbSaveModal').classList.remove('visible');
+}
+
+function confirmSaveRoute() {
+  const name = document.getElementById('rbRouteName').value.trim() || `Rute ${savedRoutes.length + 1}`;
+  const route = {
+    id: Date.now().toString(),
+    name,
+    created: new Date().toLocaleDateString('da-DK'),
+    stops: buildStops.map(t => ({ id: t.id, sagsnummer: t.sagsnummer, adresse: t.adresse, lat: t.coords.lat, lng: t.coords.lng, deadlineRaw: t.deadlineRaw }))
+  };
+  savedRoutes.push(route);
+  localStorage.setItem('sk_saved_routes', JSON.stringify(savedRoutes));
+  closeRbSave();
+  cancelRouteBuild();
+  switchTab('routes');
+  renderSavedRoutes();
+}
+
+function renderSavedRoutes() {
+  const el = document.getElementById('savedRoutesList');
+  document.getElementById('routeTabCount').textContent = savedRoutes.length;
+  
+  if (savedRoutes.length === 0) {
+    el.innerHTML = '<div class="no-routes"><p>Ingen gemte ruter endnu.</p><p style="margin-top:6px;font-size:12px;">Klik "Opret ny rute" og vælg opgaver på kortet eller i listen.</p></div>';
+    return;
+  }
+  
+  el.innerHTML = savedRoutes.map(r => {
+    let totalDist = 0;
+    for (let i = 1; i < r.stops.length; i++) {
+      totalDist += haversine(r.stops[i-1].lat, r.stops[i-1].lng, r.stops[i].lat, r.stops[i].lng);
+    }
+    const stopsHtml = r.stops.map((s, i) => 
+      `<div class="saved-route-stop"><span class="saved-route-stop-num">${i+1}</span><span>${s.adresse}</span></div>`
+    ).join('');
+    
+    return `<div class="saved-route-card">
+      <div class="saved-route-name">🛣️ ${r.name}</div>
+      <div class="saved-route-meta">${r.stops.length} stop · ca. ${totalDist.toFixed(0)} km · ${r.created}</div>
+      <div class="saved-route-stops">${stopsHtml}</div>
+      <div class="saved-route-actions">
+        <button class="sr-btn-show" onclick="showSavedRoute('${r.id}')">Vis på kort</button>
+        <button class="sr-btn-maps" onclick="openSavedRouteInMaps('${r.id}')">Google Maps</button>
+        <button class="sr-btn-delete" onclick="deleteSavedRoute('${r.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showSavedRoute(routeId) {
+  const r = savedRoutes.find(x => x.id === routeId);
+  if (!r) return;
+  // Clear existing custom line
+  if (activeRouteLineCustom) { map.removeLayer(activeRouteLineCustom); activeRouteLineCustom = null; }
+  const coords = r.stops.map(s => [s.lat, s.lng]);
+  if (coords.length >= 2) {
+    activeRouteLineCustom = L.polyline(coords, { color: '#9B1B1B', weight: 3, opacity: 0.7, dashArray: '10, 6' }).addTo(map);
+    map.fitBounds(coords, { padding: [60, 60] });
+  }
+}
+
+function openSavedRouteInMaps(routeId) {
+  const r = savedRoutes.find(x => x.id === routeId);
+  if (!r || !r.stops.length) return;
+  const wp = r.stops.map(s => `${s.lat},${s.lng}`);
+  window.open(`https://www.google.com/maps/dir/${wp.join('/')}`, '_blank');
+}
+
+function deleteSavedRoute(routeId) {
+  savedRoutes = savedRoutes.filter(x => x.id !== routeId);
+  localStorage.setItem('sk_saved_routes', JSON.stringify(savedRoutes));
+  if (activeRouteLineCustom) { map.removeLayer(activeRouteLineCustom); activeRouteLineCustom = null; }
+  renderSavedRoutes();
+}
 
 // ── ROUTE ──
 function checkRouteSuggestion() {
@@ -873,7 +1227,7 @@ function initMap() {
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:19}).addTo(map);
   markerGroup=L.layerGroup().addTo(map);
 }
-document.addEventListener('DOMContentLoaded',()=>{ initMap(); loadData(); setInterval(loadData,120000); });
+document.addEventListener('DOMContentLoaded',()=>{ initMap(); loadData(); setInterval(loadData,120000); document.getElementById('routeTabCount').textContent = savedRoutes.length; });
 </script>
 </body>
 </html>
