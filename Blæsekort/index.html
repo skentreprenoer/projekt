@@ -467,6 +467,29 @@ body {
   background: var(--sk-red); color: white; font-size: 10px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
 }
+
+/* ── TASK IMAGE ── */
+.task-img-row {
+  margin-top: 8px; display: flex; align-items: center; gap: 8px;
+}
+.task-img-btn {
+  font-family: 'DM Sans', sans-serif; font-size: 11px;
+  padding: 4px 10px; border-radius: 6px;
+  border: 1px dashed var(--border); background: none;
+  color: var(--text-muted); cursor: pointer;
+  display: flex; align-items: center; gap: 4px;
+  transition: all 0.2s;
+}
+.task-img-btn:hover { border-color: var(--sk-red); color: var(--sk-red); }
+.task-img-thumb {
+  width: 48px; height: 36px; border-radius: 4px;
+  object-fit: cover; border: 1px solid var(--border); cursor: pointer;
+}
+.task-img-remove {
+  font-size: 14px; color: var(--text-muted); cursor: pointer;
+  background: none; border: none; padding: 2px;
+}
+.task-img-remove:hover { color: var(--sk-red); }
 </style>
 </head>
 <body>
@@ -601,7 +624,6 @@ body {
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <script>
 const SHEET_ID = '1nAfna80c5NbT5mNhsXey84wu--DZVYct7NFRSRvTZr4';
 const GID = '321811896';
@@ -888,6 +910,19 @@ function renderTaskList() {
     else if (t.deadline) badge = `<span class="task-deadline ok">${dl}</span>`;
     const gf = t.adresse && !t.coords ? '<div class="geocode-fail">⚠ Adresse ikke fundet på kort</div>' : '';
     
+    // Image attachment
+    const hasImg = taskImages[t.id];
+    const imgRow = !buildMode ? (hasImg
+      ? `<div class="task-img-row" onclick="event.stopPropagation()">
+          <img class="task-img-thumb" src="${hasImg}" onclick="window.open(this.src,'_blank')" title="Klik for fuld størrelse"/>
+          <span style="font-size:10px;color:var(--text-muted);">GridOptimizer</span>
+          <button class="task-img-remove" onclick="removeTaskImage('${t.id}')" title="Fjern">✕</button>
+         </div>`
+      : `<div class="task-img-row" onclick="event.stopPropagation()">
+          <button class="task-img-btn" onclick="triggerImageUpload('${t.id}')">📷 Tilføj billede</button>
+         </div>`
+    ) : '';
+    
     // Build mode: show route order number, highlight selected
     const buildIdx = buildMode ? buildStops.findIndex(s => s.id === t.id) : -1;
     const inRoute = buildIdx >= 0 ? 'in-route' : '';
@@ -905,7 +940,7 @@ function renderTaskList() {
         ${t.deadline && !isOD ? `<span class="task-deadline ok">${t.deadlineRaw}</span>` : ''}
         ${isOD ? `<span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sk-red);">${t.deadlineRaw}</span>` : ''}
         ${badge}
-      </div>${gf}</div>`;
+      </div>${gf}${imgRow}</div>`;
   }).join('');
   
   // Show save button at bottom when in build mode with 2+ stops
@@ -993,6 +1028,46 @@ function closeInfo() { document.getElementById('infoModal').classList.remove('vi
 
 // ── TABS ──
 let activeTab = 'tasks';
+
+// Hidden file input for image uploads
+const _imgInput = document.createElement('input');
+_imgInput.type = 'file'; _imgInput.accept = 'image/*'; _imgInput.style.display = 'none';
+document.body.appendChild(_imgInput);
+let _imgTargetId = null;
+_imgInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file || !_imgTargetId) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    // Resize to max 800px to keep localStorage manageable
+    const img = new Image();
+    img.onload = () => {
+      const max = 800;
+      let w = img.width, h = img.height;
+      if (w > max) { h = h * max / w; w = max; }
+      if (h > max) { w = w * max / h; h = max; }
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      taskImages[_imgTargetId] = c.toDataURL('image/jpeg', 0.7);
+      try { localStorage.setItem('sk_task_images', JSON.stringify(taskImages)); } catch(e) { console.warn('localStorage full'); }
+      renderTaskList();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  _imgInput.value = '';
+});
+
+function triggerImageUpload(taskId) {
+  _imgTargetId = taskId;
+  _imgInput.click();
+}
+
+function removeTaskImage(taskId) {
+  delete taskImages[taskId];
+  localStorage.setItem('sk_task_images', JSON.stringify(taskImages));
+  renderTaskList();
+}
 function switchTab(tab) {
   activeTab = tab;
   document.getElementById('tabTasks').classList.toggle('active', tab==='tasks');
@@ -1006,6 +1081,7 @@ function switchTab(tab) {
 let buildMode = false;
 let buildStops = []; // array of task objects
 let savedRoutes = JSON.parse(localStorage.getItem('sk_saved_routes') || '[]');
+let taskImages = JSON.parse(localStorage.getItem('sk_task_images') || '{}');
 let activeRouteLineCustom = null;
 
 function startRouteBuild() {
@@ -1223,208 +1299,152 @@ function openInMaps() {
   if(wp.length) window.open(`https://www.google.com/maps/dir/${wp.join('/')}`,'_blank');
 }
 
-// ── PDF EXPORT ──
+// ── PDF EXPORT (print-window) ──
 function exportRoutePDF(routeId) {
   const r = savedRoutes.find(x => x.id === routeId);
-  if (!r) return;
+  if (!r || !r.stops.length) return;
   
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const W = 210, H = 297;
-  const ML = 20, MR = 20, MT = 20;
-  let y = MT;
-  
-  // Colors
-  const RED = [155, 27, 27];
-  const CHARCOAL = [45, 45, 45];
-  const GRAY = [107, 101, 96];
-  const LIGHT = [242, 238, 234];
-  const GREEN = [27, 140, 58];
-  const AMBER = [212, 134, 10];
-  
-  // ── Header bar ──
-  doc.setFillColor(...CHARCOAL);
-  doc.rect(0, 0, W, 22, 'F');
-  doc.setFillColor(...RED);
-  doc.roundedRect(ML, 5, 12, 12, 2, 2, 'F');
-  // SK icon lines
-  doc.setDrawColor(255, 255, 255);
-  doc.setLineWidth(0.8);
-  doc.line(ML+2, 8, ML+10, 8);
-  doc.line(ML+2, 10.5, ML+7, 10.5);
-  doc.line(ML+2, 13, ML+8.5, 13);
-  
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text(r.name, ML + 16, 13);
-  
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
-  doc.text('SØREN KNUDSEN A/S', W - MR, 13, { align: 'right' });
-  
-  y = 32;
-  
-  // ── Route summary ──
-  let totalDist = 0;
+  // REPLACED: old jsPDF approach
+  const DUMMY_JSPDF = null;
+
   const dists = [];
+  let totalDist = 0;
   for (let i = 1; i < r.stops.length; i++) {
     const d = haversine(r.stops[i-1].lat, r.stops[i-1].lng, r.stops[i].lat, r.stops[i].lng);
-    dists.push(d);
-    totalDist += d;
+    dists.push(d); totalDist += d;
   }
   
-  doc.setFillColor(...LIGHT);
-  doc.roundedRect(ML, y, W - ML - MR, 16, 3, 3, 'F');
-  doc.setTextColor(...CHARCOAL);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text(`${r.stops.length} stop`, ML + 6, y + 7);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`·  ca. ${totalDist.toFixed(1)} km total  ·  Oprettet ${r.created}`, ML + 24, y + 7);
+  function osmEmbed(lat, lng) {
+    return `https://www.openstreetmap.org/export/embed.html?bbox=${lng-0.012},${lat-0.007},${lng+0.012},${lat+0.007}&layer=mapnik&marker=${lat},${lng}`;
+  }
   
-  doc.setFontSize(8);
-  doc.setTextColor(...GRAY);
-  doc.text('Udskrevet: ' + new Date().toLocaleDateString('da-DK') + ' ' + new Date().toLocaleTimeString('da-DK', {hour:'2-digit',minute:'2-digit'}), ML + 6, y + 13);
+  const lats = r.stops.map(s => s.lat), lngs = r.stops.map(s => s.lng);
   
-  y += 24;
-  
-  // ── Stops ──
+  let stopPages = '';
   r.stops.forEach((s, i) => {
-    // Check page break
-    if (y > H - 50) {
-      doc.addPage();
-      y = MT;
-    }
-    
     const task = tasks.find(t => t.id === s.id);
     const days = task ? daysUntil(task.deadline) : null;
     const dc = days !== null ? deadlineClass(days) : 'ok';
+    const dl = days !== null ? deadlineLabel(days) : '';
+    const statusText = task ? (task.status==='ikke-blaest' ? 'Ikke blæst' : 'Er blæst') : '';
+    const statusColor = task && task.status==='er-blaest' ? '#1B8C3A' : '#9B1B1B';
     
-    // Stop number circle
-    doc.setFillColor(...RED);
-    doc.circle(ML + 5, y + 5, 4, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`${i + 1}`, ML + 5, y + 6.5, { align: 'center' });
+    let urgentHtml = '';
+    if (dc==='overdue') urgentHtml = `<div style="background:#9B1B1B;color:white;padding:6px 14px;border-radius:6px;font-size:14px;font-weight:700;display:inline-block;margin-top:6px;">OVERSKREDET — ${dl}</div>`;
+    else if (dc==='soon') urgentHtml = `<div style="background:#D4860A;color:white;padding:6px 14px;border-radius:6px;font-size:14px;font-weight:700;display:inline-block;margin-top:6px;">HASTER — ${dl}</div>`;
     
-    // Address
-    doc.setTextColor(...CHARCOAL);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text(s.adresse, ML + 14, y + 4);
+    const distToNext = i < r.stops.length-1
+      ? `<div style="margin-top:14px;padding:10px 14px;background:#F5F2EE;border-radius:8px;font-size:13px;color:#6B6560;">
+          ↓ Næste stop: <strong style="color:#1A1A1A;">${r.stops[i+1].adresse}</strong> — ${dists[i].toFixed(1)} km
+         </div>`
+      : `<div style="margin-top:14px;padding:10px 14px;background:rgba(27,140,58,0.1);border-radius:8px;font-size:13px;color:#1B8C3A;font-weight:600;">✓ Sidste stop</div>`;
     
-    // Sagsnr + deadline
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...GRAY);
-    let metaText = `Sagsnr: ${s.sagsnummer || '-'}`;
-    if (s.deadlineRaw) metaText += `  ·  Deadline: ${s.deadlineRaw}`;
-    doc.text(metaText, ML + 14, y + 9);
-    
-    // Status indicator
-    if (dc === 'overdue') {
-      doc.setTextColor(...RED);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`OVERSKREDET (${Math.abs(days)} dage)`, ML + 14, y + 14);
-    } else if (dc === 'soon') {
-      doc.setTextColor(...AMBER);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`HASTER (${deadlineLabel(days)})`, ML + 14, y + 14);
-    }
-    
-    // Status badge
-    if (task) {
-      const statusText = task.status === 'ikke-blaest' ? 'Ikke blæst' : 'Er blæst';
-      const statusColor = task.status === 'ikke-blaest' ? RED : GREEN;
-      const stX = W - MR - 22;
-      doc.setFillColor(...statusColor);
-      doc.roundedRect(stX, y, 22, 6, 1.5, 1.5, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(6);
-      doc.setFont('helvetica', 'bold');
-      doc.text(statusText, stX + 11, y + 4.2, { align: 'center' });
-    }
-    
-    y += (dc === 'overdue' || dc === 'soon') ? 19 : 15;
-    
-    // Distance to next stop
-    if (i < r.stops.length - 1) {
-      // Dashed line
-      doc.setDrawColor(...GRAY);
-      doc.setLineWidth(0.3);
-      const dashY = y - 2;
-      for (let dx = ML + 5; dx < ML + 5; dx += 3) {
-        doc.line(dx, dashY, dx + 1.5, dashY);
-      }
-      // Vertical connector dots
-      doc.setFillColor(200, 195, 190);
-      doc.circle(ML + 5, y - 3, 0.6, 'F');
-      doc.circle(ML + 5, y - 1, 0.6, 'F');
-      doc.circle(ML + 5, y + 1, 0.6, 'F');
-      
-      // Distance label
-      doc.setTextColor(...GRAY);
-      doc.setFontSize(7);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`↓ ${dists[i].toFixed(1)} km`, ML + 14, y);
-      
-      y += 6;
-    }
+    stopPages += `
+      <div class="page">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #9B1B1B;">
+          <div style="width:36px;height:36px;border-radius:50%;background:#9B1B1B;color:white;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div>
+          <div style="font-size:14px;font-weight:600;">Stop ${i+1} af ${r.stops.length}</div>
+          <div style="margin-left:auto;font-size:11px;color:#6B6560;">${r.name}</div>
+        </div>
+        
+        <div style="font-size:22px;font-weight:800;letter-spacing:-0.02em;margin-bottom:14px;">${s.adresse}</div>
+        
+        <div style="display:flex;gap:24px;margin-bottom:10px;">
+          <div><div style="font-size:10px;color:#6B6560;text-transform:uppercase;letter-spacing:0.05em;">Sagsnummer</div><div style="font-size:14px;font-weight:600;margin-top:2px;">${s.sagsnummer||'-'}</div></div>
+          <div><div style="font-size:10px;color:#6B6560;text-transform:uppercase;letter-spacing:0.05em;">Deadline</div><div style="font-size:14px;font-weight:600;margin-top:2px;">${s.deadlineRaw||'-'}</div></div>
+          <div><div style="font-size:10px;color:#6B6560;text-transform:uppercase;letter-spacing:0.05em;">Status</div><div style="font-size:14px;font-weight:700;margin-top:2px;color:${statusColor};">${statusText}</div></div>
+        </div>
+        ${urgentHtml}
+        
+        <div style="margin:16px 0;border-radius:10px;overflow:hidden;border:1px solid #E2DDD7;">
+          <iframe src="${osmEmbed(s.lat, s.lng)}" style="width:100%;height:280px;border:none;"></iframe>
+          <div style="font-size:10px;color:#6B6560;padding:6px 10px;background:#F5F2EE;">
+            ${s.lat.toFixed(5)}, ${s.lng.toFixed(5)} — 
+            <a href="https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lng}" target="_blank" style="color:#9B1B1B;">Åbn i Google Maps</a>
+          </div>
+        </div>
+        ${distToNext}
+        
+        ${taskImages[s.id] ? `
+        <div style="margin-top:14px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:6px;">GridOptimizer</div>
+          <div style="border-radius:8px;overflow:hidden;border:1px solid #E2DDD7;">
+            <img src="${taskImages[s.id]}" style="width:100%;display:block;" />
+          </div>
+        </div>` : ''}
+        
+        <div style="margin-top:16px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:8px;">Noter</div>
+          <div style="border-bottom:1px solid #E2DDD7;height:24px;"></div>
+          <div style="border-bottom:1px solid #E2DDD7;height:24px;"></div>
+          <div style="border-bottom:1px solid #E2DDD7;height:24px;"></div>
+          <div style="border-bottom:1px solid #E2DDD7;height:24px;"></div>
+        </div>
+        
+        <div style="position:absolute;bottom:12mm;left:16mm;right:16mm;display:flex;justify-content:space-between;font-size:9px;color:#6B6560;border-top:1px solid #9B1B1B;padding-top:6px;">
+          <span>Søren Knudsen A/S — Minuba Blæst</span>
+          <span>Side ${i+2} / ${r.stops.length+1}</span>
+        </div>
+      </div>`;
   });
   
-  // ── Google Maps link ──
-  y += 8;
-  if (y > H - 30) { doc.addPage(); y = MT; }
+  const mapsUrl = `https://www.google.com/maps/dir/${r.stops.map(s=>`${s.lat},${s.lng}`).join('/')}`;
   
-  doc.setFillColor(...RED);
-  doc.roundedRect(ML, y, W - ML - MR, 12, 2, 2, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'bold');
-  const mapsUrl = `google.com/maps/dir/${r.stops.map(s=>`${s.lat},${s.lng}`).join('/')}`;
-  doc.text('Google Maps rute: ' + mapsUrl, ML + 4, y + 7.5);
-  // Make it clickable
-  doc.link(ML, y, W - ML - MR, 12, { url: `https://www.${mapsUrl}` });
+  const html = `<!DOCTYPE html><html lang="da"><head><meta charset="UTF-8">
+<title>Rute: ${r.name}</title>
+<style>
+@page { size: A4; margin: 0; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif; color: #1A1A1A; background: white; }
+.page { width:210mm; min-height:297mm; padding:18mm 16mm 14mm; page-break-after:always; position:relative; }
+.page:last-child { page-break-after:auto; }
+@media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } .no-print { display:none!important; } }
+.print-bar { position:fixed;top:0;left:0;right:0;background:#2D2D2D;padding:12px 20px;display:flex;align-items:center;gap:12px;z-index:999; }
+.print-bar button { padding:8px 20px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit; }
+.print-bar .bp { background:#9B1B1B;color:white; }
+.print-bar .bc { background:#3D3D3D;color:white; }
+.print-bar span { color:rgba(255,255,255,0.6);font-size:12px;margin-left:auto; }
+</style></head><body>
+<div class="print-bar no-print">
+  <button class="bp" onclick="window.print()">🖨️ Print / Gem som PDF</button>
+  <button class="bc" onclick="window.close()">Luk</button>
+  <span>Vælg "Gem som PDF" i print-dialogen</span>
+</div>
+<div class="page" style="padding-top:40mm;">
+  <div style="background:#2D2D2D;padding:16px 24px;border-radius:10px;display:flex;align-items:center;gap:14px;margin-bottom:32px;">
+    <div style="width:40px;height:40px;background:#9B1B1B;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+      <div style="width:22px;"><div style="height:3px;background:white;border-radius:1px;margin-bottom:2.5px;width:100%;"></div><div style="height:3px;background:white;border-radius:1px;margin-bottom:2.5px;width:60%;"></div><div style="height:3px;background:white;border-radius:1px;margin-bottom:2.5px;width:80%;"></div><div style="height:3px;background:white;border-radius:1px;width:50%;"></div></div>
+    </div>
+    <div style="color:rgba(255,255,255,0.5);font-size:12px;">SØREN KNUDSEN A/S</div>
+  </div>
+  <h1 style="font-size:32px;font-weight:800;letter-spacing:-0.03em;margin-bottom:8px;">${r.name}</h1>
+  <div style="font-size:14px;color:#6B6560;margin-bottom:28px;">Ruteplan · ${r.created} · ${r.stops.length} stop · ca. ${totalDist.toFixed(1)} km</div>
+  <div style="display:flex;gap:12px;margin-bottom:28px;">
+    <div style="background:#F5F2EE;padding:12px 18px;border-radius:8px;"><div style="font-size:22px;font-weight:800;color:#9B1B1B;">${r.stops.length}</div><div style="font-size:11px;color:#6B6560;">Stop</div></div>
+    <div style="background:#F5F2EE;padding:12px 18px;border-radius:8px;"><div style="font-size:22px;font-weight:800;color:#9B1B1B;">${totalDist.toFixed(1)}</div><div style="font-size:11px;color:#6B6560;">km total</div></div>
+  </div>
+  ${r.stops.map((s,i) => {
+    const dl = i < r.stops.length-1 ? `<div style="font-size:11px;color:#6B6560;padding:2px 0 2px 34px;">↓ ${dists[i].toFixed(1)} km</div>` : '';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #E2DDD7;font-size:13px;">
+      <span style="width:24px;height:24px;border-radius:50%;background:#9B1B1B;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</span>
+      <span style="flex:1;font-weight:600;">${s.adresse}</span>
+      <span style="font-size:11px;color:#6B6560;">${s.deadlineRaw||''}</span>
+    </div>${dl}`;
+  }).join('')}
+  <a href="${mapsUrl}" target="_blank" style="display:block;background:#9B1B1B;color:white;text-align:center;padding:12px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;margin-top:16px;">Åbn fuld rute i Google Maps →</a>
+  <div style="margin-top:20px;border-radius:10px;overflow:hidden;border:1px solid #E2DDD7;">
+    <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=${Math.min(...lngs)-0.04},${Math.min(...lats)-0.02},${Math.max(...lngs)+0.04},${Math.max(...lats)+0.02}&layer=mapnik" style="width:100%;height:200px;border:none;"></iframe>
+  </div>
+  <div style="position:absolute;bottom:12mm;left:16mm;right:16mm;display:flex;justify-content:space-between;font-size:9px;color:#6B6560;border-top:1px solid #9B1B1B;padding-top:6px;">
+    <span>Søren Knudsen A/S — Minuba Blæst</span><span>Side 1 / ${r.stops.length+1}</span>
+  </div>
+</div>
+${stopPages}
+</body></html>`;
   
-  y += 20;
-  
-  // ── Notes section ──
-  if (y > H - 60) { doc.addPage(); y = MT; }
-  
-  doc.setTextColor(...CHARCOAL);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Noter', ML, y);
-  y += 4;
-  
-  doc.setDrawColor(200, 195, 190);
-  doc.setLineWidth(0.3);
-  for (let line = 0; line < 8; line++) {
-    y += 8;
-    if (y > H - 15) break;
-    doc.line(ML, y, W - MR, y);
-  }
-  
-  // ── Footer ──
-  const pages = doc.getNumberOfPages();
-  for (let p = 1; p <= pages; p++) {
-    doc.setPage(p);
-    doc.setFontSize(7);
-    doc.setTextColor(...GRAY);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Søren Knudsen A/S — Minuba Blæst`, ML, H - 8);
-    doc.text(`Side ${p}/${pages}`, W - MR, H - 8, { align: 'right' });
-    // Red bottom line
-    doc.setDrawColor(...RED);
-    doc.setLineWidth(0.5);
-    doc.line(ML, H - 12, W - MR, H - 12);
-  }
-  
-  // Save
-  const fileName = r.name.replace(/[^a-zA-Z0-9æøåÆØÅ\s-]/g, '').replace(/\s+/g, '_');
-  doc.save(`Rute_${fileName}.pdf`);
+  const win = window.open('', '_blank');
+  if (win) { win.document.write(html); win.document.close(); }
+  else alert('Pop-up blokeret — tillad pop-ups for denne side.');
 }
 
 // ── INIT ──
