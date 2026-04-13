@@ -412,7 +412,7 @@ body {
     <div class="color-key"><div class="color-dot" style="background:#333"></div><span><strong>💀 Skull</strong> — Deadline overskredet!</span></div>
     <p>Opgaver med "Er sendt til Tenna" fjernes automatisk fra kortet.</p>
     <h3>Ruteforslag</h3>
-    <p>Appen finder automatisk opgaver der ligger <strong>inden for 50 km</strong> af hinanden. Når 2+ opgaver er tæt nok, foreslås en rute sorteret efter <strong>deadline</strong> — mest presserende først.</p>
+    <p>Appen finder automatisk opgaver der ligger <strong>inden for 20 km</strong> af hinanden. Når 2+ opgaver er tæt nok, foreslås en rute sorteret efter <strong>deadline</strong> — mest presserende først.</p>
     <p>Afstande mellem stop vises i km (luftlinje). "Åbn i Google Maps" giver dig kørevejledning med alle stop.</p>
     <h3>Adresser</h3>
     <p>Adresser slås op via <strong>Dataforsyningens DAWA API</strong> (Danmarks officielle adresseregister). Appen prøver 5 forskellige søgemetoder — direkte søgning, adgangsadresser, datavask, struktureret søgning og autocomplete.</p>
@@ -434,63 +434,120 @@ async function geocodeAddress(address) {
   if (GEOCODE_CACHE[address]) return GEOCODE_CACHE[address];
   const cleaned = address.replace(/\s+/g, ' ').trim();
 
-  // 1: adgangsadresser search
-  let r = await tryGeocode(`https://api.dataforsyningen.dk/adgangsadresser?q=${encodeURIComponent(cleaned)}&struktur=mini&per_side=1`);
-  if (r) { GEOCODE_CACHE[address] = r; return r; }
-
-  // 2: adresser search
-  r = await tryGeocode(`https://api.dataforsyningen.dk/adresser?q=${encodeURIComponent(cleaned)}&struktur=mini&per_side=1`);
-  if (r) { GEOCODE_CACHE[address] = r; return r; }
-
-  // 3: datavask (address washing)
-  try {
-    const resp = await fetch(`https://api.dataforsyningen.dk/datavask/adgangsadresser?betegnelse=${encodeURIComponent(cleaned)}`);
-    if (resp.ok) {
-      const data = await resp.json();
-      if (data.resultater && data.resultater.length > 0) {
-        const best = data.resultater[0];
-        if (best.adresse && best.adresse.adgangspunkt && best.adresse.adgangspunkt.koordinater) {
-          r = { lat: best.adresse.adgangspunkt.koordinater[1], lng: best.adresse.adgangspunkt.koordinater[0] };
-          GEOCODE_CACHE[address] = r; return r;
-        }
-      }
-      if (data.aktueladresse) {
-        const adg = data.aktueladresse.adgangsadresse || data.aktueladresse;
-        if (adg.adgangspunkt && adg.adgangspunkt.koordinater) {
-          r = { lat: adg.adgangspunkt.koordinater[1], lng: adg.adgangspunkt.koordinater[0] };
-          GEOCODE_CACHE[address] = r; return r;
-        }
+  // Helper: extract coords from datavask response
+  function extractFromDatavask(data) {
+    if (data.resultater && data.resultater.length > 0) {
+      const best = data.resultater[0];
+      const a = best.adresse || best.aktueladresse;
+      if (a) {
+        if (a.adgangspunkt && a.adgangspunkt.koordinater)
+          return { lat: a.adgangspunkt.koordinater[1], lng: a.adgangspunkt.koordinater[0] };
+        // Sometimes nested differently
+        if (a.adgangsadresse && a.adgangsadresse.adgangspunkt && a.adgangsadresse.adgangspunkt.koordinater)
+          return { lat: a.adgangsadresse.adgangspunkt.koordinater[1], lng: a.adgangsadresse.adgangspunkt.koordinater[0] };
       }
     }
-  } catch(e) {}
+    if (data.aktueladresse) {
+      const adg = data.aktueladresse.adgangsadresse || data.aktueladresse;
+      if (adg.adgangspunkt && adg.adgangspunkt.koordinater)
+        return { lat: adg.adgangspunkt.koordinater[1], lng: adg.adgangspunkt.koordinater[0] };
+    }
+    return null;
+  }
 
-  // 4: structured params
-  const match = cleaned.match(/^(.+?)\s*,?\s*(\d{4})\s+(.+)$/);
-  if (match) {
-    const street = match[1].trim();
-    const zip = match[2];
-    r = await tryGeocode(`https://api.dataforsyningen.dk/adgangsadresser?q=${encodeURIComponent(street)}&postnr=${zip}&struktur=mini&per_side=1`);
+  // Build address variants to try
+  // "Buevej 17, 5685 Søby Ærø" → also try "Buevej 17, 5685 Søby" and "Buevej 17, Søby"
+  const variants = [cleaned];
+  // Remove trailing place-name suffixes after city (e.g. "Søby Ærø" → "Søby")
+  const m = cleaned.match(/^(.+?)\s*,?\s*(\d{4})\s+(.+)$/);
+  if (m) {
+    const street = m[1].trim();
+    const zip = m[2];
+    const cityParts = m[3].trim().split(/\s+/);
+    // Try without last word (e.g. "Søby Ærø" → "Søby")
+    if (cityParts.length > 1) {
+      variants.push(`${street}, ${zip} ${cityParts.slice(0,-1).join(' ')}`);
+    }
+    // Try with just street + zip
+    variants.push(`${street}, ${zip}`);
+    // Try reformatted with comma
+    variants.push(`${street}, ${zip} ${m[3].trim()}`);
+  }
+  // Also try replacing comma with space, or removing comma
+  if (cleaned.includes(',')) {
+    variants.push(cleaned.replace(/,/g, ''));
+  }
+
+  let r;
+
+  // Strategy 1: Datavask first — best at handling messy/ambiguous input
+  for (const v of variants) {
+    try {
+      const resp = await fetch(`https://api.dataforsyningen.dk/datavask/adgangsadresser?betegnelse=${encodeURIComponent(v)}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        r = extractFromDatavask(data);
+        if (r) { GEOCODE_CACHE[address] = r; return r; }
+      }
+    } catch(e) {}
+  }
+
+  // Strategy 2: adgangsadresser q-search with variants
+  for (const v of variants) {
+    r = await tryGeocode(`https://api.dataforsyningen.dk/adgangsadresser?q=${encodeURIComponent(v)}&struktur=mini&per_side=1`);
     if (r) { GEOCODE_CACHE[address] = r; return r; }
+  }
+
+  // Strategy 3: Structured params (vejnavn + husnr + postnr)
+  if (m) {
+    const street = m[1].trim();
+    const zip = m[2];
     const sm = street.match(/^(.+?)\s+(\d+\w?)$/);
     if (sm) {
       r = await tryGeocode(`https://api.dataforsyningen.dk/adgangsadresser?vejnavn=${encodeURIComponent(sm[1])}&husnr=${encodeURIComponent(sm[2])}&postnr=${zip}&struktur=mini&per_side=1`);
       if (r) { GEOCODE_CACHE[address] = r; return r; }
+      // Also try without postnr (in case postnr doesn't match)
+      r = await tryGeocode(`https://api.dataforsyningen.dk/adgangsadresser?vejnavn=${encodeURIComponent(sm[1])}&husnr=${encodeURIComponent(sm[2])}&struktur=mini&per_side=1`);
+      if (r) { GEOCODE_CACHE[address] = r; return r; }
     }
+    // Just street + postnr
+    r = await tryGeocode(`https://api.dataforsyningen.dk/adgangsadresser?q=${encodeURIComponent(street)}&postnr=${zip}&struktur=mini&per_side=1`);
+    if (r) { GEOCODE_CACHE[address] = r; return r; }
   }
 
-  // 5: autocomplete
+  // Strategy 4: Autocomplete (very forgiving, handles partial input)
+  for (const v of variants.slice(0, 2)) {
+    try {
+      const resp = await fetch(`https://api.dataforsyningen.dk/autocomplete?q=${encodeURIComponent(v)}&type=adgangsadresse&per_side=1`);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.length > 0) {
+          const item = data[0];
+          if (item.adgangsadresse) {
+            const adg = item.adgangsadresse;
+            if (adg.x != null && adg.y != null) { r = { lat: adg.y, lng: adg.x }; GEOCODE_CACHE[address] = r; return r; }
+            if (adg.adgangspunkt && adg.adgangspunkt.koordinater) {
+              r = { lat: adg.adgangspunkt.koordinater[1], lng: adg.adgangspunkt.koordinater[0] };
+              GEOCODE_CACHE[address] = r; return r;
+            }
+          }
+          // Also try data from the combined autocomplete endpoint
+          if (item.data && item.data.x != null) {
+            r = { lat: item.data.y, lng: item.data.x };
+            GEOCODE_CACHE[address] = r; return r;
+          }
+        }
+      }
+    } catch(e) {}
+  }
+
+  // Strategy 5: Adresser datavask (different endpoint)
   try {
-    const resp = await fetch(`https://api.dataforsyningen.dk/adgangsadresser/autocomplete?q=${encodeURIComponent(cleaned)}&per_side=1`);
+    const resp = await fetch(`https://api.dataforsyningen.dk/datavask/adresser?betegnelse=${encodeURIComponent(cleaned)}`);
     if (resp.ok) {
       const data = await resp.json();
-      if (data.length > 0 && data[0].adgangsadresse) {
-        const adg = data[0].adgangsadresse;
-        if (adg.adgangspunkt && adg.adgangspunkt.koordinater) {
-          r = { lat: adg.adgangspunkt.koordinater[1], lng: adg.adgangspunkt.koordinater[0] };
-          GEOCODE_CACHE[address] = r; return r;
-        }
-        if (adg.x && adg.y) { r = { lat: adg.y, lng: adg.x }; GEOCODE_CACHE[address] = r; return r; }
-      }
+      r = extractFromDatavask(data);
+      if (r) { GEOCODE_CACHE[address] = r; return r; }
     }
   } catch(e) {}
 
@@ -699,7 +756,7 @@ function checkRouteSuggestion() {
     if (used.has(i)) continue; const cl=[pending[i]]; used.add(i);
     for (let j=i+1;j<pending.length;j++) {
       if (used.has(j)) continue;
-      if (cl.some(c=>haversine(c.coords.lat,c.coords.lng,pending[j].coords.lat,pending[j].coords.lng)<50))
+      if (cl.some(c=>haversine(c.coords.lat,c.coords.lng,pending[j].coords.lat,pending[j].coords.lng)<20))
         { cl.push(pending[j]); used.add(j); }
     }
     if (cl.length>=2) clusters.push(cl);
@@ -717,7 +774,7 @@ function showRoute(tc) {
   for (let i=1;i<tc.length;i++) dists.push(haversine(tc[i-1].coords.lat,tc[i-1].coords.lng,tc[i].coords.lat,tc[i].coords.lng));
   const totalKm=dists.reduce((a,b)=>a+b,0);
   document.getElementById('routeExplanation').innerHTML =
-    `Disse <strong>${tc.length} opgaver</strong> ligger inden for <strong>50 km</strong> af hinanden (ca. ${totalKm.toFixed(0)} km total). Sorteret efter deadline — mest presserende først.`;
+    `Disse <strong>${tc.length} opgaver</strong> ligger inden for <strong>20 km</strong> af hinanden (ca. ${totalKm.toFixed(0)} km total). Sorteret efter deadline — mest presserende først.`;
   let h='';
   tc.forEach((t,i) => {
     const d=daysUntil(t.deadline), dc=deadlineClass(d), dl=deadlineLabel(d);
