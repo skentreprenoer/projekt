@@ -199,6 +199,7 @@ body {
 .map-container { flex: 1; position: relative; }
 #map { width: 100%; height: 100%; }
 .leaflet-popup-content-wrapper { border-radius: var(--radius-sm) !important; box-shadow: var(--shadow-lg) !important; font-family: 'DM Sans', sans-serif !important; }
+.leaflet-div-icon { background: none !important; border: none !important; }
 .leaflet-popup-content { margin: 14px 16px !important; min-width: 200px !important; }
 .popup-sag { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
 .popup-addr { font-size: 14px; font-weight: 600; margin: 4px 0; }
@@ -412,7 +413,7 @@ body {
     <div class="color-key"><div class="color-dot" style="background:#333"></div><span><strong>💀 Skull</strong> — Deadline overskredet!</span></div>
     <p>Opgaver med "Er sendt til Tenna" fjernes automatisk fra kortet.</p>
     <h3>Ruteforslag</h3>
-    <p>Appen finder automatisk opgaver der ligger <strong>inden for 20 km</strong> af hinanden. Når 2+ opgaver er tæt nok, foreslås en rute sorteret efter <strong>deadline</strong> — mest presserende først.</p>
+    <p>Appen finder automatisk opgaver der ligger <strong>inden for 20 km</strong> af hinanden. Når 2+ opgaver er tæt nok, foreslås en rute. Ruten starter ved den <strong>mest presserende</strong> opgave og vælger derefter altid det <strong>nærmeste</strong> næste stop — så du kører mindst muligt.</p>
     <p>Afstande mellem stop vises i km (luftlinje). "Åbn i Google Maps" giver dig kørevejledning med alle stop.</p>
     <h3>Adresser</h3>
     <p>Adresser slås op via <strong>Dataforsyningens DAWA API</strong> (Danmarks officielle adresseregister). Appen prøver 5 forskellige søgemetoder — direkte søgning, adgangsadresser, datavask, struktureret søgning og autocomplete.</p>
@@ -456,26 +457,37 @@ async function geocodeAddress(address) {
   }
 
   // Build address variants to try
-  // "Buevej 17, 5685 Søby Ærø" → also try "Buevej 17, 5685 Søby" and "Buevej 17, Søby"
   const variants = [cleaned];
-  // Remove trailing place-name suffixes after city (e.g. "Søby Ærø" → "Søby")
-  const m = cleaned.match(/^(.+?)\s*,?\s*(\d{4})\s+(.+)$/);
-  if (m) {
-    const street = m[1].trim();
-    const zip = m[2];
-    const cityParts = m[3].trim().split(/\s+/);
-    // Try without last word (e.g. "Søby Ærø" → "Søby")
-    if (cityParts.length > 1) {
-      variants.push(`${street}, ${zip} ${cityParts.slice(0,-1).join(' ')}`);
+  
+  // Match: "Street Nr, Zip City..." or "Street Nr, Zip" (no city)
+  const m = cleaned.match(/^(.+?)\s*,\s*(\d{4})(?:\s+(.+))?$/);
+  // Also try: "Street Nr Zip City" (no comma)  
+  const m2 = !m ? cleaned.match(/^(.+?)\s+(\d{4})(?:\s+(.+))?$/) : null;
+  const match = m || m2;
+  
+  if (match) {
+    const street = match[1].trim();
+    const zip = match[2];
+    const city = (match[3] || '').trim();
+    
+    if (city) {
+      // Has city: try without trailing suffix words
+      const cityParts = city.split(/\s+/);
+      if (cityParts.length > 1) {
+        variants.push(`${street}, ${zip} ${cityParts.slice(0,-1).join(' ')}`);
+      }
+      variants.push(`${street}, ${zip}`);
+      variants.push(`${street}, ${zip} ${city}`);
+    } else {
+      // No city name — just "Buevej 17, 5685"
+      // Try with comma and without
+      variants.push(`${street} ${zip}`);
     }
-    // Try with just street + zip
-    variants.push(`${street}, ${zip}`);
-    // Try reformatted with comma
-    variants.push(`${street}, ${zip} ${m[3].trim()}`);
   }
-  // Also try replacing comma with space, or removing comma
+  
+  // Also try without commas
   if (cleaned.includes(',')) {
-    variants.push(cleaned.replace(/,/g, ''));
+    variants.push(cleaned.replace(/,/g, '').replace(/\s+/g, ' '));
   }
 
   let r;
@@ -499,14 +511,14 @@ async function geocodeAddress(address) {
   }
 
   // Strategy 3: Structured params (vejnavn + husnr + postnr)
-  if (m) {
-    const street = m[1].trim();
-    const zip = m[2];
+  if (match) {
+    const street = match[1].trim();
+    const zip = match[2];
     const sm = street.match(/^(.+?)\s+(\d+\w?)$/);
     if (sm) {
       r = await tryGeocode(`https://api.dataforsyningen.dk/adgangsadresser?vejnavn=${encodeURIComponent(sm[1])}&husnr=${encodeURIComponent(sm[2])}&postnr=${zip}&struktur=mini&per_side=1`);
       if (r) { GEOCODE_CACHE[address] = r; return r; }
-      // Also try without postnr (in case postnr doesn't match)
+      // Also try without postnr
       r = await tryGeocode(`https://api.dataforsyningen.dk/adgangsadresser?vejnavn=${encodeURIComponent(sm[1])}&husnr=${encodeURIComponent(sm[2])}&struktur=mini&per_side=1`);
       if (r) { GEOCODE_CACHE[address] = r; return r; }
     }
@@ -602,11 +614,32 @@ async function loadData() {
   try {
     const resp = await fetch(CSV_URL); const csv = await resp.text(); const rows = parseCSV(csv);
     tasks = [];
+    
+    // Debug: log first row to see actual column names
+    if (rows.length > 0) console.log('CSV columns found:', Object.keys(rows[0]), 'First row:', rows[0]);
+    
     for (const row of rows) {
-      const sag = row['sagsnummer']||row['sagsnr']||'';
-      const adr = row['adresse']||'';
-      const dlRaw = row['deadline']||'';
-      const stRaw = (row['status']||'').toLowerCase();
+      // Flexible column matching — normalize keys, try multiple names
+      const keys = Object.keys(row);
+      const findCol = (...names) => {
+        for (const name of names) {
+          // Exact match
+          if (row[name] !== undefined) return row[name];
+          // Case-insensitive
+          const k = keys.find(k => k.toLowerCase() === name.toLowerCase());
+          if (k) return row[k];
+          // Partial match
+          const pk = keys.find(k => k.toLowerCase().includes(name.toLowerCase()));
+          if (pk) return row[pk];
+        }
+        return '';
+      };
+      
+      const sag = findCol('sagsnummer', 'sagsnr', 'sag', 'nr', 'nummer', 'id');
+      const adr = findCol('adresse', 'adr', 'addresse', 'address');
+      const dlRaw = findCol('deadline', 'dato', 'frist', 'date');
+      const stRaw = findCol('status', 'stat').toLowerCase();
+      
       if (!sag && !adr) continue;
       if (stRaw.includes('tenna')) continue;
       let dl = null;
@@ -614,16 +647,20 @@ async function loadData() {
       const st = stRaw.includes('er bl') ? 'er-blaest' : 'ikke-blaest';
       tasks.push({ id: sag||`UNK_${tasks.length}`, sagsnummer:sag, adresse:adr, deadline:dl, deadlineRaw:dlRaw, status:st, coords:null });
     }
+    
+    console.log(`Loaded ${tasks.length} tasks, geocoding...`);
     await Promise.all(tasks.map(async t => { if (t.adresse) t.coords = await geocodeAddress(t.adresse); }));
+    const geocoded = tasks.filter(t => t.coords).length;
+    console.log(`Geocoded ${geocoded}/${tasks.length} tasks`);
     renderAll();
   } catch(e) { console.error('Load failed:', e); loadDemoData(); }
 }
 
 function loadDemoData() {
   tasks = [
-    { id:'1534132', sagsnummer:'1534132', adresse:'Buevej 17, 5685 Søby', deadline:new Date(2026,3,1), deadlineRaw:'01/04/2026', status:'ikke-blaest', coords:{lat:54.9357,lng:10.2531} },
+    { id:'1534132', sagsnummer:'1534132', adresse:'Buevej 17, 5685', deadline:new Date(2026,3,1), deadlineRaw:'01/04/2026', status:'ikke-blaest', coords:{lat:54.9357,lng:10.2531} },
     { id:'1540244', sagsnummer:'1540244', adresse:'Reberbanen 14, 5960 Marstal', deadline:new Date(2026,3,9), deadlineRaw:'09/04/2026', status:'ikke-blaest', coords:{lat:54.8561,lng:10.5128} },
-    { id:'000789M', sagsnummer:'000789M', adresse:'Odinsvej 16, 7200 Grindsted', deadline:new Date(2026,3,14), deadlineRaw:'14/04/2026', status:'ikke-blaest', coords:{lat:55.7587,lng:8.9253} },
+    { id:'000789M', sagsnummer:'000789M', adresse:'Søbygårdsmarkvej 6, 5985', deadline:new Date(2026,3,9), deadlineRaw:'09/04/2026', status:'ikke-blaest', coords:{lat:54.9445,lng:10.2083} },
   ];
   renderAll();
 }
@@ -690,23 +727,33 @@ function renderMarkers() {
   visible.forEach(t => {
     if (!t.coords) return;
     const days = daysUntil(t.deadline), isOD = days<0, isS = days>=0&&days<=3;
-    let color, size, html;
+    let color, markerSize, html;
+    
+    // All markers use a fixed-size wrapper div with everything centered via flexbox
+    // This prevents drift when zooming
+    const S = 44; // total icon container size
+    const center = `display:flex;align-items:center;justify-content:center;width:${S}px;height:${S}px;`;
+    
     if (isOD && t.status==='ikke-blaest') {
-      color='#9B1B1B'; size=20;
-      html=`<div style="position:relative;width:${size}px;height:${size}px;">
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;border-radius:50%;background:rgba(155,27,27,0.2);animation:pulse 1.5s infinite;"></div>
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;background:rgba(155,27,27,0.3);animation:pulse 1.5s .3s infinite;"></div>
-        <div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 2px 10px rgba(155,27,27,0.5);position:relative;z-index:2;display:flex;align-items:center;justify-content:center;font-size:11px;">💀</div></div>`;
+      color='#9B1B1B'; markerSize=20;
+      html=`<div style="${center}position:relative;">
+        <div style="position:absolute;width:40px;height:40px;border-radius:50%;background:rgba(155,27,27,0.2);animation:pulse 1.5s infinite;"></div>
+        <div style="position:absolute;width:30px;height:30px;border-radius:50%;background:rgba(155,27,27,0.3);animation:pulse 1.5s .3s infinite;"></div>
+        <div style="width:${markerSize}px;height:${markerSize}px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 2px 10px rgba(155,27,27,0.5);position:relative;z-index:2;display:flex;align-items:center;justify-content:center;font-size:11px;">💀</div>
+      </div>`;
     } else if (isS && t.status==='ikke-blaest') {
-      color='#D4860A'; size=16;
-      html=`<div style="position:relative;width:${size}px;height:${size}px;">
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;border:2px solid ${color};opacity:.5;animation:pulse 2s infinite;"></div>
-        <div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 2px 8px rgba(212,134,10,0.4);position:relative;z-index:2;"></div></div>`;
+      color='#D4860A'; markerSize=16;
+      html=`<div style="${center}position:relative;">
+        <div style="position:absolute;width:30px;height:30px;border-radius:50%;border:2px solid ${color};opacity:.5;animation:pulse 2s infinite;"></div>
+        <div style="width:${markerSize}px;height:${markerSize}px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 2px 8px rgba(212,134,10,0.4);position:relative;z-index:2;"></div>
+      </div>`;
     } else {
-      color = t.status==='ikke-blaest'?'#9B1B1B':'#1B8C3A'; size=12;
-      html=`<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.3);"></div>`;
+      color = t.status==='ikke-blaest'?'#9B1B1B':'#1B8C3A'; markerSize=12;
+      html=`<div style="${center}">
+        <div style="width:${markerSize}px;height:${markerSize}px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.3);"></div>
+      </div>`;
     }
-    const icon = L.divIcon({ className:'custom-marker', html, iconSize:[44,44], iconAnchor:[22,22] });
+    const icon = L.divIcon({ className:'', html, iconSize:[S,S], iconAnchor:[S/2,S/2] });
     let popExtra = '';
     if (isOD) popExtra = `<div class="popup-overdue">💀 ${Math.abs(days)} dage overskredet!</div>`;
     else if (isS) popExtra = `<div style="background:var(--amber);color:white;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:700;margin-top:6px;display:inline-block;">⏰ ${deadlineLabel(days)}</div>`;
@@ -763,9 +810,33 @@ function checkRouteSuggestion() {
   }
   if (clusters.length) {
     const best=clusters.sort((a,b)=>b.length-a.length)[0];
-    best.sort((a,b)=>(a.deadline?a.deadline.getTime():Infinity)-(b.deadline?b.deadline.getTime():Infinity));
-    showRoute(best);
+    // Sort with nearest-neighbor: start from most urgent, then always pick closest next stop
+    const ordered = optimizeRoute(best);
+    showRoute(ordered);
   } else closeRoute();
+}
+
+// Nearest-neighbor route optimization
+// Start from the most urgent task (earliest deadline), then always go to the closest unvisited
+function optimizeRoute(tasks) {
+  if (tasks.length <= 2) return tasks.sort((a,b)=>(a.deadline?a.deadline.getTime():Infinity)-(b.deadline?b.deadline.getTime():Infinity));
+  
+  // Start with the most urgent (earliest deadline)
+  const sorted = [...tasks].sort((a,b)=>(a.deadline?a.deadline.getTime():Infinity)-(b.deadline?b.deadline.getTime():Infinity));
+  const result = [sorted[0]];
+  const remaining = new Set(sorted.slice(1));
+  
+  while (remaining.size > 0) {
+    const last = result[result.length - 1];
+    let closest = null, closestDist = Infinity;
+    for (const t of remaining) {
+      const d = haversine(last.coords.lat, last.coords.lng, t.coords.lat, t.coords.lng);
+      if (d < closestDist) { closestDist = d; closest = t; }
+    }
+    result.push(closest);
+    remaining.delete(closest);
+  }
+  return result;
 }
 
 function showRoute(tc) {
@@ -774,7 +845,7 @@ function showRoute(tc) {
   for (let i=1;i<tc.length;i++) dists.push(haversine(tc[i-1].coords.lat,tc[i-1].coords.lng,tc[i].coords.lat,tc[i].coords.lng));
   const totalKm=dists.reduce((a,b)=>a+b,0);
   document.getElementById('routeExplanation').innerHTML =
-    `Disse <strong>${tc.length} opgaver</strong> ligger inden for <strong>20 km</strong> af hinanden (ca. ${totalKm.toFixed(0)} km total). Sorteret efter deadline — mest presserende først.`;
+    `Disse <strong>${tc.length} opgaver</strong> ligger inden for <strong>20 km</strong> af hinanden (ca. ${totalKm.toFixed(0)} km total). Ruten starter ved den mest presserende og tager nærmeste stop næst.`;
   let h='';
   tc.forEach((t,i) => {
     const d=daysUntil(t.deadline), dc=deadlineClass(d), dl=deadlineLabel(d);
