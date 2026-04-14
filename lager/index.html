@@ -1286,8 +1286,9 @@ function renderDashTable() {
   const tbody = document.getElementById('dash-tbody');
   if (!items.length) { tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><p>Ingen varer fundet</p></div></td></tr>`; return; }
   tbody.innerHTML = items.map(item => {
-    const imgHtml = item.imgId
-      ? `<img src="https://lh3.googleusercontent.com/d/${item.imgId}" style="width:44px;height:44px;object-fit:contain;border-radius:4px;background:var(--bg3)">`
+    const imgSrcDash = item.imgId ? (item.imgId.startsWith('data:') ? item.imgId : `https://lh3.googleusercontent.com/d/${item.imgId}`) : '';
+    const imgHtml = imgSrcDash
+      ? `<img src="${imgSrcDash}" style="width:44px;height:44px;object-fit:contain;border-radius:4px;background:var(--bg3)">`
       : `<div style="width:44px;height:44px;border-radius:4px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:1.2rem">📦</div>`;
     return `<tr>
       <td>${imgHtml}</td>
@@ -1338,8 +1339,9 @@ function renderRegCards() {
   grid.innerHTML = items.map(item => {
     const s = getStatus(item);
     const stockColor = s==='out'?'var(--red)':s==='low'?'var(--yellow)':'var(--green)';
-    const imgHtml = item.imgId
-      ? `<img class="item-card-img" src="https://lh3.googleusercontent.com/d/${item.imgId}" loading="lazy" alt="${esc(item.navn)}">`
+    const imgSrcCard = item.imgId ? (item.imgId.startsWith('data:') ? item.imgId : `https://lh3.googleusercontent.com/d/${item.imgId}`) : '';
+    const imgHtml = imgSrcCard
+      ? `<img class="item-card-img" src="${imgSrcCard}" loading="lazy" alt="${esc(item.navn)}">`
       : `<div class="item-card-img-placeholder">📦</div>`;
     return `<div class="item-card${s==='out'?' out-of-stock':''}" onclick="openItemDetail('${esc(item.varenr)}')">
       ${imgHtml}
@@ -1361,8 +1363,9 @@ function openItemDetail(varenr) {
   state.qtyTarget = { varenr: item.varenr, navn: item.navn, enhed: item.enhed, lager: item.lager };
   // Image
   const imgWrap = document.getElementById('detail-img-wrap');
-  imgWrap.innerHTML = item.imgId
-    ? `<img class="item-detail-img" src="https://lh3.googleusercontent.com/d/${item.imgId}" alt="${esc(item.navn)}">`
+  const imgSrcDetail = item.imgId ? (item.imgId.startsWith('data:') ? item.imgId : `https://lh3.googleusercontent.com/d/${item.imgId}`) : '';
+  imgWrap.innerHTML = imgSrcDetail
+    ? `<img class="item-detail-img" src="${imgSrcDetail}" alt="${esc(item.navn)}">`
     : `<div class="item-detail-placeholder">📦</div>`;
   document.getElementById('detail-title').textContent = item.navn;
   const s = getStatus(item);
@@ -1791,7 +1794,7 @@ function openEditItem(rowIndex) {
   const preview = document.getElementById('item-img-preview');
   document.getElementById('item-img-file').value = '';
   if (item.imgId) {
-    preview.src = `https://lh3.googleusercontent.com/d/${item.imgId}`;
+    preview.src = item.imgId.startsWith('data:') ? item.imgId : `https://lh3.googleusercontent.com/d/${item.imgId}`;
     preview.style.display = 'block';
     area.classList.add('has-image');
     document.getElementById('img-upload-placeholder').style.display = 'none';
@@ -1849,72 +1852,44 @@ async function saveItem() {
     }
   } catch(e) { toast('Fejl ved gemning af vare','error'); btn.textContent=editRow?'Gem ændringer':'Gem vare'; btn.disabled=false; return; }
 
-  // UPLOAD BILLEDE BAGEFTER (kend nu rowIndex)
+  // BILLEDE: komprimer og gem som dataURL direkte i sheet (kolonne 8)
   if (imgFile) {
-    btn.textContent = 'Uploader billede...';
-    toast('Uploader billede...', 'info');
-    
-    // Find rowIndex – enten fra editRow eller fra det vi lige oprettede
-    let targetRow = editRow ? parseInt(editRow) : 0;
-    if (!targetRow) {
-      // Ny vare – find rækken i sheet
-      try {
-        const vData = await fetchSheet(SHEETS.varer);
-        const rows = vData.slice(1);
-        const idx = rows.findIndex(r => String(r[0]).trim() === String(varenr).trim());
-        if (idx >= 0) targetRow = idx + 2;
-      } catch(e) {}
-    }
-
-    await new Promise(resolve => {
-      // Komprimer billede til maks 800px og JPEG 70% kvalitet inden upload
+    btn.textContent = 'Behandler billede...';
+    imgId = await new Promise(resolve => {
       const img = new Image();
-      const objectUrl = URL.createObjectURL(imgFile);
-      img.onload = async () => {
-        URL.revokeObjectURL(objectUrl);
+      const url = URL.createObjectURL(imgFile);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
         const canvas = document.createElement('canvas');
-        const MAX = 800;
+        const MAX = 600;
         let w = img.width, h = img.height;
-        if (w > MAX || h > MAX) {
-          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
-          else { w = Math.round(w * MAX / h); h = MAX; }
-        }
+        if (w > h) { if (w > MAX) { h = Math.round(h*MAX/w); w = MAX; } }
+        else { if (h > MAX) { w = Math.round(w*MAX/h); h = MAX; } }
         canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-        const base64 = dataUrl.split(',')[1];
-        const sizeKB = Math.round(base64.length * 0.75 / 1024);
-        toast(`Sender billede (${sizeKB} KB)...`, 'info');
-        
-        await fetch(WEBHOOK, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: JSON.stringify({ action:'uploadImage', base64, mime:'image/jpeg', name: imgFile.name.replace(/\.[^.]+$/, '.jpg'), varenr:String(varenr), sheetRow:targetRow })
-        });
-        // Poll i op til 15 sek
-        for (let i = 0; i < 15; i++) {
-          await new Promise(r => setTimeout(r, 1000));
-          try {
-            const vData = await fetchSheet(SHEETS.varer);
-            const match = vData.slice(1).find(r => String(r[0]).trim() === String(varenr).trim());
-            if (match && match[7] && match[7].trim()) { imgId = match[7].trim(); break; }
-          } catch(e) {}
-        }
-        resolve();
+        resolve(canvas.toDataURL('image/jpeg', 0.65));
       };
-      img.src = objectUrl;
+      img.src = url;
     });
-
-    if (imgId && imgId !== existingImg) toast('Billede uploadet! ✓', 'success');
-    else toast('Vare gemt – billede uploades i baggrunden', 'info');
-  } else if (imgRemoved && existingImg) {
-    // Slet billede-reference
-    if (editRow) await webhookPost({ action:'updateCell', sheet:SHEETS.varer, row:parseInt(editRow), col:8, value:'' });
-    toast(`${navn} gemt!`, 'success');
-  } else {
-    toast(`${navn} ${editRow ? 'opdateret' : 'tilføjet'}!`, 'success');
+  } else if (imgRemoved) {
+    imgId = '';
   }
 
+  // Gem imgId (enten dataURL eller '') i sheet
+  try {
+    if (editRow) {
+      await webhookPost({ action:'updateCell', sheet:SHEETS.varer, row:parseInt(editRow), col:8, value:imgId });
+    } else {
+      // Opdater den række vi lige appendede
+      const vData = await fetchSheet(SHEETS.varer);
+      const idx = vData.slice(1).findIndex(r => String(r[0]).trim() === String(varenr).trim());
+      if (idx >= 0 && imgId) {
+        await webhookPost({ action:'updateCell', sheet:SHEETS.varer, row:idx+2, col:8, value:imgId });
+      }
+    }
+  } catch(e) {}
+
+  toast(`${navn} ${editRow ? 'opdateret' : 'tilføjet'}!`, 'success');
   closeModal('modal-additem');
   await loadData();
   btn.textContent = editRow ? 'Gem ændringer':'Gem vare'; btn.disabled=false;
