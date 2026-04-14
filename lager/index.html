@@ -499,9 +499,27 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
 
 /* responsive */
 @media (max-width: 600px) {
-  .topbar { padding: 0 12px; }
-  .main { padding: 16px; }
+  .topbar { padding: 0 10px; height: 48px; }
+  .topbar-logo { font-size: 0.8rem; }
+  .main { padding: 12px; }
+  .nav-tab { padding: 5px 10px; font-size: 0.78rem; }
   .nav-tab span { display: none; }
+  .register-layout { grid-template-columns: 1fr; }
+  .cards-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+  .cart-panel { position: static; max-height: none; }
+  .scanner-area { padding: 20px; }
+  #scanner-input { font-size: 1rem; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .section-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .modal { padding: 20px 16px; }
+  .form-grid2 { grid-template-columns: 1fr; }
+  .admin-grid { grid-template-columns: 1fr; }
+  .table-toolbar { flex-direction: column; align-items: stretch; }
+  .search-input { width: 100% !important; }
+  .btn { font-size: 0.8rem; padding: 8px 12px; }
+  #reg-search { width: 100% !important; }
+  .cat-pills { gap: 6px; }
+  .cat-pill { padding: 4px 10px; font-size: 0.72rem; }
 }
 </style>
 </head>
@@ -560,6 +578,10 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
       <button class="nav-tab" onclick="showTab('order')" data-tab="order">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
         <span>Bestil</span>
+      </button>
+      <button class="nav-tab medarbejder-only" onclick="showTab('myreg')" data-tab="myreg" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg>
+        <span>Mine træk</span>
       </button>
       <button class="nav-tab admin-only" onclick="showTab('admin')" data-tab="admin" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg>
@@ -764,6 +786,26 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
         </div>
         <textarea id="order-text" readonly></textarea>
       </div>
+    </div>
+
+    <!-- ══ MINE REGISTRERINGER ══ -->
+    <div class="tab-content" id="tab-myreg">
+      <div class="section-header" style="margin-bottom:8px">
+        <span class="section-title">Mine træk fra lager</span>
+      </div>
+      <div id="myreg-user-badge" style="display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:20px">
+        <div id="myreg-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.9rem">?</div>
+        <div>
+          <div style="font-size:0.7rem;color:var(--text3);letter-spacing:1px;font-family:var(--font-mono)">DINE REGISTRERINGER</div>
+          <div style="font-weight:600;font-size:1rem" id="myreg-name">–</div>
+        </div>
+        <div style="margin-left:auto;text-align:right">
+          <div style="font-size:0.7rem;color:var(--text3)">Seneste 50 træk</div>
+        </div>
+      </div>
+
+      <!-- Mobil-venlig liste -->
+      <div id="myreg-list" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
 
     <!-- ══ ADMIN ══ -->
@@ -1110,13 +1152,18 @@ function showApp() {
     loadData().then(() => showPicker());
 
   } else if (u.role === 'medarbejder') {
-    // Medarbejder: Overblik + Registrer kun
+    // Medarbejder: Registrer + Mine træk – ingen admin/bestil/overblik
     state.isLagerPC = false;
     document.querySelectorAll('.nav-tab').forEach(t => {
-      if (t.dataset.tab === 'admin' || t.dataset.tab === 'order') t.style.display = 'none';
+      if (t.dataset.tab === 'admin' || t.dataset.tab === 'order' || t.dataset.tab === 'dashboard') {
+        t.style.display = 'none';
+      }
     });
+    // Vis "Mine træk" fanen
+    document.querySelectorAll('.medarbejder-only').forEach(el => el.style.display = '');
     document.getElementById('reg-employee-banner').style.display = 'none';
     document.getElementById('reg-employee-wrap').style.display = 'block';
+    showTab('register');
     loadData();
 
   } else {
@@ -1214,7 +1261,7 @@ async function loadData() {
     state.transactions = tData.slice(1).filter(r=>r[0]).map(r=>({
       tid: r[0]||'', medarbejder: r[1]||'', varenr: r[2]||'',
       navn: r[3]||'', antal: r[4]||'', kategori: r[5]||''
-    })).reverse().slice(0,50);
+    })).reverse().slice(0,200);
   } catch(e) { state.transactions = []; }
 
   renderAll();
@@ -1231,6 +1278,7 @@ function renderAll() {
   renderOrderTable();
   renderUsersTable();
   renderLog();
+  renderMyReg();
   populateEmployees();
 }
 
@@ -1440,6 +1488,41 @@ function renderUsersTable() {
       </td>
     </tr>
   `).join('');
+}
+
+function renderMyReg() {
+  const u = state.currentUser;
+  if (!u || u.role !== 'medarbejder') return;
+  const name = u.name;
+  const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('myreg-name').textContent = name;
+  document.getElementById('myreg-avatar').textContent = initials;
+
+  const myTrans = state.transactions.filter(t =>
+    t.medarbejder && t.medarbejder.toLowerCase() === name.toLowerCase()
+  );
+
+  const list = document.getElementById('myreg-list');
+  if (!myTrans.length) {
+    list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text3);font-size:0.85rem">Ingen registreringer endnu</div>`;
+    return;
+  }
+
+  list.innerHTML = myTrans.map(t => {
+    const catColor = t.kategori==='Erhverv'?'var(--erhverv)':t.kategori==='Eftersalg'?'var(--eftersalg)':'var(--dso)';
+    return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:14px">
+      <div style="width:40px;height:40px;border-radius:var(--radius);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">📦</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.navn}</div>
+        <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--text3);margin-top:2px">${t.varenr}</div>
+        <div style="font-size:0.72rem;color:var(--text3);margin-top:3px">${t.tid}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-family:var(--font-mono);font-weight:700;font-size:1.1rem">${t.antal}</div>
+        <div style="font-size:0.7rem;color:${catColor};margin-top:2px">${t.kategori}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function renderLog() {
