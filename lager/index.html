@@ -1841,11 +1841,20 @@ async function saveItem() {
       const reader = new FileReader();
       reader.onload = async e => {
         const base64 = e.target.result.split(',')[1];
-        // Post med no-cors – Apps Script skriver imgId direkte i Sheets
+        // no-cors: browseren ignorerer custom headers, men body sendes stadig
+        // Apps Script læser e.postData.contents uanset content-type
+        const payload = JSON.stringify({ 
+          action: 'uploadImage', 
+          base64, 
+          mime: imgFile.type, 
+          name: imgFile.name, 
+          varenr: String(varenr), 
+          sheetRow: editRow ? parseInt(editRow) : 0 
+        });
         await fetch(WEBHOOK, {
-          method: 'POST', mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'uploadImage', base64, mime: imgFile.type, name: imgFile.name, varenr, sheetRow: editRow ? parseInt(editRow) : 0 })
+          method: 'POST', 
+          mode: 'no-cors',
+          body: payload
         });
         // Poll sheet i op til 8 sek for at hente det nye imgId
         let found = '';
