@@ -244,11 +244,69 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
 .grid-copy{font-size:11px;cursor:pointer;background:var(--red-dim);border:1px solid var(--red-border);color:#e05555;font-family:inherit;padding:3px 10px;border-radius:4px;transition:all .15s}
 .grid-copy:hover{background:rgba(165,28,28,.25)}
 .grid-copy.copied{color:var(--green);border-color:rgba(46,204,113,.3);background:rgba(46,204,113,.1)}
+
+/* HAMBURGER MENU */
+.menu-toggle{display:none;position:fixed;top:10px;left:10px;z-index:150;background:var(--red);border:none;color:#fff;font-size:20px;padding:8px 12px;border-radius:8px;cursor:pointer;line-height:1}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99}
+
+/* TABLET (<1100px) — sidebar hidden by default */
+@media(max-width:1100px){
+  .sidebar{transform:translateX(-100%);transition:transform .25s ease}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay.open{display:block}
+  .menu-toggle{display:block}
+  .main{margin-left:0}
+  .topbar{padding:12px 16px 12px 54px}
+  .content{padding:16px}
+  .stats-row{grid-template-columns:repeat(2,1fr);gap:8px}
+  .dash-grid{grid-template-columns:1fr;gap:10px}
+  .search-input{width:180px}
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .modal{max-width:96vw;max-height:94vh}
+  .modal-top{padding:18px 20px 16px}
+  .modal-body{padding:18px 20px}
+  .mat-grid{grid-template-columns:repeat(2,1fr)}
+  .weather-widget{flex-wrap:wrap}
+  .weather-forecast{margin-left:0}
+  .grid-cards{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+}
+
+/* PHONE (<600px) */
+@media(max-width:600px){
+  .topbar{padding:10px 12px 10px 50px;gap:8px}
+  .page-title{font-size:13px}
+  .search-input{width:120px;font-size:12px;padding:6px 10px 6px 28px}
+  .search-icon{font-size:12px;left:8px}
+  .refresh-btn{padding:6px 10px;font-size:11px}
+  .content{padding:12px}
+  .stats-row{grid-template-columns:1fr 1fr;gap:6px}
+  .stat-card{padding:12px 14px}
+  .stat-value{font-size:20px}
+  .stat-label{font-size:9px}
+  .filter-bar{padding:8px 12px;gap:5px}
+  .filter-btn{padding:3px 10px;font-size:11px}
+  .table-header{padding:10px 14px}
+  th{padding:7px 10px;font-size:9px}
+  td{padding:8px 10px;font-size:12px}
+  .trunc{max-width:140px}
+  .modal{border-radius:10px}
+  .modal-top{padding:16px 18px 14px}
+  .modal-title{font-size:17px}
+  .modal-body{padding:14px 16px}
+  .mat-grid{grid-template-columns:1fr 1fr}
+  .weather-details{gap:10px}
+  .weather-temp{font-size:22px}
+  .weather-icon{font-size:28px}
+  .grid-cards{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
-<nav class="sidebar">
+<button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<nav class="sidebar" id="sidebar">
   <div class="logo">
     <div class="logo-banner">
       <div class="logo-name">Søren Knudsen A/S</div>
@@ -408,6 +466,37 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
 </div>
 
 <script>
+// Sidebar toggle for tablet/phone
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+
+// Helper: Detect "green" / færdig rows based on status column content
+// For DSO2026 (no deadline): status = col 7
+// For Norlys/BB/Erhverv (has deadline): status = col 8
+function isRowFærdig(r, hasDeadline) {
+  const statusIdx = hasDeadline ? 8 : 7;
+  const s = (r[statusIdx]||'').toLowerCase().trim();
+  return s.includes('færdig') || s.includes('faktureret');
+}
+
+// Helper: Validate that a "landmålt" or "blæst" value looks like actual field data
+// Valid: dates (dd/mm/yyyy, dd-mm-yyyy), "ja", or meter+fiber strings like "200m 2 fiber"
+// Invalid: random notes, "Mi", "afventer", header text etc.
+function isValidFieldValue(v) {
+  if (!v) return false;
+  const s = v.trim();
+  if (!s) return false;
+  // Date patterns: dd/mm/yyyy, dd-mm-yyyy, dd.mm.yyyy, or just dd/mm
+  if (/\d{1,2}[\/\.\-]\d{1,2}/.test(s)) return true;
+  // "ja" or "ok"
+  if (/^(ja|ok|yes)$/i.test(s)) return true;
+  // Meter+fiber pattern: "200m 2 fiber" or "150m 12 fiber, 300m 2 fiber"
+  if (/\d+\s*m\s/i.test(s)) return true;
+  return false;
+}
+
 const SHEET_ID = "1nAfna80c5NbT5mNhsXey84wu--DZVYct7NFRSRvTZr4";
 const GIDS = { dso2026:"231051019", norlys:"129649262", gridopt:"995508700", bb:"730701596", kontakter:"1115694378", erhverv:"275893518" };
 const KUNDELISTE_LINKS = {
@@ -770,6 +859,9 @@ function showPage(id) {
   const srch=document.getElementById('search');
   srch.style.display = id==='gridopt'?'none':'';
   srch.value=''; searchQuery='';
+  // Close sidebar on mobile/tablet
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
   renderCurrent();
 }
 
@@ -803,12 +895,14 @@ function showErr(key, msg) {
 function renderDSO2026() {
   const d=DATA.dso2026;
   if(!d){showErr('dso2026','Kunne ikke hente data. Er Google Sheet delt offentligt?');return;}
-  const all=d.rows.filter(r=>isSagsnr(r[0]));
+  const allRaw=d.rows.filter(r=>isSagsnr(r[0]));
+  // Filter out færdig/green rows
+  const all=allRaw.filter(r=>!isRowFærdig(r, false));
   const fil=activeFilters.dso2026||'all';
   let rows=all.filter(r=>fil==='all'||r[3]===fil||r[1]===fil);
   rows=filterRows(rows);
 
-  const total=all.length,udl=all.filter(r=>r[4]).length,land=all.filter(r=>r[8]).length,blae=all.filter(r=>r[9]).length;
+  const total=all.length,udl=all.filter(r=>r[4]).length,land=all.filter(r=>isValidFieldValue(r[8])).length,blae=all.filter(r=>isValidFieldValue(r[9])).length;
   document.getElementById('stats-dso2026').innerHTML=`
     <div class="stat-card"><div class="stat-label">Projekter</div><div class="stat-value">${total}</div></div>
     <div class="stat-card"><div class="stat-label">Udleveret</div><div class="stat-value">${udl}</div><div class="stat-sub">af ${total}</div></div>
@@ -850,7 +944,8 @@ function renderDSO2026() {
 function renderNorlys() {
   const d=DATA.norlys;
   if(!d){showErr('norlys','Kunne ikke hente data.');return;}
-  const all=d.rows.filter(r=>isSagsnr(r[0]));
+  const allRaw=d.rows.filter(r=>isSagsnr(r[0]));
+  const all=allRaw.filter(r=>!isRowFærdig(r, true));
   const fil=activeFilters.norlys||'all';
   let rows=all.filter(r=>fil==='all'||r[3]===fil);
   rows=filterRows(rows);
@@ -924,10 +1019,12 @@ function renderBB() {
   const d = DATA.bb;
   if (!d) { showErr('bb','Kunne ikke hente data.'); return; }
 
-  const all = d.rows.filter(r => {
+  const allRaw = d.rows.filter(r => {
     const addr = (r[2]||'').trim();
     return addr.length > 2;
   });
+  // Filter out færdig/green rows (BB has deadline = true)
+  const all = allRaw.filter(r => !isRowFærdig(r, true));
 
   const fil = activeFilters.bb || 'all';
   let rows = all.filter(r => fil==='all' || r[3]===fil || r[1]===fil);
@@ -935,8 +1032,8 @@ function renderBB() {
 
   const total = all.length;
   const udl   = all.filter(r => r[5] && r[5].trim()).length;
-  const land  = all.filter(r => r[9] && r[9].trim()).length;
-  const blae  = all.filter(r => r[10] && r[10].trim()).length;
+  const land  = all.filter(r => isValidFieldValue(r[9])).length;
+  const blae  = all.filter(r => isValidFieldValue(r[10])).length;
 
   document.getElementById('stats-bb').innerHTML = `
     <div class="stat-card"><div class="stat-label">Projekter</div><div class="stat-value">${total}</div></div>
@@ -986,15 +1083,16 @@ function renderBB() {
 function renderErhverv() {
   const d=DATA.erhverv;
   if(!d){showErr('erhverv','Kunne ikke hente data.');return;}
-  const all=d.rows.filter(r=>isSagsnr(r[0]));
+  const allRaw=d.rows.filter(r=>isSagsnr(r[0]));
+  const all=allRaw.filter(r=>!isRowFærdig(r, true));
   const fil=activeFilters.erhverv||'all';
   let rows=all.filter(r=>fil==='all'||r[3]===fil);
   rows=filterRows(rows);
 
   const total=all.length;
   const udl=all.filter(r=>r[5]&&r[5].trim()).length;
-  const land=all.filter(r=>r[9]&&r[9].trim()).length;
-  const blae=all.filter(r=>r[10]&&r[10].trim()).length;
+  const land=all.filter(r=>isValidFieldValue(r[9])).length;
+  const blae=all.filter(r=>isValidFieldValue(r[10])).length;
 
   document.getElementById('stats-erhverv').innerHTML=`
     <div class="stat-card"><div class="stat-label">Projekter</div><div class="stat-value">${total}</div></div>
@@ -1038,7 +1136,7 @@ function renderErhverv() {
 function openModalBB(idx) {
   const d = DATA.bb;
   if (!d) return;
-  const all = d.rows.filter(r => (r[2]||'').trim().length > 2);
+  const all = d.rows.filter(r => (r[2]||'').trim().length > 2 && !isRowFærdig(r, true));
   const r = all[idx];
   if (!r) return;
 
@@ -1145,11 +1243,11 @@ async function toggleDoneBB(idx, wrap) {
 function openModal(key, idx) {
   const d=DATA[key];
   if(!d) return;
-  const all=d.rows.filter(r=>isSagsnr(r[0]));
+  const hasDeadline = key==='norlys' || key==='erhverv';
+  const all=d.rows.filter(r=>isSagsnr(r[0])&&!isRowFærdig(r, hasDeadline));
   const r=all[idx];
   if(!r) return;
 
-  const hasDeadline = key==='norlys' || key==='erhverv';
   const COL = {
     deadline: hasDeadline ? 4 : null,
     udleveret: hasDeadline ? 5 : 4,
@@ -1309,10 +1407,10 @@ function setFilter(key,val,btn){
 // DASHBOARD — FIXED: BB stats now use correct column indices
 function buildDashboard() {
   const d26=DATA.dso2026, dn=DATA.norlys, dg=DATA.gridopt, dbb=DATA.bb, de=DATA.erhverv;
-  const all26=d26?d26.rows.filter(r=>isSagsnr(r[0])):[];
-  const alln=dn?dn.rows.filter(r=>isSagsnr(r[0])):[];
-  const allbb=dbb?dbb.rows.filter(r=>(r[2]||'').trim().length>2):[];
-  const alle=de?de.rows.filter(r=>isSagsnr(r[0])):[];
+  const all26=d26?d26.rows.filter(r=>isSagsnr(r[0])&&!isRowFærdig(r,false)):[];
+  const alln=dn?dn.rows.filter(r=>isSagsnr(r[0])&&!isRowFærdig(r,true)):[];
+  const allbb=dbb?dbb.rows.filter(r=>(r[2]||'').trim().length>2&&!isRowFærdig(r,true)):[];
+  const alle=de?de.rows.filter(r=>isSagsnr(r[0])&&!isRowFærdig(r,true)):[];
   const gridCount=dg?dg.rows.filter(r=>r[0]&&r[0].trim()&&r[0]!=='MEDARBEJDER').length:0;
 
   document.getElementById('cnt-dso2026').textContent=all26.length;
@@ -1321,21 +1419,21 @@ function buildDashboard() {
   const elE=document.getElementById('cnt-erhverv'); if(elE) elE.textContent=alle.length;
 
   const dsoUdl=all26.filter(r=>r[4]&&r[4].trim()).length;
-  const dsoLand=all26.filter(r=>r[8]&&r[8].trim()).length;
-  const dsoBlae=all26.filter(r=>r[9]&&r[9].trim()).length;
+  const dsoLand=all26.filter(r=>isValidFieldValue(r[8])).length;
+  const dsoBlae=all26.filter(r=>isValidFieldValue(r[9])).length;
 
   const norUdl=alln.filter(r=>r[5]&&r[5].trim()).length;
-  const norLand=alln.filter(r=>r[9]&&r[9].trim()).length;
-  const norBlae=alln.filter(r=>r[10]&&r[10].trim()).length;
+  const norLand=alln.filter(r=>isValidFieldValue(r[9])).length;
+  const norBlae=alln.filter(r=>isValidFieldValue(r[10])).length;
 
-  // BB stats — FIXED: shifted +1 for Deadline column
+  // BB stats
   const bbUdl=allbb.filter(r=>r[5]&&r[5].trim()).length;
-  const bbLand=allbb.filter(r=>r[9]&&r[9].trim()).length;
-  const bbBlae=allbb.filter(r=>r[10]&&r[10].trim()).length;
+  const bbLand=allbb.filter(r=>isValidFieldValue(r[9])).length;
+  const bbBlae=allbb.filter(r=>isValidFieldValue(r[10])).length;
 
   const erhUdl=alle.filter(r=>r[5]&&r[5].trim()).length;
-  const erhLand=alle.filter(r=>r[9]&&r[9].trim()).length;
-  const erhBlae=alle.filter(r=>r[10]&&r[10].trim()).length;
+  const erhLand=alle.filter(r=>isValidFieldValue(r[9])).length;
+  const erhBlae=alle.filter(r=>isValidFieldValue(r[10])).length;
 
   const totalAll=all26.length+alln.length+allbb.length+alle.length;
   const totalLand=dsoLand+norLand+bbLand+erhLand;
