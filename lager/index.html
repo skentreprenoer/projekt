@@ -1826,63 +1826,14 @@ async function saveItem() {
   const btn = document.getElementById('additem-save-btn');
   btn.textContent = 'Gemmer...'; btn.disabled = true;
 
-  // Handle image upload
-  // Apps Script returnerer ikke JSON over CORS fra GitHub Pages.
-  // Vi poster med no-cors + varenr, Apps Script skriver imgId i sheet selv.
-  // Derefter poller vi sheet for at hente imgId.
-  let imgId = existingImg;
   const imgFile = document.getElementById('item-img-file').files[0];
   const preview = document.getElementById('item-img-preview');
-  const imgRemoved = !preview.src || preview.style.display==='none' || preview.src===window.location.href;
+  const imgRemoved = preview.style.display === 'none' || !preview.src || preview.src === window.location.href;
+  let imgId = imgRemoved && !imgFile ? '' : existingImg;
 
-  if (imgFile) {
-    toast('Uploader billede – vent et øjeblik...', 'info');
-    imgId = await new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onload = async e => {
-        const base64 = e.target.result.split(',')[1];
-        // no-cors: browseren ignorerer custom headers, men body sendes stadig
-        // Apps Script læser e.postData.contents uanset content-type
-        const payload = JSON.stringify({ 
-          action: 'uploadImage', 
-          base64, 
-          mime: imgFile.type, 
-          name: imgFile.name, 
-          varenr: String(varenr), 
-          sheetRow: editRow ? parseInt(editRow) : 0 
-        });
-        await fetch(WEBHOOK, {
-          method: 'POST', 
-          mode: 'no-cors',
-          body: payload
-        });
-        // Poll sheet i op til 8 sek for at hente det nye imgId
-        let found = '';
-        for (let attempt = 0; attempt < 8; attempt++) {
-          await new Promise(r => setTimeout(r, 1000));
-          try {
-            const vData = await fetchSheet(SHEETS.varer);
-            const rows = vData.slice(1);
-            // Find rækken med dette varenr
-            const match = rows.find(r => String(r[0]).trim() === String(varenr).trim());
-            if (match && match[7] && match[7].trim()) { found = match[7].trim(); break; }
-          } catch(e) { /* fortsæt polling */ }
-        }
-        resolve(found || existingImg);
-      };
-      reader.readAsDataURL(imgFile);
-    });
-    if (imgId && imgId !== existingImg) toast('Billede uploadet!', 'success');
-    else toast('Billede sendt – opdater siden om lidt hvis det ikke vises', 'info');
-  } else if (imgRemoved && existingImg) {
-    imgId = ''; // Brugeren har fjernet billedet
-  }
-
-  const row = [varenr, navn, kat, lager, min, enhed, note, imgId];
-
+  // GEM VAREN FØRST
   try {
     if (editRow) {
-      // Update existing row cell by cell
       const r = parseInt(editRow);
       await Promise.all([
         webhookPost({ action:'updateCell', sheet:SHEETS.varer, row:r, col:1, value:varenr }),
@@ -1892,17 +1843,65 @@ async function saveItem() {
         webhookPost({ action:'updateCell', sheet:SHEETS.varer, row:r, col:5, value:min }),
         webhookPost({ action:'updateCell', sheet:SHEETS.varer, row:r, col:6, value:enhed }),
         webhookPost({ action:'updateCell', sheet:SHEETS.varer, row:r, col:7, value:note }),
-        webhookPost({ action:'updateCell', sheet:SHEETS.varer, row:r, col:8, value:imgId }),
       ]);
-      toast(`${navn} opdateret!`, 'success');
     } else {
-      await webhookPost({ action: 'appendRow', sheet: SHEETS.varer, row });
-      toast(`${navn} tilføjet!`, 'success');
+      await webhookPost({ action:'appendRow', sheet:SHEETS.varer, row:[varenr, navn, kat, lager, min, enhed, note, ''] });
     }
-    closeModal('modal-additem');
-    await loadData();
-  } catch(e) { toast('Fejl ved gemning', 'error'); }
-  finally { btn.textContent = editRow ? 'Gem ændringer':'Gem vare'; btn.disabled=false; }
+  } catch(e) { toast('Fejl ved gemning af vare','error'); btn.textContent=editRow?'Gem ændringer':'Gem vare'; btn.disabled=false; return; }
+
+  // UPLOAD BILLEDE BAGEFTER (kend nu rowIndex)
+  if (imgFile) {
+    btn.textContent = 'Uploader billede...';
+    toast('Uploader billede...', 'info');
+    
+    // Find rowIndex – enten fra editRow eller fra det vi lige oprettede
+    let targetRow = editRow ? parseInt(editRow) : 0;
+    if (!targetRow) {
+      // Ny vare – find rækken i sheet
+      try {
+        const vData = await fetchSheet(SHEETS.varer);
+        const rows = vData.slice(1);
+        const idx = rows.findIndex(r => String(r[0]).trim() === String(varenr).trim());
+        if (idx >= 0) targetRow = idx + 2;
+      } catch(e) {}
+    }
+
+    await new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = async e => {
+        const base64 = e.target.result.split(',')[1];
+        await fetch(WEBHOOK, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify({ action:'uploadImage', base64, mime:imgFile.type, name:imgFile.name, varenr:String(varenr), sheetRow:targetRow })
+        });
+        // Poll i op til 12 sek
+        for (let i = 0; i < 12; i++) {
+          await new Promise(r => setTimeout(r, 1000));
+          try {
+            const vData = await fetchSheet(SHEETS.varer);
+            const match = vData.slice(1).find(r => String(r[0]).trim() === String(varenr).trim());
+            if (match && match[7] && match[7].trim()) { imgId = match[7].trim(); break; }
+          } catch(e) {}
+        }
+        resolve();
+      };
+      reader.readAsDataURL(imgFile);
+    });
+
+    if (imgId && imgId !== existingImg) toast('Billede uploadet! ✓', 'success');
+    else toast('Vare gemt – billede uploades i baggrunden', 'info');
+  } else if (imgRemoved && existingImg) {
+    // Slet billede-reference
+    if (editRow) await webhookPost({ action:'updateCell', sheet:SHEETS.varer, row:parseInt(editRow), col:8, value:'' });
+    toast(`${navn} gemt!`, 'success');
+  } else {
+    toast(`${navn} ${editRow ? 'opdateret' : 'tilføjet'}!`, 'success');
+  }
+
+  closeModal('modal-additem');
+  await loadData();
+  btn.textContent = editRow ? 'Gem ændringer':'Gem vare'; btn.disabled=false;
 }
 
 async function deleteItem(rowIndex, navn) {
