@@ -859,12 +859,22 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
     <input type="hidden" id="item-existing-img" value="">
     <div class="form-row">
       <label>Produktbillede</label>
-      <div class="img-upload-area" id="img-upload-area" onclick="triggerImgUpload()">
-        <input type="file" id="item-img-file" accept="image/*" onchange="previewImg(this)" onclick="event.stopPropagation()">
-        <div class="img-upload-icon">📷</div>
-        <div class="img-upload-hint">Klik for at uploade billede (valgfrit)</div>
-        <img id="item-img-preview" src="" alt="" style="display:none">
-        <button class="img-remove-btn" onclick="removeImg(event)">✕ Fjern</button>
+      <div class="img-upload-area" id="img-upload-area">
+        <input type="file" id="item-img-file" accept="image/*" onchange="previewImg(this)" style="display:none">
+        <div class="img-upload-icon" id="img-upload-placeholder">📷</div>
+        <div class="img-upload-hint" id="img-upload-hint-text">Klik for at vælge billede</div>
+        <img id="item-img-preview" src="" alt="" style="display:none;width:100%;max-height:160px;object-fit:contain">
+        <button class="img-remove-btn" onclick="removeImg(event)">✕ Fjern billede</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button type="button" class="btn btn-ghost" style="font-size:0.78rem;padding:6px 12px;flex:1" onclick="document.getElementById('item-img-file').click()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          <span id="img-btn-label">Vælg billede</span>
+        </button>
+        <button type="button" class="btn btn-ghost" style="font-size:0.78rem;padding:6px 12px;color:var(--red);border-color:var(--border)" id="img-delete-btn" onclick="removeImg(event)" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          Slet billede
+        </button>
       </div>
     </div>
     <div class="form-grid2">
@@ -1287,7 +1297,7 @@ function renderDashTable() {
       <td style="color:var(--text3)">${item.enhed}</td>
       <td style="display:flex;gap:6px;align-items:center;padding:8px 14px">
         <button class="btn-sm" onclick="openEditItem(${item.rowIndex})">Rediger</button>
-        <button class="btn-sm danger" onclick="deleteItem(${item.rowIndex}, '${esc(item.navn)}')">Slet</button>
+        <button class="btn-sm danger" onclick="deleteItem(${item.rowIndex}, '${esc(item.navn)}')">Slet vare</button>
       </td>
     </tr>`;
   }).join('');
@@ -1687,29 +1697,34 @@ function renderOrderSummary() {} // placeholder
 // ITEM CRUD
 // ═══════════════════════════════════════════════
 // ── IMAGE UPLOAD HELPERS ──
-function triggerImgUpload() {
-  document.getElementById('item-img-file').click();
-}
 function previewImg(input) {
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    const area = document.getElementById('img-upload-area');
     const preview = document.getElementById('item-img-preview');
     preview.src = e.target.result;
     preview.style.display = 'block';
-    area.classList.add('has-image');
+    document.getElementById('img-upload-placeholder').style.display = 'none';
+    document.getElementById('img-upload-hint-text').style.display = 'none';
+    document.getElementById('img-upload-area').classList.add('has-image');
+    document.getElementById('img-btn-label').textContent = 'Skift billede';
+    document.getElementById('img-delete-btn').style.display = 'flex';
   };
   reader.readAsDataURL(file);
 }
 function removeImg(e) {
-  e.stopPropagation();
+  if(e && e.stopPropagation) e.stopPropagation();
   document.getElementById('img-upload-area').classList.remove('has-image');
-  document.getElementById('item-img-preview').style.display='none';
-  document.getElementById('item-img-preview').src='';
-  document.getElementById('item-img-file').value='';
-  document.getElementById('item-existing-img').value='';
+  const preview = document.getElementById('item-img-preview');
+  preview.style.display = 'none';
+  preview.src = '';
+  document.getElementById('item-img-file').value = '';
+  document.getElementById('item-existing-img').value = '';
+  document.getElementById('img-upload-placeholder').style.display = 'block';
+  document.getElementById('img-upload-hint-text').style.display = 'block';
+  document.getElementById('img-btn-label').textContent = 'Vælg billede';
+  document.getElementById('img-delete-btn').style.display = 'none';
 }
 async function uploadImgToDrive(file) {
   return new Promise((resolve, reject) => {
@@ -1776,9 +1791,18 @@ function openEditItem(rowIndex) {
     preview.src = `https://drive.google.com/uc?export=view&id=${item.imgId}`;
     preview.style.display = 'block';
     area.classList.add('has-image');
+    document.getElementById('img-upload-placeholder').style.display = 'none';
+    document.getElementById('img-upload-hint-text').style.display = 'none';
+    document.getElementById('img-btn-label').textContent = 'Skift billede';
+    document.getElementById('img-delete-btn').style.display = 'flex';
   } else {
     preview.style.display = 'none';
+    preview.src = '';
     area.classList.remove('has-image');
+    document.getElementById('img-upload-placeholder').style.display = 'block';
+    document.getElementById('img-upload-hint-text').style.display = 'block';
+    document.getElementById('img-btn-label').textContent = 'Vælg billede';
+    document.getElementById('img-delete-btn').style.display = 'none';
   }
   document.getElementById('modal-additem').classList.add('open');
 }
@@ -1800,39 +1824,47 @@ async function saveItem() {
   btn.textContent = 'Gemmer...'; btn.disabled = true;
 
   // Handle image upload
+  // Apps Script returnerer ikke JSON over CORS fra GitHub Pages.
+  // Vi poster med no-cors + varenr, Apps Script skriver imgId i sheet selv.
+  // Derefter poller vi sheet for at hente imgId.
   let imgId = existingImg;
   const imgFile = document.getElementById('item-img-file').files[0];
+  const preview = document.getElementById('item-img-preview');
+  const imgRemoved = !preview.src || preview.style.display==='none' || preview.src===window.location.href;
+
   if (imgFile) {
-    toast('Uploader billede...', 'info');
-    const reader = new FileReader();
+    toast('Uploader billede – vent et øjeblik...', 'info');
     imgId = await new Promise(resolve => {
+      const reader = new FileReader();
       reader.onload = async e => {
         const base64 = e.target.result.split(',')[1];
-        try {
-          // We post with regular fetch to get response back
-          const r = await fetch(WEBHOOK + '?action=uploadImage', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'uploadImage', base64, mime: imgFile.type, name: imgFile.name })
-          });
-          const data = await r.json();
-          resolve(data.imgId || existingImg);
-        } catch {
-          // no-cors fallback – post and keep existing
-          await fetch(WEBHOOK, { method:'POST', mode:'no-cors',
-            headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ action:'uploadImage', base64, mime:imgFile.type, name:imgFile.name, varenr })
-          });
-          resolve(existingImg);
+        // Post med no-cors – Apps Script skriver imgId direkte i Sheets
+        await fetch(WEBHOOK, {
+          method: 'POST', mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'uploadImage', base64, mime: imgFile.type, name: imgFile.name, varenr, sheetRow: editRow ? parseInt(editRow) : 0 })
+        });
+        // Poll sheet i op til 8 sek for at hente det nye imgId
+        let found = '';
+        for (let attempt = 0; attempt < 8; attempt++) {
+          await new Promise(r => setTimeout(r, 1000));
+          try {
+            const vData = await fetchSheet(SHEETS.varer);
+            const rows = vData.slice(1);
+            // Find rækken med dette varenr
+            const match = rows.find(r => String(r[0]).trim() === String(varenr).trim());
+            if (match && match[7] && match[7].trim()) { found = match[7].trim(); break; }
+          } catch(e) { /* fortsæt polling */ }
         }
+        resolve(found || existingImg);
       };
       reader.readAsDataURL(imgFile);
     });
+    if (imgId && imgId !== existingImg) toast('Billede uploadet!', 'success');
+    else toast('Billede sendt – opdater siden om lidt hvis det ikke vises', 'info');
+  } else if (imgRemoved && existingImg) {
+    imgId = ''; // Brugeren har fjernet billedet
   }
-
-  // If preview shown but no file and no existingImg -> image removed
-  const preview = document.getElementById('item-img-preview');
-  if (!preview.src || preview.style.display==='none') imgId = '';
 
   const row = [varenr, navn, kat, lager, min, enhed, note, imgId];
 
