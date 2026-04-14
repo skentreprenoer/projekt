@@ -1091,15 +1091,25 @@ function showApp() {
   // Lager-PC rolle: hop direkte til registrering, vis picker
   if (u.role === 'lager') {
     state.isLagerPC = true;
-    // Skjul navigation undtagen registrering
     document.querySelectorAll('.nav-tab').forEach(t => {
       if (t.dataset.tab !== 'register') t.style.display = 'none';
     });
     showTab('register');
     loadData().then(() => showPicker());
-  } else {
+
+  } else if (u.role === 'medarbejder') {
+    // Medarbejder: kun Overblik + Registrer, låst til sig selv
     state.isLagerPC = false;
-    // Telefon/admin: medarbejder er dem selv
+    document.querySelectorAll('.nav-tab').forEach(t => {
+      if (t.dataset.tab === 'admin' || t.dataset.tab === 'order') t.style.display = 'none';
+    });
+    document.getElementById('reg-employee-banner').style.display = 'none';
+    document.getElementById('reg-employee-wrap').style.display = 'block';
+    loadData();
+
+  } else {
+    // Admin: fuld adgang
+    state.isLagerPC = false;
     document.getElementById('reg-employee-banner').style.display = 'none';
     document.getElementById('reg-employee-wrap').style.display = 'block';
     loadData();
@@ -1157,9 +1167,12 @@ async function fetchSheet(sheetName) {
   // Byg header-række fra cols
   const headers = json.table.cols.map(c => c.label || c.id || '');
   const rows = json.table.rows.map(r => r.c.map(c => {
-    if (!c || c.v === null || c.v === undefined) return '';
-    // GViz returnerer tal som numbers – konverter til string
-    return String(c.v);
+    if (!c || (c.v === null && c.f === null)) return '';
+    // Brug c.f (formatted value) hvis det findes – bevarer Ø, æ, ø osv. korrekt
+    // c.v kan mangle specialtegn i tal-formatterede celler
+    if (c.f !== null && c.f !== undefined && c.f !== '') return String(c.f);
+    if (c.v !== null && c.v !== undefined) return String(c.v);
+    return '';
   }));
   return [headers, ...rows];
 }
@@ -1261,7 +1274,7 @@ function renderDashTable() {
   if (!items.length) { tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><p>Ingen varer fundet</p></div></td></tr>`; return; }
   tbody.innerHTML = items.map(item => {
     const imgHtml = item.imgId
-      ? `<img src="https://drive.google.com/thumbnail?id=${item.imgId}&sz=w60" style="width:44px;height:44px;object-fit:contain;border-radius:4px;background:var(--bg3)">`
+      ? `<img src="https://drive.google.com/uc?export=view&id=${item.imgId}" style="width:44px;height:44px;object-fit:contain;border-radius:4px;background:var(--bg3)">`
       : `<div style="width:44px;height:44px;border-radius:4px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:1.2rem">📦</div>`;
     return `<tr>
       <td>${imgHtml}</td>
@@ -1313,7 +1326,7 @@ function renderRegCards() {
     const s = getStatus(item);
     const stockColor = s==='out'?'var(--red)':s==='low'?'var(--yellow)':'var(--green)';
     const imgHtml = item.imgId
-      ? `<img class="item-card-img" src="https://drive.google.com/thumbnail?id=${item.imgId}&sz=w200" loading="lazy" alt="${esc(item.navn)}">`
+      ? `<img class="item-card-img" src="https://drive.google.com/uc?export=view&id=${item.imgId}" loading="lazy" alt="${esc(item.navn)}">`
       : `<div class="item-card-img-placeholder">📦</div>`;
     return `<div class="item-card${s==='out'?' out-of-stock':''}" onclick="openItemDetail('${esc(item.varenr)}')">
       ${imgHtml}
@@ -1336,7 +1349,7 @@ function openItemDetail(varenr) {
   // Image
   const imgWrap = document.getElementById('detail-img-wrap');
   imgWrap.innerHTML = item.imgId
-    ? `<img class="item-detail-img" src="https://drive.google.com/thumbnail?id=${item.imgId}&sz=w400" alt="${esc(item.navn)}">`
+    ? `<img class="item-detail-img" src="https://drive.google.com/uc?export=view&id=${item.imgId}" alt="${esc(item.navn)}">`
     : `<div class="item-detail-placeholder">📦</div>`;
   document.getElementById('detail-title').textContent = item.navn;
   const s = getStatus(item);
@@ -1437,12 +1450,26 @@ function populateEmployees() {
     if (u.navn === cur) o.selected = true;
     sel.appendChild(o);
   });
-  // Telefon: pre-select den indloggede bruger
-  if (!state.isLagerPC && state.currentUser && state.currentUser.role !== 'lager') {
-    if (!cur) sel.value = state.currentUser.name || '';
-    // Og lås feltet for medarbejder-rolle
+  // Sæt og lås medarbejder baseret på rolle
+  if (!state.isLagerPC && state.currentUser) {
     if (state.currentUser.role === 'medarbejder') {
+      // Lås til sig selv – skjul dropdown, vis navn som badge i stedet
+      sel.value = state.currentUser.name || '';
       sel.disabled = true;
+      sel.style.opacity = '0.6';
+      sel.style.cursor = 'not-allowed';
+      // Vis hvem det er tydeligt
+      const wrap = document.getElementById('reg-employee-wrap');
+      const existingBadge = document.getElementById('emp-locked-badge');
+      if (!existingBadge) {
+        const badge = document.createElement('div');
+        badge.id = 'emp-locked-badge';
+        badge.style.cssText = 'display:flex;align-items:center;gap:8px;margin-top:6px;font-size:0.75rem;color:var(--text3)';
+        badge.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Låst til din bruger';
+        wrap.appendChild(badge);
+      }
+    } else if (state.currentUser.role !== 'lager') {
+      if (!cur) sel.value = state.currentUser.name || '';
     }
   }
 }
@@ -1746,7 +1773,7 @@ function openEditItem(rowIndex) {
   const preview = document.getElementById('item-img-preview');
   document.getElementById('item-img-file').value = '';
   if (item.imgId) {
-    preview.src = `https://drive.google.com/thumbnail?id=${item.imgId}&sz=w200`;
+    preview.src = `https://drive.google.com/uc?export=view&id=${item.imgId}`;
     preview.style.display = 'block';
     area.classList.add('has-image');
   } else {
