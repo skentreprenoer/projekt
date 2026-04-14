@@ -525,7 +525,7 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
     </div>
     <div class="form-row">
       <label>Adgangskode</label>
-      <input type="password" id="login-pass" autocomplete="current-password" placeholder="••••••••">
+      <input type="password" id="login-pass" autocomplete="new-password" placeholder="••••••••">
     </div>
     <button class="btn-primary" onclick="doLogin()">LOG IND</button>
     <div class="login-error" id="login-error">Forkert brugernavn eller adgangskode</div>
@@ -937,7 +937,7 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
     <div class="form-row"><label>Brugernavn</label><input type="text" id="user-username" placeholder="fornavn.efternavn"></div>
     <div class="form-row">
       <label id="user-pwd-label">Adgangskode</label>
-      <input type="password" id="user-password" placeholder="••••••••">
+      <input type="password" id="user-password" placeholder="••••••••" autocomplete="new-password">
       <div id="user-pwd-hint" style="font-size:0.72rem;color:var(--text3);margin-top:4px;display:none">Lad feltet stå tomt for at beholde eksisterende kodeord</div>
     </div>
     <div class="form-row">
@@ -1147,12 +1147,21 @@ function selectEmployee(navn) {
 // DATA FETCHING
 // ═══════════════════════════════════════════════
 async function fetchSheet(sheetName) {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}&headers=1`;
   const res = await fetch(url);
   const text = await res.text();
-  const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
-  const rows = json.table.rows;
-  return rows.map(r => r.c.map(c => c ? (c.v !== null && c.v !== undefined ? String(c.v) : '') : ''));
+  const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+  if (!match) { console.error('GViz parse fejl for sheet:', sheetName, text.slice(0,200)); return []; }
+  const json = JSON.parse(match[1]);
+  if (!json.table || !json.table.rows) { console.warn('Tomt sheet:', sheetName); return []; }
+  // Byg header-række fra cols
+  const headers = json.table.cols.map(c => c.label || c.id || '');
+  const rows = json.table.rows.map(r => r.c.map(c => {
+    if (!c || c.v === null || c.v === undefined) return '';
+    // GViz returnerer tal som numbers – konverter til string
+    return String(c.v);
+  }));
+  return [headers, ...rows];
 }
 
 async function loadData() {
@@ -1292,8 +1301,8 @@ function renderRegCards() {
   const grid = document.getElementById('reg-cards');
   if (!items.length) {
     const debugInfo = state.items.length === 0
-      ? 'Sheet ikke loadet – åbn konsollen (F12) for detaljer'
-      : `Filter: "${state.regFilter}", søgning: "${q}" – ${state.items.length} varer i alt`;
+      ? `Sheet "Varer" ikke loadet – åbn konsollen (F12) og tjek Network-fanen`
+      : `${state.items.length} varer i alt – filter "${state.regFilter}", søgning "${q}" matcher ingen`;
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;padding:40px">
       <p>Ingen varer fundet</p>
       <p style="font-size:0.72rem;color:var(--text3);margin-top:8px;font-family:var(--font-mono)">${debugInfo}</p>
