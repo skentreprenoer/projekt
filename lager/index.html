@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SK Lager – Norlys Materialestyring</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0b0d;
+  --bg2: #0f1114;
+  --bg3: #141619;
+  --bg4: #1a1d21;
+  --border: #1e2126;
+  --border2: #252a30;
+  --border3: #2e333a;
+  --text: #dde3ea;
+  --text2: #7a8694;
+  --text3: #3d4550;
+  --accent: #e63946;
+  --accent2: #c1121f;
+  --accent-glow: rgba(230,57,70,0.15);
+  --green: #2dc653;
+  --yellow: #f4a261;
+  --red: #e63946;
+  --orange: #f4a261;
+  --erhverv: #e63946;
+  --eftersalg: #c77dff;
+  --dso: #2dc653;
+  --font-display: 'Orbitron', monospace;
+  --font-sans: 'Rajdhani', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius: 3px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.6);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Grid + scanline overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(230,57,70,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(230,57,70,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none; z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent, transparent 2px,
+    rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px
+  );
+  pointer-events: none; z-index: 0;
+}
+#loader, #login-screen, #app { position: relative; z-index: 1; }
+
+/* ── LOADER ── */
+#loader {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.5s;
+}
+#loader .logo-big {
+  font-family: var(--font-display); font-size: 2.8rem; color: var(--accent);
+  letter-spacing: 4px; text-shadow: 0 0 40px rgba(230,57,70,0.5);
+  animation: flicker 3s infinite;
+}
+#loader .logo-sub { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text3); letter-spacing: 6px; margin-top: 10px; }
+#loader .bar { width: 240px; height: 1px; background: var(--border); margin-top: 40px; overflow: hidden; }
+#loader .bar-fill { height: 100%; background: var(--accent); box-shadow: 0 0 8px var(--accent); width: 0; animation: loadfill 1.4s ease forwards; }
+@keyframes loadfill { to { width: 100%; } }
+@keyframes flicker {
+  0%,95%,100% { opacity:1; } 96% { opacity:0.85; } 97% { opacity:1; } 98% { opacity:0.9; }
+}
+
+/* ── LOGIN ── */
+#login-screen {
+  display: none;
+  position: fixed; inset: 0;
+  background: var(--bg);
+  align-items: center; justify-content: center;
+  z-index: 1000;
+}
+#login-screen.active { display: flex; }
+.login-box {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-top: 2px solid var(--accent);
+  border-radius: 0;
+  padding: 48px 40px;
+  width: 380px;
+  box-shadow: var(--shadow), 0 0 60px rgba(230,57,70,0.08);
+  position: relative;
+}
+.login-box::before {
+  content: ''; position: absolute; top: -1px; left: 40px; right: 40px; height: 2px;
+  background: var(--accent); filter: blur(4px);
+}
+.login-logo { font-family: var(--font-display); font-size: 1.6rem; color: var(--accent); margin-bottom: 4px; letter-spacing: 3px; text-shadow: 0 0 20px rgba(230,57,70,0.4); }
+.login-sub { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text3); letter-spacing: 4px; margin-bottom: 36px; }
+.login-box label { font-size: 0.7rem; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 6px; }
+.login-box label { font-family: var(--font-mono); }
+.login-box input {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 0; color: var(--text); font-family: var(--font-mono);
+  font-size: 0.9rem; padding: 10px 14px; outline: none; margin-bottom: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.login-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), inset 0 0 20px rgba(230,57,70,0.05); }
+.btn-primary {
+  width: 100%; background: var(--accent); color: #fff; border: none;
+  border-radius: 0; font-family: var(--font-display); font-size: 0.85rem;
+  font-weight: 600; padding: 13px; cursor: pointer; transition: all 0.2s;
+  letter-spacing: 3px; text-transform: uppercase;
+  box-shadow: 0 0 20px rgba(230,57,70,0.3);
+}
+.btn-primary:hover { background: var(--accent2); box-shadow: 0 0 30px rgba(230,57,70,0.5); }
+.login-error { color: var(--accent); font-family: var(--font-mono); font-size: 0.75rem; margin-top: 10px; display: none; letter-spacing: 1px; }
+
+/* ── LAYOUT ── */
+#app { display: none; flex-direction: column; min-height: 100vh; }
+#app.active { display: flex; }
+
+/* ── TOPBAR ── */
+.topbar {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--bg2); border-bottom: 2px solid var(--border);
+  border-bottom-color: var(--accent);
+  padding: 0 20px; height: 54px; position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 30px rgba(230,57,70,0.12);
+}
+.topbar::after {
+  content: ''; position: absolute; bottom: -3px; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, var(--accent), transparent 60%);
+  pointer-events: none;
+}
+.topbar-logo {
+  font-family: var(--font-display); font-size: 1.1rem; color: var(--accent);
+  font-weight: 700; letter-spacing: 3px; white-space: nowrap;
+  text-shadow: 0 0 16px rgba(230,57,70,0.4);
+}
+.topbar-divider { width: 1px; height: 20px; background: var(--border); }
+
+.nav-tabs { display: flex; gap: 2px; flex: 1; }
+.nav-tab {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 16px; border-radius: 0; cursor: pointer;
+  font-size: 0.82rem; color: var(--text2); border: none; background: none;
+  transition: all 0.15s; font-family: var(--font-sans); white-space: nowrap;
+  letter-spacing: 0.5px; font-weight: 500; text-transform: uppercase;
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+}
+.nav-tab:hover { color: var(--text); background: rgba(230,57,70,0.05); }
+.nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(230,57,70,0.05); }
+.nav-tab svg { width: 14px; height: 14px; }
+
+.topbar-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+.user-badge {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 0; padding: 4px 12px 4px 4px;
+  font-size: 0.78rem; color: var(--text2); font-family: var(--font-mono);
+}
+.user-avatar {
+  width: 26px; height: 26px; border-radius: 0;
+  background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 0.65rem; font-weight: 700;
+}
+.btn-logout {
+  background: none; border: 1px solid var(--border2); border-radius: 0;
+  color: var(--text3); font-size: 0.72rem; padding: 4px 10px; cursor: pointer;
+  transition: all 0.15s; font-family: var(--font-mono); letter-spacing: 1px;
+}
+.btn-logout:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── MAIN CONTENT ── */
+.main { flex: 1; padding: 24px; max-width: 1400px; margin: 0 auto; width: 100%; }
+
+/* ── SECTION HEADERS ── */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.section-title {
+  font-family: var(--font-mono); font-size: 0.68rem;
+  color: var(--accent); letter-spacing: 3px; text-transform: uppercase;
+  opacity: 0.7;
+}
+
+/* ── CATEGORY PILLS ── */
+.cat-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.cat-pill {
+  padding: 5px 16px; border-radius: 0; font-size: 0.72rem;
+  font-family: var(--font-mono); cursor: pointer; border: 1px solid transparent;
+  transition: all 0.15s; letter-spacing: 1px; text-transform: uppercase;
+}
+.cat-pill[data-cat="alle"] { border-color: var(--border2); color: var(--text2); }
+.cat-pill[data-cat="alle"].active { background: var(--text2); color: #000; border-color: var(--text2); }
+.cat-pill[data-cat="Erhverv"] { border-color: var(--erhverv); color: var(--erhverv); }
+.cat-pill[data-cat="Erhverv"].active { background: var(--erhverv); color: #fff; box-shadow: 0 0 12px rgba(230,57,70,0.3); }
+.cat-pill[data-cat="Eftersalg"] { border-color: var(--eftersalg); color: var(--eftersalg); }
+.cat-pill[data-cat="Eftersalg"].active { background: var(--eftersalg); color: #000; }
+.cat-pill[data-cat="DSO"] { border-color: var(--dso); color: var(--dso); }
+.cat-pill[data-cat="DSO"].active { background: var(--dso); color: #000; }
+
+/* ── STAT CARDS ── */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-left: 2px solid var(--accent); border-radius: 0; padding: 16px 20px;
+  position: relative; overflow: hidden;
+}
+.stat-card::after {
+  content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(230,57,70,0.03));
+  pointer-events: none;
+}
+.stat-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+.stat-value { font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--text); }
+.stat-value.red { color: var(--red); }
+.stat-value.yellow { color: var(--yellow); }
+.stat-value.green { color: var(--green); }
+
+/* ── TABLE ── */
+.table-wrap {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-top: 1px solid var(--accent); border-radius: 0; overflow: hidden;
+}
+.table-toolbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  flex-wrap: wrap; background: var(--bg3);
+}
+.search-input {
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 0; color: var(--text); font-family: var(--font-mono);
+  font-size: 0.82rem; padding: 7px 12px; outline: none; width: 240px;
+  transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(230,57,70,0.2); }
+.search-input::placeholder { color: var(--text3); }
+
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  text-align: left; padding: 9px 14px;
+  font-family: var(--font-mono); font-size: 0.62rem; color: var(--accent);
+  letter-spacing: 2px; text-transform: uppercase; opacity: 0.6;
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+  background: var(--bg3);
+}
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(230,57,70,0.04); }
+tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans); }
+.mono { font-family: var(--font-mono); }
+
+/* status badges */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 8px; border-radius: 4px; font-family: var(--font-mono);
+  font-size: 0.72rem; font-weight: 500;
+}
+.badge-ok { background: rgba(0,230,118,0.12); color: var(--green); }
+.badge-low { background: rgba(255,179,0,0.12); color: var(--yellow); }
+.badge-out { background: rgba(255,61,87,0.12); color: var(--red); }
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.cat-tag {
+  display: inline-block; padding: 2px 8px; border-radius: 3px;
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500;
+}
+.cat-tag-Erhverv { background: rgba(0,194,255,0.12); color: var(--erhverv); }
+.cat-tag-Eftersalg { background: rgba(167,139,250,0.12); color: var(--eftersalg); }
+.cat-tag-DSO { background: rgba(0,230,118,0.12); color: var(--dso); }
+
+/* action btns in table */
+.btn-sm {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 4px;
+  color: var(--text2); font-size: 0.72rem; padding: 4px 9px; cursor: pointer;
+  transition: all 0.15s; font-family: var(--font-sans);
+}
+.btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+.btn-sm.danger:hover { border-color: var(--red); color: var(--red); }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 16px; border-radius: var(--radius); cursor: pointer;
+  font-size: 0.82rem; border: none; font-family: var(--font-sans);
+  font-weight: 500; transition: all 0.15s; white-space: nowrap;
+}
+.btn-accent { background: var(--accent); color: #fff; border-radius: 0; letter-spacing: 1px; box-shadow: 0 0 12px rgba(230,57,70,0.25); }
+.btn-accent:hover { background: var(--accent2); box-shadow: 0 0 20px rgba(230,57,70,0.4); }
+.btn-ghost { background: transparent; border: 1px solid var(--border2); border-radius: 0; color: var(--text2); font-family: var(--font-mono); letter-spacing: 0.5px; }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: rgba(230,57,70,0.05); }
+.btn-green { background: var(--green); color: #000; border-radius: 0; letter-spacing: 1px; }
+.btn-green:hover { opacity: 0.85; }
+.btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 500;
+  align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-top: 2px solid var(--accent);
+  border-radius: 0; padding: 28px 28px 24px;
+  width: 480px; max-width: 95vw; box-shadow: var(--shadow), 0 0 60px rgba(230,57,70,0.08);
+  max-height: 90vh; overflow-y: auto;
+}
+.modal-title { font-family: var(--font-display); font-size: 0.95rem; color: var(--accent); margin-bottom: 20px; letter-spacing: 2px; text-shadow: 0 0 12px rgba(230,57,70,0.3); }
+.form-row { margin-bottom: 14px; }
+.form-row label { font-size: 0.7rem; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 5px; }
+.form-row input, .form-row select, .form-row textarea {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 0; color: var(--text); font-family: var(--font-mono);
+  font-size: 0.85rem; padding: 9px 12px; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(230,57,70,0.3), inset 0 0 16px rgba(230,57,70,0.04);
+}
+.form-row select option { background: var(--bg2); }
+.form-row textarea { resize: vertical; min-height: 80px; }
+.form-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+/* ── SCANNER INPUT ── */
+.scanner-area {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-top: 2px solid var(--border3);
+  border-radius: 0; padding: 28px; text-align: center;
+  margin-bottom: 20px; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.scanner-area.ready { border-color: var(--accent); border-style: solid; box-shadow: 0 0 20px rgba(230,57,70,0.1); }
+.scanner-area.scanned { border-color: var(--green); animation: scanpulse 0.4s ease; }
+@keyframes scanpulse { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 24px rgba(0,230,118,0.3); } }
+.scanner-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.scanner-hint { font-size: 0.8rem; color: var(--text3); margin-bottom: 16px; }
+#scanner-input {
+  width: 100%; background: var(--bg3); border: 1px solid var(--accent);
+  border-radius: 0; color: var(--accent); font-family: var(--font-display);
+  font-size: 1.2rem; padding: 12px 16px; outline: none; text-align: center;
+  letter-spacing: 4px; box-shadow: 0 0 20px rgba(230,57,70,0.1);
+}
+
+/* ── REGISTER PAGE ── */
+.register-layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+@media (max-width: 900px) { .register-layout { grid-template-columns: 1fr; } }
+
+.cart-panel {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-top: 2px solid var(--accent);
+  border-radius: 0; padding: 20px; position: sticky; top: 72px;
+  max-height: calc(100vh - 90px); overflow-y: auto;
+}
+.cart-title { font-family: var(--font-display); font-size: 0.75rem; color: var(--accent); letter-spacing: 3px; margin-bottom: 16px; opacity: 0.8; }
+.cart-empty { color: var(--text3); font-size: 0.82rem; text-align: center; padding: 24px 0; }
+.cart-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.cart-item:last-of-type { border-bottom: none; }
+.cart-item-info { flex: 1; }
+.cart-item-name { font-size: 0.83rem; color: var(--text); }
+.cart-item-meta { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text3); }
+.cart-qty {
+  display: flex; align-items: center; gap: 6px;
+}
+.qty-btn {
+  width: 24px; height: 24px; border-radius: 4px; border: 1px solid var(--border);
+  background: var(--bg3); color: var(--text); font-size: 0.9rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.qty-btn:hover { border-color: var(--accent); color: var(--accent); }
+.qty-val { font-family: var(--font-mono); font-size: 0.85rem; min-width: 24px; text-align: center; }
+.remove-btn { color: var(--text3); cursor: pointer; transition: color 0.15s; background: none; border: none; font-size: 1rem; padding: 2px; }
+.remove-btn:hover { color: var(--red); }
+.cart-total { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.cart-submit { margin-top: 14px; width: 100%; }
+
+/* ── ORDER PAGE ── */
+.order-header { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.order-export-box {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; margin-top: 20px; display: none;
+}
+.order-export-box.visible { display: block; }
+.order-export-box textarea {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text); font-family: var(--font-mono);
+  font-size: 0.8rem; padding: 12px; min-height: 180px; outline: none; resize: vertical;
+}
+
+/* ── ADMIN PAGE ── */
+.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 800px) { .admin-grid { grid-template-columns: 1fr; } }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9000;
+  display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+}
+.toast-item {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-left: 3px solid var(--accent);
+  border-radius: 0; padding: 12px 16px; font-family: var(--font-mono); font-size: 0.78rem;
+  display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow);
+  animation: toastin 0.25s ease forwards;
+  min-width: 260px; letter-spacing: 0.5px;
+}
+.toast-item.success { border-left-color: var(--green); }
+.toast-item.error { border-left-color: var(--accent); }
+.toast-item.info { border-left-color: var(--yellow); }
+@keyframes toastin { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+/* ── EMPTY STATE ── */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text3); }
+.empty-state svg { width: 40px; height: 40px; margin-bottom: 16px; opacity: 0.3; }
+.empty-state p { font-size: 0.85rem; }
+
+/* ── PROGRESS BAR ── */
+.stock-bar { height: 4px; border-radius: 2px; background: var(--border); margin-top: 4px; overflow: hidden; width: 80px; }
+.stock-bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+
+/* ── TABS CONTENT ── */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── ALERT BANNER ── */
+.alert-banner {
+  background: rgba(230,57,70,0.06); border: 1px solid rgba(230,57,70,0.2);
+  border-left: 3px solid var(--accent);
+  border-radius: 0; padding: 12px 16px; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 10px; font-size: 0.82rem;
+  font-family: var(--font-mono); letter-spacing: 0.3px;
+}
+.alert-banner svg { width: 16px; height: 16px; color: var(--accent); flex-shrink: 0; }
+
+/* ── ITEM CARDS (Registrer) ── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.item-card {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-top: 1px solid var(--border3);
+  border-radius: 0; overflow: hidden; cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  display: flex; flex-direction: column;
+}
+.item-card:hover {
+  border-color: var(--accent); transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px var(--accent);
+}
+.item-card.out-of-stock { opacity: 0.5; }
+.item-card-img {
+  width: 100%; aspect-ratio: 1/1; object-fit: contain;
+  background: var(--bg3); padding: 12px;
+}
+.item-card-img-placeholder {
+  width: 100%; aspect-ratio: 1/1;
+  background: var(--bg3); display: flex; align-items: center;
+  justify-content: center; font-size: 2rem; color: var(--text3);
+}
+.item-card-body { padding: 10px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.item-card-name { font-size: 0.78rem; color: var(--text); line-height: 1.3; font-weight: 500; }
+.item-card-nr { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text3); }
+.item-card-stock {
+  margin-top: auto; padding-top: 6px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: var(--font-mono); font-size: 0.75rem;
+}
+
+/* ── IMAGE UPLOAD ── */
+.img-upload-area {
+  border: 2px dashed var(--border); border-radius: var(--radius);
+  padding: 20px; text-align: center; cursor: pointer;
+  transition: border-color 0.2s; position: relative; overflow: hidden;
+}
+.img-upload-area:hover { border-color: var(--accent); }
+.img-upload-area input[type=file] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+}
+.img-upload-area.has-image { padding: 0; border-style: solid; }
+.img-upload-area img { width: 100%; max-height: 160px; object-fit: contain; display: block; }
+.img-upload-hint { font-size: 0.75rem; color: var(--text3); margin-top: 6px; }
+.img-upload-icon { font-size: 1.8rem; margin-bottom: 4px; }
+.img-remove-btn {
+  position: absolute; top: 6px; right: 6px;
+  background: rgba(0,0,0,0.6); border: none; border-radius: 4px;
+  color: var(--red); padding: 4px 8px; cursor: pointer; font-size: 0.75rem;
+  display: none;
+}
+.img-upload-area.has-image .img-remove-btn { display: block; }
+.img-upload-area.has-image .img-upload-hint,
+.img-upload-area.has-image .img-upload-icon { display: none; }
+
+/* ── ITEM DETAIL MODAL ── */
+.item-detail-img {
+  width: 100%; max-height: 220px; object-fit: contain;
+  background: var(--bg3); border-radius: var(--radius); margin-bottom: 16px; display: block;
+}
+.item-detail-placeholder {
+  width: 100%; height: 120px; background: var(--bg3); border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; color: var(--text3); margin-bottom: 16px;
+}
+.detail-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.detail-meta-item { background: var(--bg3); border-radius: 4px; padding: 8px 12px; }
+.detail-meta-label { font-size: 0.65rem; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+.detail-meta-value { font-family: var(--font-mono); font-size: 1rem; color: var(--text); margin-top: 2px; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* responsive */
+@media (max-width: 600px) {
+  .topbar { padding: 0 12px; }
+  .main { padding: 16px; }
+  .nav-tab span { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="logo-big">SK/LAGER</div>
+  <div class="logo-sub">NORLYS MATERIALESTYRING</div>
+  <div class="bar"><div class="bar-fill"></div></div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">SK/LAGER</div>
+    <div class="login-sub">SØREN KNUDSEN A/S</div>
+    <div class="form-row">
+      <label>Brugernavn</label>
+      <input type="text" id="login-user" autocomplete="username" placeholder="dit.navn">
+    </div>
+    <div class="form-row">
+      <label>Adgangskode</label>
+      <input type="password" id="login-pass" autocomplete="current-password" placeholder="••••••••">
+    </div>
+    <button class="btn-primary" onclick="doLogin()">LOG IND</button>
+    <div class="login-error" id="login-error">Forkert brugernavn eller adgangskode</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-logo">SK∕LAGER</div>
+    <div class="topbar-divider"></div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showTab('dashboard')" data-tab="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span>Overblik</span>
+      </button>
+      <button class="nav-tab" onclick="showTab('register')" data-tab="register">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Registrer</span>
+      </button>
+      <button class="nav-tab" onclick="showTab('order')" data-tab="order">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        <span>Bestil</span>
+      </button>
+      <button class="nav-tab admin-only" onclick="showTab('admin')" data-tab="admin" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg>
+        <span>Admin</span>
+      </button>
+    </div>
+    <div class="topbar-right">
+      <div class="user-badge">
+        <div class="user-avatar" id="user-avatar">TK</div>
+        <span id="user-name-display">Toke</span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Log ud</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="section-header">
+        <span class="section-title">Lagerstatus</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" onclick="loadData()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+            Opdater
+          </button>
+          <button class="btn btn-accent" onclick="openAddItem()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            Ny vare
+          </button>
+        </div>
+      </div>
+
+      <div class="stat-grid" id="stat-grid">
+        <div class="stat-card"><div class="stat-label">Varer i alt</div><div class="stat-value" id="stat-total">–</div></div>
+        <div class="stat-card"><div class="stat-label">Kritisk lav</div><div class="stat-value red" id="stat-critical">–</div></div>
+        <div class="stat-card"><div class="stat-label">Advarsel</div><div class="stat-value yellow" id="stat-warning">–</div></div>
+        <div class="stat-card"><div class="stat-label">OK</div><div class="stat-value green" id="stat-ok">–</div></div>
+      </div>
+
+      <div id="alerts-area"></div>
+
+      <div class="cat-pills" id="dash-cat-pills">
+        <div class="cat-pill active" data-cat="alle" onclick="filterDash('alle')">Alle</div>
+        <div class="cat-pill" data-cat="Erhverv" onclick="filterDash('Erhverv')">Erhverv</div>
+        <div class="cat-pill" data-cat="Eftersalg" onclick="filterDash('Eftersalg')">Eftersalg</div>
+        <div class="cat-pill" data-cat="DSO" onclick="filterDash('DSO')">DSO</div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input class="search-input" type="text" placeholder="Søg varenr eller navn..." id="dash-search" oninput="renderDashTable()">
+          <span style="font-size:0.75rem;color:var(--text3);margin-left:auto" id="dash-count"></span>
+        </div>
+        <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:52px">Billede</th>
+              <th>Varenr.</th>
+              <th>Navn</th>
+              <th>Kategori</th>
+              <th>Lager</th>
+              <th>Min.</th>
+              <th>Status</th>
+              <th>Enhed</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="dash-tbody"></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ REGISTRER ══ -->
+    <div class="tab-content" id="tab-register">
+      <div class="section-header">
+        <span class="section-title">Registrer træk fra lager</span>
+      </div>
+
+      <div class="register-layout">
+        <div>
+          <!-- Scanner -->
+          <div class="scanner-area" id="scanner-area">
+            <div class="scanner-icon">⎋</div>
+            <div class="scanner-hint">Scan stregkode eller søg nedenfor</div>
+            <input type="text" id="scanner-input" placeholder="Scan eller tast varenr..." autocomplete="off">
+          </div>
+
+          <!-- Medarbejder + Kategori valg -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+            <div class="form-row" style="margin:0">
+              <label>Medarbejder</label>
+              <select id="reg-employee" style="font-size:0.82rem;padding:8px 10px">
+                <option value="">Vælg medarbejder...</option>
+              </select>
+            </div>
+            <div class="form-row" style="margin:0">
+              <label>Kategori</label>
+              <select id="reg-category" style="font-size:0.82rem;padding:8px 10px">
+                <option value="Erhverv">Erhverv</option>
+                <option value="Eftersalg">Eftersalg</option>
+                <option value="DSO">DSO</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Søgning + Kort -->
+          <div class="table-wrap" style="padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius)">
+            <input class="search-input" type="text" placeholder="Søg vare..." id="reg-search" oninput="renderRegCards()" style="width:100%">
+          </div>
+          <div class="cards-grid" id="reg-cards"></div>
+        </div>
+
+        <!-- Kurv -->
+        <div class="cart-panel">
+          <div class="cart-title">INDKØBSKURV</div>
+          <div id="cart-items"><div class="cart-empty">Ingen varer valgt endnu</div></div>
+          <div class="cart-total" id="cart-total" style="display:none">
+            <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text2)">
+              <span>Poster i alt</span>
+              <span id="cart-count">0</span>
+            </div>
+          </div>
+          <button class="btn btn-green cart-submit" onclick="submitCart()" id="cart-submit-btn" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
+            Registrer træk
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BESTIL ══ -->
+    <div class="tab-content" id="tab-order">
+      <div class="section-header">
+        <span class="section-title">Bestillingsmodul</span>
+      </div>
+
+      <div class="cat-pills" id="order-cat-pills">
+        <div class="cat-pill active" data-cat="alle" onclick="filterOrder('alle')">Alle</div>
+        <div class="cat-pill" data-cat="Erhverv" onclick="filterOrder('Erhverv')">Erhverv</div>
+        <div class="cat-pill" data-cat="Eftersalg" onclick="filterOrder('Eftersalg')">Eftersalg</div>
+        <div class="cat-pill" data-cat="DSO" onclick="filterOrder('DSO')">DSO</div>
+      </div>
+
+      <div class="table-wrap" style="margin-bottom:16px">
+        <div class="table-toolbar">
+          <input class="search-input" type="text" placeholder="Søg vare..." id="order-search" oninput="renderOrderTable()">
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button class="btn btn-ghost" onclick="autoSelectLow()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/></svg>
+              Vælg lave lager auto
+            </button>
+            <button class="btn btn-accent" onclick="generateOrder()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Generer bestilling
+            </button>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="order-check-all" onchange="toggleAllOrder(this)"></th>
+              <th>Varenr.</th>
+              <th>Navn</th>
+              <th>Kategori</th>
+              <th>Lager</th>
+              <th>Min.</th>
+              <th>Status</th>
+              <th>Antal at bestille</th>
+            </tr>
+          </thead>
+          <tbody id="order-tbody"></tbody>
+        </table>
+        </div>
+      </div>
+
+      <div class="order-export-box" id="order-export-box">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <span class="section-title">BESTILLINGSTEKST</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost" onclick="copyOrder()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Kopiér
+            </button>
+            <button class="btn btn-accent" onclick="exportExcel()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Excel
+            </button>
+          </div>
+        </div>
+        <textarea id="order-text" readonly></textarea>
+      </div>
+    </div>
+
+    <!-- ══ ADMIN ══ -->
+    <div class="tab-content" id="tab-admin">
+      <div class="section-header">
+        <span class="section-title">Administration</span>
+      </div>
+      <div class="admin-grid">
+        <!-- Brugere -->
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <span style="font-size:0.75rem;color:var(--text3)">BRUGERE</span>
+            <button class="btn btn-accent" style="margin-left:auto;padding:6px 12px;font-size:0.78rem" onclick="openAddUser()">+ Tilføj bruger</button>
+          </div>
+          <table>
+            <thead><tr><th>Navn</th><th>Brugernavn</th><th>Rolle</th><th></th></tr></thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+        <!-- Log -->
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <span style="font-size:0.75rem;color:var(--text3)">SENESTE TRANSAKTIONER</span>
+          </div>
+          <table>
+            <thead><tr><th>Tid</th><th>Medarbejder</th><th>Vare</th><th>Antal</th><th>Kat.</th></tr></thead>
+            <tbody id="log-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ── MODALS ── -->
+<!-- Tilføj / Rediger vare -->
+<div class="modal-overlay" id="modal-additem">
+  <div class="modal">
+    <div class="modal-title" id="additem-title">+ NY VARE</div>
+    <input type="hidden" id="item-edit-row" value="">
+    <input type="hidden" id="item-existing-img" value="">
+    <div class="form-row">
+      <label>Produktbillede</label>
+      <div class="img-upload-area" id="img-upload-area" onclick="triggerImgUpload()">
+        <input type="file" id="item-img-file" accept="image/*" onchange="previewImg(this)" onclick="event.stopPropagation()">
+        <div class="img-upload-icon">📷</div>
+        <div class="img-upload-hint">Klik for at uploade billede (valgfrit)</div>
+        <img id="item-img-preview" src="" alt="" style="display:none">
+        <button class="img-remove-btn" onclick="removeImg(event)">✕ Fjern</button>
+      </div>
+    </div>
+    <div class="form-grid2">
+      <div class="form-row"><label>Varenummer</label><input type="text" id="item-varenr" placeholder="NR-00001"></div>
+      <div class="form-row"><label>Enhed</label><input type="text" id="item-unit" placeholder="stk / m / rulle"></div>
+    </div>
+    <div class="form-row"><label>Varenavn</label><input type="text" id="item-name" placeholder="Kabelmuffe 25mm"></div>
+    <div class="form-row">
+      <label>Kategori</label>
+      <select id="item-cat">
+        <option value="Erhverv">Erhverv</option>
+        <option value="Eftersalg">Eftersalg</option>
+        <option value="DSO">DSO</option>
+      </select>
+    </div>
+    <div class="form-grid2">
+      <div class="form-row"><label>Lagerbeholdning</label><input type="number" id="item-stock" placeholder="0" min="0"></div>
+      <div class="form-row"><label>Minimumslager</label><input type="number" id="item-min" placeholder="5" min="0"></div>
+    </div>
+    <div class="form-row"><label>Bemærkning</label><textarea id="item-note" placeholder="Valgfri note..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-additem')">Annuller</button>
+      <button class="btn btn-accent" id="additem-save-btn" onclick="saveItem()">Gem vare</button>
+    </div>
+  </div>
+</div>
+
+<!-- Item detail (klik på kort i registrer) -->
+<div class="modal-overlay" id="modal-item-detail">
+  <div class="modal" style="width:360px">
+    <div id="detail-img-wrap"></div>
+    <div class="modal-title" id="detail-title"></div>
+    <div class="detail-meta" id="detail-meta"></div>
+    <div class="form-row">
+      <label>Antal</label>
+      <input type="number" id="detail-qty" min="1" value="1" style="font-size:1.2rem;text-align:center;padding:12px">
+    </div>
+    <div style="font-size:0.75rem;color:var(--text3);margin-bottom:12px" id="detail-note"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-item-detail')">Annuller</button>
+      <button class="btn btn-green" onclick="addToCartFromDetail()" style="flex:1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Tilføj til kurv
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Rediger lager (hurtig) -->
+<div class="modal-overlay" id="modal-editstock">
+  <div class="modal" style="width:360px">
+    <div class="modal-title">OPDATER LAGER</div>
+    <div id="edit-stock-info" style="font-size:0.82rem;color:var(--text2);margin-bottom:16px"></div>
+    <div class="form-row"><label>Ny lagerbeholdning</label><input type="number" id="edit-stock-val" min="0"></div>
+    <div class="form-row"><label>Nyt minimumslager</label><input type="number" id="edit-min-val" min="0"></div>
+    <input type="hidden" id="edit-stock-row">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-editstock')">Annuller</button>
+      <button class="btn btn-accent" onclick="saveStock()">Gem</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tilføj bruger -->
+<div class="modal-overlay" id="modal-adduser">
+  <div class="modal" style="width:380px">
+    <div class="modal-title">+ NY BRUGER</div>
+    <div class="form-row"><label>Fuldt navn</label><input type="text" id="user-fullname" placeholder="Fornavn Efternavn"></div>
+    <div class="form-row"><label>Brugernavn</label><input type="text" id="user-username" placeholder="fornavn.efternavn"></div>
+    <div class="form-row"><label>Adgangskode</label><input type="password" id="user-password" placeholder="••••••••"></div>
+    <div class="form-row">
+      <label>Rolle</label>
+      <select id="user-role">
+        <option value="medarbejder">Medarbejder</option>
+        <option value="admin">Admin / Superbruger</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-adduser')">Annuller</button>
+      <button class="btn btn-accent" onclick="saveUser()">Opret bruger</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mængde modal (klik på vare i reg) -->
+<div class="modal-overlay" id="modal-qty">
+  <div class="modal" style="width:320px">
+    <div class="modal-title" id="qty-modal-title">VÆLG ANTAL</div>
+    <div id="qty-modal-info" style="font-size:0.82rem;color:var(--text2);margin-bottom:16px"></div>
+    <div class="form-row"><label>Antal</label><input type="number" id="qty-input" min="1" value="1"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-qty')">Annuller</button>
+      <button class="btn btn-accent" onclick="addToCartConfirm()">Tilføj til kurv</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════
+const SHEET_ID = '1ES8S0aT3BEpSz4iCx62iEMAXlmGmUCYNOFES5osB0ws';
+const WEBHOOK  = 'https://script.google.com/macros/s/AKfycbxMmK4WLxf8F2Xuw8LxsNv3e60QX-xBdpymOEEXktUvWinswb0NX56hy7vCfuO0-JIL/exec';
+const SHEETS   = { varer: 'Varer', trans: 'Transaktioner', brugere: 'Brugere', bestil: 'Bestillinger' };
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let state = {
+  items: [],
+  users: [],
+  transactions: [],
+  currentUser: null,
+  dashFilter: 'alle',
+  orderFilter: 'alle',
+  cart: [],
+  qtyTarget: null,
+};
+
+// ═══════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════
+window.addEventListener('load', async () => {
+  await new Promise(r => setTimeout(r, 1400));
+  document.getElementById('loader').style.opacity = '0';
+  setTimeout(() => document.getElementById('loader').style.display = 'none', 400);
+
+  const saved = sessionStorage.getItem('sk_user');
+  if (saved) {
+    state.currentUser = JSON.parse(saved);
+    showApp();
+  } else {
+    document.getElementById('login-screen').classList.add('active');
+  }
+
+  // Scanner
+  document.getElementById('scanner-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const val = e.target.value.trim();
+      if (val) { handleScan(val); e.target.value = ''; }
+    }
+  });
+  document.getElementById('scanner-input').addEventListener('input', () => {
+    document.getElementById('scanner-area').classList.add('ready');
+  });
+  document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+});
+
+// ═══════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════
+function hashPass(str) {
+  // Simple deterministic hash (not crypto-grade, but workable for this use case)
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return 'h' + Math.abs(hash).toString(16);
+}
+
+async function doLogin() {
+  const username = document.getElementById('login-user').value.trim().toLowerCase();
+  const password = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-error');
+  err.style.display = 'none';
+
+  if (!username || !password) { err.textContent = 'Udfyld begge felter'; err.style.display = 'block'; return; }
+
+  // Load users from sheet
+  try {
+    const data = await fetchSheet(SHEETS.brugere);
+    // cols: navn, brugernavn, password_hash, rolle
+    const rows = data.slice(1); // skip header
+    const match = rows.find(r => (r[1]||'').toLowerCase() === username);
+    if (!match) { err.textContent = 'Bruger ikke fundet'; err.style.display = 'block'; return; }
+    const stored = (match[2]||'').trim();
+    const inputHash = hashPass(password);
+    // Support both plain (first login) and hashed
+    if (stored !== password && stored !== inputHash) {
+      err.textContent = 'Forkert adgangskode'; err.style.display = 'block'; return;
+    }
+    state.currentUser = { name: match[0], username: match[1], role: match[3] || 'medarbejder', rowIndex: rows.indexOf(match) + 2 };
+    sessionStorage.setItem('sk_user', JSON.stringify(state.currentUser));
+    document.getElementById('login-screen').classList.remove('active');
+    showApp();
+  } catch(e) {
+    err.textContent = 'Kunne ikke forbinde til server'; err.style.display = 'block';
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('sk_user');
+  state.currentUser = null;
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('login-screen').classList.add('active');
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+}
+
+function showApp() {
+  const u = state.currentUser;
+  document.getElementById('user-name-display').textContent = u.name;
+  document.getElementById('user-avatar').textContent = u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('app').classList.add('active');
+
+  // Admin tab
+  if (u.role === 'admin') {
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
+  }
+
+  loadData();
+}
+
+// ═══════════════════════════════════════════════
+// DATA FETCHING
+// ═══════════════════════════════════════════════
+async function fetchSheet(sheetName) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+  const res = await fetch(url);
+  const text = await res.text();
+  const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+  const rows = json.table.rows;
+  return rows.map(r => r.c.map(c => c ? (c.v !== null && c.v !== undefined ? String(c.v) : '') : ''));
+}
+
+async function loadData() {
+  try {
+    // Varer: varenr, navn, kategori, lager, minimum, enhed, note
+    const vData = await fetchSheet(SHEETS.varer);
+    state.items = vData.slice(1).filter(r => r[0]).map((r,i) => ({
+      rowIndex: i + 2,
+      varenr: r[0]||'', navn: r[1]||'', kategori: r[2]||'',
+      lager: parseFloat(r[3])||0, min: parseFloat(r[4])||0,
+      enhed: r[5]||'stk', note: r[6]||'', imgId: r[7]||''
+    }));
+  } catch(e) { state.items = []; }
+
+  try {
+    const uData = await fetchSheet(SHEETS.brugere);
+    state.users = uData.slice(1).filter(r=>r[0]).map((r,i)=>({
+      rowIndex: i+2, navn: r[0]||'', brugernavn: r[1]||'', rolle: r[3]||'medarbejder'
+    }));
+  } catch(e) { state.users = []; }
+
+  try {
+    const tData = await fetchSheet(SHEETS.trans);
+    state.transactions = tData.slice(1).filter(r=>r[0]).map(r=>({
+      tid: r[0]||'', medarbejder: r[1]||'', varenr: r[2]||'',
+      navn: r[3]||'', antal: r[4]||'', kategori: r[5]||''
+    })).reverse().slice(0,50);
+  } catch(e) { state.transactions = []; }
+
+  renderAll();
+}
+
+// ═══════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════
+function renderAll() {
+  renderStats();
+  renderAlerts();
+  renderDashTable();
+  renderRegCards();
+  renderOrderTable();
+  renderUsersTable();
+  renderLog();
+  populateEmployees();
+}
+
+function getStatus(item) {
+  if (item.lager <= 0) return 'out';
+  if (item.lager <= item.min) return 'low';
+  return 'ok';
+}
+
+function statusBadge(item) {
+  const s = getStatus(item);
+  if (s==='out') return '<span class="badge badge-out"><span class="badge-dot"></span>TOM</span>';
+  if (s==='low') return '<span class="badge badge-low"><span class="badge-dot"></span>LAV</span>';
+  return '<span class="badge badge-ok"><span class="badge-dot"></span>OK</span>';
+}
+
+function stockBar(item) {
+  const pct = item.min > 0 ? Math.min(100, (item.lager/item.min)*100) : 100;
+  const color = getStatus(item)==='ok' ? 'var(--green)' : getStatus(item)==='low' ? 'var(--yellow)' : 'var(--red)';
+  return `<div class="stock-bar"><div class="stock-bar-fill" style="width:${pct}%;background:${color}"></div></div>`;
+}
+
+function renderStats() {
+  const all = state.items;
+  const critical = all.filter(i=>i.lager<=0).length;
+  const warning = all.filter(i=>i.lager>0 && i.lager<=i.min).length;
+  document.getElementById('stat-total').textContent = all.length;
+  document.getElementById('stat-critical').textContent = critical;
+  document.getElementById('stat-warning').textContent = warning;
+  document.getElementById('stat-ok').textContent = all.length - critical - warning;
+}
+
+function renderAlerts() {
+  const alerts = state.items.filter(i=>getStatus(i)!=='ok');
+  const area = document.getElementById('alerts-area');
+  if (!alerts.length) { area.innerHTML=''; return; }
+  const critical = alerts.filter(i=>i.lager<=0);
+  const low = alerts.filter(i=>i.lager>0 && i.lager<=i.min);
+  let html = '';
+  if (critical.length) html += `<div class="alert-banner"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><strong style="color:var(--red)">${critical.length} vare(r) er tomme:</strong> ${critical.map(i=>i.navn).join(', ')}</div>`;
+  if (low.length) html += `<div class="alert-banner" style="background:rgba(255,179,0,0.08);border-color:rgba(255,179,0,0.2)"><svg fill="none" viewBox="0 0 24 24" stroke="var(--yellow)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><strong style="color:var(--yellow)">${low.length} vare(r) under minimum:</strong> ${low.map(i=>i.navn).join(', ')}</div>`;
+  area.innerHTML = html;
+}
+
+function renderDashTable() {
+  const q = document.getElementById('dash-search').value.toLowerCase();
+  const items = state.items.filter(i=>{
+    const catOk = state.dashFilter==='alle' || i.kategori===state.dashFilter;
+    const qOk = !q || i.varenr.toLowerCase().includes(q) || i.navn.toLowerCase().includes(q);
+    return catOk && qOk;
+  });
+  document.getElementById('dash-count').textContent = `${items.length} vare(r)`;
+  const tbody = document.getElementById('dash-tbody');
+  if (!items.length) { tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><p>Ingen varer fundet</p></div></td></tr>`; return; }
+  tbody.innerHTML = items.map(item => {
+    const imgHtml = item.imgId
+      ? `<img src="https://drive.google.com/thumbnail?id=${item.imgId}&sz=w60" style="width:44px;height:44px;object-fit:contain;border-radius:4px;background:var(--bg3)">`
+      : `<div style="width:44px;height:44px;border-radius:4px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:1.2rem">📦</div>`;
+    return `<tr>
+      <td>${imgHtml}</td>
+      <td class="mono">${item.varenr}</td>
+      <td>${item.navn}</td>
+      <td><span class="cat-tag cat-tag-${item.kategori}">${item.kategori}</span></td>
+      <td><span class="mono" style="font-weight:600">${item.lager}</span> ${item.enhed}${stockBar(item)}</td>
+      <td class="mono" style="color:var(--text3)">${item.min}</td>
+      <td>${statusBadge(item)}</td>
+      <td style="color:var(--text3)">${item.enhed}</td>
+      <td style="display:flex;gap:6px;align-items:center;padding:8px 14px">
+        <button class="btn-sm" onclick="openEditItem(${item.rowIndex})">Rediger</button>
+        <button class="btn-sm danger" onclick="deleteItem(${item.rowIndex}, '${esc(item.navn)}')">Slet</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterDash(cat) {
+  state.dashFilter = cat;
+  document.querySelectorAll('#dash-cat-pills .cat-pill').forEach(p => p.classList.toggle('active', p.dataset.cat===cat));
+  renderDashTable();
+}
+
+function renderRegCards() {
+  const q = document.getElementById('reg-search').value.toLowerCase();
+  const cat = document.getElementById('reg-category').value;
+  const items = state.items.filter(i=>{
+    if (i.kategori !== cat) return false;
+    return !q || i.varenr.toLowerCase().includes(q) || i.navn.toLowerCase().includes(q);
+  });
+  const grid = document.getElementById('reg-cards');
+  if (!items.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;padding:40px"><p>Ingen varer i ${cat}</p></div>`;
+    return;
+  }
+  grid.innerHTML = items.map(item => {
+    const s = getStatus(item);
+    const stockColor = s==='out'?'var(--red)':s==='low'?'var(--yellow)':'var(--green)';
+    const imgHtml = item.imgId
+      ? `<img class="item-card-img" src="https://drive.google.com/thumbnail?id=${item.imgId}&sz=w200" loading="lazy" alt="${esc(item.navn)}">`
+      : `<div class="item-card-img-placeholder">📦</div>`;
+    return `<div class="item-card${s==='out'?' out-of-stock':''}" onclick="openItemDetail('${esc(item.varenr)}')">
+      ${imgHtml}
+      <div class="item-card-body">
+        <div class="item-card-name">${item.navn}</div>
+        <div class="item-card-nr">${item.varenr}</div>
+        <div class="item-card-stock">
+          <span style="color:${stockColor};font-weight:600">${item.lager} ${item.enhed}</span>
+          <span style="font-size:0.65rem;color:var(--text3)">min ${item.min}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openItemDetail(varenr) {
+  const item = state.items.find(i=>i.varenr===varenr);
+  if (!item) return;
+  state.qtyTarget = { varenr: item.varenr, navn: item.navn, enhed: item.enhed, lager: item.lager };
+  // Image
+  const imgWrap = document.getElementById('detail-img-wrap');
+  imgWrap.innerHTML = item.imgId
+    ? `<img class="item-detail-img" src="https://drive.google.com/thumbnail?id=${item.imgId}&sz=w400" alt="${esc(item.navn)}">`
+    : `<div class="item-detail-placeholder">📦</div>`;
+  document.getElementById('detail-title').textContent = item.navn;
+  const s = getStatus(item);
+  const stockColor = s==='out'?'var(--red)':s==='low'?'var(--yellow)':'var(--green)';
+  document.getElementById('detail-meta').innerHTML = `
+    <div class="detail-meta-item"><div class="detail-meta-label">Varenr.</div><div class="detail-meta-value">${item.varenr}</div></div>
+    <div class="detail-meta-item"><div class="detail-meta-label">Lager</div><div class="detail-meta-value" style="color:${stockColor}">${item.lager} ${item.enhed}</div></div>
+    <div class="detail-meta-item"><div class="detail-meta-label">Kategori</div><div class="detail-meta-value">${item.kategori}</div></div>
+    <div class="detail-meta-item"><div class="detail-meta-label">Minimum</div><div class="detail-meta-value">${item.min} ${item.enhed}</div></div>
+  `;
+  document.getElementById('detail-note').textContent = item.note || '';
+  document.getElementById('detail-qty').value = 1;
+  document.getElementById('modal-item-detail').classList.add('open');
+  setTimeout(()=>document.getElementById('detail-qty').focus(), 100);
+}
+
+function addToCartFromDetail() {
+  const qty = parseInt(document.getElementById('detail-qty').value)||1;
+  const t = state.qtyTarget;
+  if (!t) return;
+  const existing = state.cart.find(c=>c.varenr===t.varenr);
+  if (existing) existing.antal += qty;
+  else state.cart.push({ varenr: t.varenr, navn: t.navn, enhed: t.enhed, antal: qty });
+  closeModal('modal-item-detail');
+  renderCart();
+  toast(`${qty} × ${t.navn} tilføjet`, 'success');
+}
+
+document.getElementById('reg-category').addEventListener('change', renderRegCards);
+
+function renderOrderTable() {
+  const q = document.getElementById('order-search').value.toLowerCase();
+  const items = state.items.filter(i=>{
+    const catOk = state.orderFilter==='alle' || i.kategori===state.orderFilter;
+    const qOk = !q || i.varenr.toLowerCase().includes(q) || i.navn.toLowerCase().includes(q);
+    return catOk && qOk;
+  });
+  const tbody = document.getElementById('order-tbody');
+  if (!items.length) { tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state" style="padding:30px"><p>Ingen varer</p></div></td></tr>`; return; }
+  tbody.innerHTML = items.map(item => {
+    const suggest = Math.max(0, item.min * 3 - item.lager);
+    return `<tr>
+      <td><input type="checkbox" class="order-check" data-varenr="${item.varenr}" onchange="renderOrderSummary()"></td>
+      <td class="mono">${item.varenr}</td>
+      <td>${item.navn}</td>
+      <td><span class="cat-tag cat-tag-${item.kategori}">${item.kategori}</span></td>
+      <td class="mono">${item.lager}</td>
+      <td class="mono">${item.min}</td>
+      <td>${statusBadge(item)}</td>
+      <td><input type="number" class="order-qty" data-varenr="${item.varenr}" value="${suggest||item.min||1}" min="1" style="background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--font-mono);padding:4px 8px;width:70px;font-size:0.82rem" onchange="renderOrderSummary()"></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterOrder(cat) {
+  state.orderFilter = cat;
+  document.querySelectorAll('#order-cat-pills .cat-pill').forEach(p => p.classList.toggle('active', p.dataset.cat===cat));
+  renderOrderTable();
+}
+
+function renderUsersTable() {
+  const tbody = document.getElementById('users-tbody');
+  if (!state.users.length) { tbody.innerHTML='<tr><td colspan="4" style="padding:20px;color:var(--text3);text-align:center">Ingen brugere</td></tr>'; return; }
+  tbody.innerHTML = state.users.map(u=>`
+    <tr>
+      <td>${u.navn}</td>
+      <td class="mono" style="color:var(--text2)">${u.brugernavn}</td>
+      <td><span class="badge ${u.rolle==='admin'?'badge-ok':'badge-low'}">${u.rolle}</span></td>
+      <td><button class="btn-sm danger" onclick="deleteUser(${u.rowIndex}, '${esc(u.navn)}')">Fjern</button></td>
+    </tr>
+  `).join('');
+}
+
+function renderLog() {
+  const tbody = document.getElementById('log-tbody');
+  if (!state.transactions.length) { tbody.innerHTML='<tr><td colspan="5" style="padding:20px;color:var(--text3);text-align:center">Ingen transaktioner</td></tr>'; return; }
+  tbody.innerHTML = state.transactions.map(t=>`
+    <tr>
+      <td class="mono" style="font-size:0.72rem;color:var(--text3)">${t.tid}</td>
+      <td>${t.medarbejder}</td>
+      <td>${t.navn} <span class="mono" style="color:var(--text3);font-size:0.72rem">${t.varenr}</span></td>
+      <td class="mono">${t.antal}</td>
+      <td><span class="cat-tag cat-tag-${t.kategori}">${t.kategori}</span></td>
+    </tr>
+  `).join('');
+}
+
+function populateEmployees() {
+  const sel = document.getElementById('reg-employee');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Vælg medarbejder...</option>';
+  state.users.forEach(u => {
+    const o = document.createElement('option');
+    o.value = u.navn; o.textContent = u.navn;
+    if (u.navn === cur) o.selected = true;
+    sel.appendChild(o);
+  });
+  // Pre-select current user
+  if (!cur && state.currentUser) {
+    sel.value = state.currentUser.name || '';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// SCANNER
+// ═══════════════════════════════════════════════
+function handleScan(code) {
+  const area = document.getElementById('scanner-area');
+  area.classList.remove('ready'); area.classList.add('scanned');
+  setTimeout(() => area.classList.remove('scanned'), 600);
+
+  const item = state.items.find(i => i.varenr === code);
+  if (item) {
+    const cat = document.getElementById('reg-category').value;
+    if (item.kategori !== cat) {
+      document.getElementById('reg-category').value = item.kategori;
+      renderRegTable();
+    }
+    openQtyModal(item.varenr, item.navn, item.enhed, item.lager);
+    toast(`Fandt: ${item.navn}`, 'info');
+  } else {
+    toast(`Varenr. ${code} ikke fundet`, 'error');
+    document.getElementById('reg-search').value = code;
+    renderRegTable();
+  }
+}
+
+// ═══════════════════════════════════════════════
+// CART
+// ═══════════════════════════════════════════════
+function openQtyModal(varenr, navn, enhed, lager) {
+  state.qtyTarget = { varenr, navn, enhed, lager };
+  document.getElementById('qty-modal-title').textContent = navn;
+  document.getElementById('qty-modal-info').textContent = `Varenr: ${varenr} | Lager: ${lager} ${enhed}`;
+  document.getElementById('qty-input').value = 1;
+  document.getElementById('modal-qty').classList.add('open');
+  setTimeout(()=>document.getElementById('qty-input').focus(),100);
+}
+
+function addToCartConfirm() {
+  const qty = parseInt(document.getElementById('qty-input').value) || 1;
+  const t = state.qtyTarget;
+  if (!t) return;
+  const existing = state.cart.find(c=>c.varenr===t.varenr);
+  if (existing) existing.antal += qty;
+  else state.cart.push({ varenr: t.varenr, navn: t.navn, enhed: t.enhed, antal: qty });
+  closeModal('modal-qty');
+  renderCart();
+  toast(`${qty} × ${t.navn} tilføjet`, 'success');
+}
+
+function renderCart() {
+  const area = document.getElementById('cart-items');
+  const totalDiv = document.getElementById('cart-total');
+  const submitBtn = document.getElementById('cart-submit-btn');
+
+  if (!state.cart.length) {
+    area.innerHTML = '<div class="cart-empty">Ingen varer valgt endnu</div>';
+    totalDiv.style.display='none'; submitBtn.style.display='none'; return;
+  }
+  area.innerHTML = state.cart.map((c,i) => `
+    <div class="cart-item">
+      <div class="cart-item-info">
+        <div class="cart-item-name">${c.navn}</div>
+        <div class="cart-item-meta">${c.varenr}</div>
+      </div>
+      <div class="cart-qty">
+        <button class="qty-btn" onclick="adjustCart(${i},-1)">−</button>
+        <span class="qty-val">${c.antal}</span>
+        <button class="qty-btn" onclick="adjustCart(${i},1)">+</button>
+      </div>
+      <button class="remove-btn" onclick="removeCart(${i})">✕</button>
+    </div>
+  `).join('');
+  document.getElementById('cart-count').textContent = state.cart.reduce((s,c)=>s+c.antal,0);
+  totalDiv.style.display='block'; submitBtn.style.display='flex';
+}
+
+function adjustCart(i, delta) {
+  state.cart[i].antal = Math.max(1, state.cart[i].antal + delta);
+  renderCart();
+}
+function removeCart(i) { state.cart.splice(i,1); renderCart(); }
+
+async function submitCart() {
+  const emp = document.getElementById('reg-employee').value;
+  const cat = document.getElementById('reg-category').value;
+  if (!emp) { toast('Vælg medarbejder!', 'error'); return; }
+  if (!state.cart.length) return;
+
+  const btn = document.getElementById('cart-submit-btn');
+  btn.disabled = true; btn.textContent = 'Registrerer...';
+
+  const now = new Date().toLocaleString('da-DK');
+  const rows = state.cart.map(c => [now, emp, c.varenr, c.navn, c.antal, cat]);
+
+  try {
+    await webhookPost({ action: 'appendRows', sheet: SHEETS.trans, rows });
+    // Update local stock
+    state.cart.forEach(c => {
+      const item = state.items.find(i=>i.varenr===c.varenr);
+      if (item) item.lager = Math.max(0, item.lager - c.antal);
+    });
+    // Update sheet stock
+    for (const c of state.cart) {
+      const item = state.items.find(i=>i.varenr===c.varenr);
+      if (item) await webhookPost({ action: 'updateCell', sheet: SHEETS.varer, row: item.rowIndex, col: 4, value: item.lager });
+    }
+    state.cart = [];
+    renderCart();
+    renderAll();
+    toast(`✓ ${rows.length} post(er) registreret!`, 'success');
+  } catch(e) {
+    toast('Fejl ved registrering', 'error');
+  } finally {
+    btn.disabled=false; btn.textContent='Registrer træk'; btn.style.display='flex';
+    // re-add icon
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg> Registrer træk';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// ORDER
+// ═══════════════════════════════════════════════
+function autoSelectLow() {
+  document.querySelectorAll('.order-check').forEach(cb => {
+    const varenr = cb.dataset.varenr;
+    const item = state.items.find(i=>i.varenr===varenr);
+    cb.checked = item && getStatus(item)!=='ok';
+  });
+  toast('Valgte alle varer under minimum', 'info');
+}
+
+function toggleAllOrder(master) {
+  document.querySelectorAll('.order-check').forEach(cb => cb.checked=master.checked);
+}
+
+function generateOrder() {
+  const checked = [...document.querySelectorAll('.order-check:checked')];
+  if (!checked.length) { toast('Vælg mindst én vare', 'error'); return; }
+
+  const lines = [];
+  const groups = {};
+  checked.forEach(cb => {
+    const varenr = cb.dataset.varenr;
+    const qty = document.querySelector(`.order-qty[data-varenr="${varenr}"]`)?.value || 1;
+    const item = state.items.find(i=>i.varenr===varenr);
+    if (!item) return;
+    if (!groups[item.kategori]) groups[item.kategori] = [];
+    groups[item.kategori].push({ ...item, bestilAntal: qty });
+  });
+
+  const now = new Date().toLocaleDateString('da-DK');
+  let txt = `NORLYS MATERIALEBESTILLING\n${now}\nGenereret af: ${state.currentUser.name}\n`;
+  txt += '━'.repeat(50) + '\n\n';
+  Object.entries(groups).forEach(([cat, items]) => {
+    txt += `[ ${cat.toUpperCase()} ]\n`;
+    items.forEach(i => {
+      txt += `  ${i.varenr.padEnd(12)} ${i.navn.padEnd(35)} ${String(i.bestilAntal).padStart(5)} ${i.enhed}\n`;
+    });
+    txt += '\n';
+  });
+
+  document.getElementById('order-text').value = txt;
+  document.getElementById('order-export-box').classList.add('visible');
+  document.getElementById('order-export-box').scrollIntoView({behavior:'smooth'});
+
+  // Log to Bestillinger sheet
+  const rows = [];
+  Object.entries(groups).forEach(([cat, items]) => {
+    const now2 = new Date().toLocaleString('da-DK');
+    items.forEach(i => rows.push([now2, state.currentUser.name, i.varenr, i.navn, i.bestilAntal, cat]));
+  });
+  webhookPost({ action: 'appendRows', sheet: SHEETS.bestil, rows }).catch(()=>{});
+}
+
+function copyOrder() {
+  const txt = document.getElementById('order-text').value;
+  navigator.clipboard.writeText(txt).then(()=>toast('Kopieret!','success')).catch(()=>{
+    document.getElementById('order-text').select();
+    document.execCommand('copy');
+    toast('Kopieret!','success');
+  });
+}
+
+function exportExcel() {
+  const checked = [...document.querySelectorAll('.order-check:checked')];
+  if (!checked.length) { toast('Ingen varer valgt', 'error'); return; }
+
+  let csv = 'Varenummer,Varenavn,Kategori,Nuværende lager,Minimum,Antal at bestille,Enhed\n';
+  checked.forEach(cb => {
+    const varenr = cb.dataset.varenr;
+    const qty = document.querySelector(`.order-qty[data-varenr="${varenr}"]`)?.value || 1;
+    const item = state.items.find(i=>i.varenr===varenr);
+    if (!item) return;
+    csv += `"${item.varenr}","${item.navn}","${item.kategori}",${item.lager},${item.min},${qty},"${item.enhed}"\n`;
+  });
+
+  const bom = '\uFEFF';
+  const blob = new Blob([bom+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url;
+  a.download = `bestilling_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('Excel-fil downloades...', 'success');
+}
+
+function renderOrderSummary() {} // placeholder
+
+// ═══════════════════════════════════════════════
+// ITEM CRUD
+// ═══════════════════════════════════════════════
+// ── IMAGE UPLOAD HELPERS ──
+function triggerImgUpload() {
+  document.getElementById('item-img-file').click();
+}
+function previewImg(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const area = document.getElementById('img-upload-area');
+    const preview = document.getElementById('item-img-preview');
+    preview.src = e.target.result;
+    preview.style.display = 'block';
+    area.classList.add('has-image');
+  };
+  reader.readAsDataURL(file);
+}
+function removeImg(e) {
+  e.stopPropagation();
+  document.getElementById('img-upload-area').classList.remove('has-image');
+  document.getElementById('item-img-preview').style.display='none';
+  document.getElementById('item-img-preview').src='';
+  document.getElementById('item-img-file').value='';
+  document.getElementById('item-existing-img').value='';
+}
+async function uploadImgToDrive(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async e => {
+      const base64 = e.target.result.split(',')[1];
+      const mime = file.type;
+      const name = file.name;
+      try {
+        const res = await fetch(WEBHOOK, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'uploadImage', base64, mime, name })
+        });
+        // no-cors fallback: assume ok, get id from sheet later
+        resolve('pending');
+      } catch(err) {
+        // Fallback: post with no-cors
+        await fetch(WEBHOOK, {
+          method: 'POST', mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'uploadImage', base64, mime, name })
+        });
+        resolve('pending');
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── ITEM CRUD ──
+function openAddItem() {
+  document.getElementById('additem-title').textContent = '+ NY VARE';
+  document.getElementById('additem-save-btn').textContent = 'Gem vare';
+  document.getElementById('item-edit-row').value = '';
+  document.getElementById('item-existing-img').value = '';
+  ['item-varenr','item-name','item-unit','item-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('item-stock').value=0;
+  document.getElementById('item-min').value=5;
+  document.getElementById('item-cat').value='Erhverv';
+  removeImg({stopPropagation:()=>{}});
+  document.getElementById('modal-additem').classList.add('open');
+}
+
+function openEditItem(rowIndex) {
+  const item = state.items.find(i=>i.rowIndex===rowIndex);
+  if (!item) return;
+  document.getElementById('additem-title').textContent = 'REDIGER VARE';
+  document.getElementById('additem-save-btn').textContent = 'Gem ændringer';
+  document.getElementById('item-edit-row').value = rowIndex;
+  document.getElementById('item-existing-img').value = item.imgId || '';
+  document.getElementById('item-varenr').value = item.varenr;
+  document.getElementById('item-name').value = item.navn;
+  document.getElementById('item-cat').value = item.kategori;
+  document.getElementById('item-stock').value = item.lager;
+  document.getElementById('item-min').value = item.min;
+  document.getElementById('item-unit').value = item.enhed;
+  document.getElementById('item-note').value = item.note || '';
+  // Show existing image if any
+  const area = document.getElementById('img-upload-area');
+  const preview = document.getElementById('item-img-preview');
+  document.getElementById('item-img-file').value = '';
+  if (item.imgId) {
+    preview.src = `https://drive.google.com/thumbnail?id=${item.imgId}&sz=w200`;
+    preview.style.display = 'block';
+    area.classList.add('has-image');
+  } else {
+    preview.style.display = 'none';
+    area.classList.remove('has-image');
+  }
+  document.getElementById('modal-additem').classList.add('open');
+}
+
+async function saveItem() {
+  const varenr = document.getElementById('item-varenr').value.trim();
+  const navn = document.getElementById('item-name').value.trim();
+  const kat = document.getElementById('item-cat').value;
+  const lager = document.getElementById('item-stock').value||0;
+  const min = document.getElementById('item-min').value||0;
+  const enhed = document.getElementById('item-unit').value.trim()||'stk';
+  const note = document.getElementById('item-note').value.trim();
+  const editRow = document.getElementById('item-edit-row').value;
+  const existingImg = document.getElementById('item-existing-img').value;
+
+  if (!varenr||!navn) { toast('Udfyld varenr og navn','error'); return; }
+
+  const btn = document.getElementById('additem-save-btn');
+  btn.textContent = 'Gemmer...'; btn.disabled = true;
+
+  // Handle image upload
+  let imgId = existingImg;
+  const imgFile = document.getElementById('item-img-file').files[0];
+  if (imgFile) {
+    toast('Uploader billede...', 'info');
+    const reader = new FileReader();
+    imgId = await new Promise(resolve => {
+      reader.onload = async e => {
+        const base64 = e.target.result.split(',')[1];
+        try {
+          // We post with regular fetch to get response back
+          const r = await fetch(WEBHOOK + '?action=uploadImage', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'uploadImage', base64, mime: imgFile.type, name: imgFile.name })
+          });
+          const data = await r.json();
+          resolve(data.imgId || existingImg);
+        } catch {
+          // no-cors fallback – post and keep existing
+          await fetch(WEBHOOK, { method:'POST', mode:'no-cors',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ action:'uploadImage', base64, mime:imgFile.type, name:imgFile.name, varenr })
+          });
+          resolve(existingImg);
+        }
+      };
+      reader.readAsDataURL(imgFile);
+    });
+  }
+
+  // If preview shown but no file and no existingImg -> image removed
+  const preview = document.getElementById('item-img-preview');
+  if (!preview.src || preview.style.display==='none') imgId = '';
+
+  const row = [varenr, navn, kat, lager, min, enhed, note, imgId];
+
+  try {
+    if (editRow) {
+      // Update existing row cell by cell
+      const r = parseInt(editRow);
+      await Promise.all([
+        webhookPost({ action:'updateCell', sheet:SHEETS.varer, row:r, col:1, value:varenr }),
+        webhookPost({ action:'updateCell', sheet:SHEETS.varer, row:r, col:2, value:navn }),
+        webhookPost({ action:'updateCell', sheet:SHEETS.varer, row:r, col:3, value:kat }),
+        webhookPost({ action:'updateCell', sheet:SHEETS.varer, row:r, col:4, value:lager }),
+        webhookPost({ action:'updateCell', sheet:SHEETS.varer, row:r, col:5, value:min }),
+        webhookPost({ action:'updateCell', sheet:SHEETS.varer, row:r, col:6, value:enhed }),
+        webhookPost({ action:'updateCell', sheet:SHEETS.varer, row:r, col:7, value:note }),
+        webhookPost({ action:'updateCell', sheet:SHEETS.varer, row:r, col:8, value:imgId }),
+      ]);
+      toast(`${navn} opdateret!`, 'success');
+    } else {
+      await webhookPost({ action: 'appendRow', sheet: SHEETS.varer, row });
+      toast(`${navn} tilføjet!`, 'success');
+    }
+    closeModal('modal-additem');
+    await loadData();
+  } catch(e) { toast('Fejl ved gemning', 'error'); }
+  finally { btn.textContent = editRow ? 'Gem ændringer':'Gem vare'; btn.disabled=false; }
+}
+
+async function deleteItem(rowIndex, navn) {
+  if (!confirm(`Er du sikker på du vil slette "${navn}"? Dette kan ikke fortrydes.`)) return;
+  try {
+    await webhookPost({ action: 'deleteRow', sheet: SHEETS.varer, row: rowIndex });
+    await loadData();
+    toast(`${navn} slettet`, 'info');
+  } catch(e) { toast('Fejl ved sletning', 'error'); }
+}
+
+function openEditStock(rowIndex, varenr, navn, lager, min) {
+  document.getElementById('edit-stock-info').textContent = `${varenr} – ${navn}`;
+  document.getElementById('edit-stock-val').value = lager;
+  document.getElementById('edit-min-val').value = min;
+  document.getElementById('edit-stock-row').value = rowIndex;
+  document.getElementById('modal-editstock').classList.add('open');
+}
+
+async function saveStock() {
+  const row = parseInt(document.getElementById('edit-stock-row').value);
+  const lager = parseFloat(document.getElementById('edit-stock-val').value)||0;
+  const min = parseFloat(document.getElementById('edit-min-val').value)||0;
+  try {
+    await Promise.all([
+      webhookPost({ action: 'updateCell', sheet: SHEETS.varer, row, col: 4, value: lager }),
+      webhookPost({ action: 'updateCell', sheet: SHEETS.varer, row, col: 5, value: min }),
+    ]);
+    const item = state.items.find(i=>i.rowIndex===row);
+    if (item) { item.lager=lager; item.min=min; }
+    closeModal('modal-editstock');
+    renderAll();
+    toast('Lager opdateret!','success');
+  } catch(e) { toast('Fejl ved opdatering','error'); }
+}
+
+// ═══════════════════════════════════════════════
+// USER CRUD
+// ═══════════════════════════════════════════════
+function openAddUser() { document.getElementById('modal-adduser').classList.add('open'); }
+
+async function saveUser() {
+  const navn = document.getElementById('user-fullname').value.trim();
+  const brugernavn = document.getElementById('user-username').value.trim().toLowerCase();
+  const pwd = document.getElementById('user-password').value;
+  const rolle = document.getElementById('user-role').value;
+  if (!navn||!brugernavn||!pwd) { toast('Udfyld alle felter','error'); return; }
+  const hash = hashPass(pwd);
+  try {
+    await webhookPost({ action: 'appendRow', sheet: SHEETS.brugere, row: [navn, brugernavn, hash, rolle] });
+    closeModal('modal-adduser');
+    await loadData();
+    toast(`${navn} oprettet!`, 'success');
+  } catch(e) { toast('Fejl ved oprettelse','error'); }
+}
+
+async function deleteUser(rowIndex, navn) {
+  if (!confirm(`Slet ${navn}?`)) return;
+  try {
+    await webhookPost({ action: 'deleteRow', sheet: SHEETS.brugere, row: rowIndex });
+    await loadData();
+    toast(`${navn} fjernet`, 'info');
+  } catch(e) { toast('Fejl','error'); }
+}
+
+// ═══════════════════════════════════════════════
+// WEBHOOK
+// ═══════════════════════════════════════════════
+async function webhookPost(payload) {
+  const res = await fetch(WEBHOOK, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  return res;
+}
+
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+function showTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  if (tab==='register') setTimeout(()=>document.getElementById('scanner-input').focus(),200);
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
+});
+
+function toast(msg, type='info') {
+  const el = document.createElement('div');
+  el.className = `toast-item ${type}`;
+  el.textContent = msg;
+  document.getElementById('toast').appendChild(el);
+  setTimeout(()=>el.remove(), 3000);
+}
+
+function esc(str) { return String(str).replace(/'/g,"\\'"); }
+</script>
+</body>
+</html>
