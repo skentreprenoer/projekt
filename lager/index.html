@@ -4,34 +4,33 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SK Lager – Norlys Materialestyring</title>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0a0b0d;
-  --bg2: #0f1114;
-  --bg3: #141619;
-  --bg4: #1a1d21;
-  --border: #1e2126;
-  --border2: #252a30;
-  --border3: #2e333a;
-  --text: #dde3ea;
-  --text2: #7a8694;
-  --text3: #3d4550;
-  --accent: #e63946;
-  --accent2: #c1121f;
-  --accent-glow: rgba(230,57,70,0.15);
-  --green: #2dc653;
-  --yellow: #f4a261;
-  --red: #e63946;
-  --orange: #f4a261;
-  --erhverv: #e63946;
-  --eftersalg: #c77dff;
-  --dso: #2dc653;
-  --font-display: 'Orbitron', monospace;
-  --font-sans: 'Rajdhani', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-  --radius: 3px;
-  --shadow: 0 8px 32px rgba(0,0,0,0.6);
+  --bg: #1a1a1a;
+  --bg2: #222222;
+  --bg3: #2a2a2a;
+  --bg4: #333333;
+  --border: #3a3a3a;
+  --border2: #444444;
+  --border3: #555555;
+  --text: #f0f0f0;
+  --text2: #aaaaaa;
+  --text3: #666666;
+  --accent: #B31C2C;
+  --accent2: #8f1522;
+  --accent-light: #d42233;
+  --green: #2e9e52;
+  --yellow: #c97d00;
+  --red: #B31C2C;
+  --erhverv: #B31C2C;
+  --eftersalg: #7b68c8;
+  --dso: #2e9e52;
+  --font-display: 'Inter', sans-serif;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --radius: 4px;
+  --shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -40,33 +39,10 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
-  font-size: 15px;
+  font-size: 14px;
   min-height: 100vh;
   overflow-x: hidden;
-  position: relative;
 }
-
-/* Grid + scanline overlay */
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background-image:
-    linear-gradient(rgba(230,57,70,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(230,57,70,0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none; z-index: 0;
-}
-body::after {
-  content: '';
-  position: fixed; inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent, transparent 2px,
-    rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px
-  );
-  pointer-events: none; z-index: 0;
-}
-#loader, #login-screen, #app { position: relative; z-index: 1; }
 
 /* ── LOADER ── */
 #loader {
@@ -75,20 +51,17 @@ body::after {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   z-index: 9999;
-  transition: opacity 0.5s;
+  transition: opacity 0.4s;
 }
 #loader .logo-big {
-  font-family: var(--font-display); font-size: 2.8rem; color: var(--accent);
-  letter-spacing: 4px; text-shadow: 0 0 40px rgba(230,57,70,0.5);
-  animation: flicker 3s infinite;
+  font-family: var(--font-sans); font-size: 1.8rem; color: var(--text);
+  font-weight: 700; letter-spacing: 1px;
 }
-#loader .logo-sub { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text3); letter-spacing: 6px; margin-top: 10px; }
-#loader .bar { width: 240px; height: 1px; background: var(--border); margin-top: 40px; overflow: hidden; }
-#loader .bar-fill { height: 100%; background: var(--accent); box-shadow: 0 0 8px var(--accent); width: 0; animation: loadfill 1.4s ease forwards; }
+#loader .logo-big span { color: var(--accent); }
+#loader .logo-sub { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text3); letter-spacing: 3px; margin-top: 8px; text-transform: uppercase; }
+#loader .bar { width: 200px; height: 2px; background: var(--border); margin-top: 36px; overflow: hidden; border-radius: 1px; }
+#loader .bar-fill { height: 100%; background: var(--accent); width: 0; animation: loadfill 1.2s ease forwards; }
 @keyframes loadfill { to { width: 100%; } }
-@keyframes flicker {
-  0%,95%,100% { opacity:1; } 96% { opacity:0.85; } 97% { opacity:1; } 98% { opacity:0.9; }
-}
 
 /* ── LOGIN ── */
 #login-screen {
@@ -102,37 +75,32 @@ body::after {
 .login-box {
   background: var(--bg2);
   border: 1px solid var(--border2);
-  border-top: 2px solid var(--accent);
-  border-radius: 0;
-  padding: 48px 40px;
-  width: 380px;
-  box-shadow: var(--shadow), 0 0 60px rgba(230,57,70,0.08);
-  position: relative;
+  border-top: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 40px 36px;
+  width: 360px;
+  box-shadow: var(--shadow);
 }
-.login-box::before {
-  content: ''; position: absolute; top: -1px; left: 40px; right: 40px; height: 2px;
-  background: var(--accent); filter: blur(4px);
-}
-.login-logo { font-family: var(--font-display); font-size: 1.6rem; color: var(--accent); margin-bottom: 4px; letter-spacing: 3px; text-shadow: 0 0 20px rgba(230,57,70,0.4); }
-.login-sub { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text3); letter-spacing: 4px; margin-bottom: 36px; }
+.login-logo { font-family: var(--font-sans); font-size: 1.4rem; color: var(--text); font-weight: 700; margin-bottom: 2px; }
+.login-logo span { color: var(--accent); }
+.login-sub { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text3); letter-spacing: 2px; margin-bottom: 28px; }
 .login-box label { font-size: 0.7rem; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 6px; }
-.login-box label { font-family: var(--font-mono); }
+.login-box label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px; color: var(--text2); }
 .login-box input {
   width: 100%; background: var(--bg3); border: 1px solid var(--border2);
-  border-radius: 0; color: var(--text); font-family: var(--font-mono);
-  font-size: 0.9rem; padding: 10px 14px; outline: none; margin-bottom: 16px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  border-radius: var(--radius); color: var(--text); font-family: var(--font-sans);
+  font-size: 0.95rem; padding: 10px 14px; outline: none; margin-bottom: 14px;
+  transition: border-color 0.2s;
 }
-.login-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), inset 0 0 20px rgba(230,57,70,0.05); }
+.login-box input:focus { border-color: var(--accent); }
 .btn-primary {
   width: 100%; background: var(--accent); color: #fff; border: none;
-  border-radius: 0; font-family: var(--font-display); font-size: 0.85rem;
-  font-weight: 600; padding: 13px; cursor: pointer; transition: all 0.2s;
-  letter-spacing: 3px; text-transform: uppercase;
-  box-shadow: 0 0 20px rgba(230,57,70,0.3);
+  border-radius: var(--radius); font-family: var(--font-sans); font-size: 0.9rem;
+  font-weight: 600; padding: 11px; cursor: pointer; transition: background 0.2s;
+  letter-spacing: 0.3px;
 }
-.btn-primary:hover { background: var(--accent2); box-shadow: 0 0 30px rgba(230,57,70,0.5); }
-.login-error { color: var(--accent); font-family: var(--font-mono); font-size: 0.75rem; margin-top: 10px; display: none; letter-spacing: 1px; }
+.btn-primary:hover { background: var(--accent-light); }
+.login-error { color: var(--accent); font-size: 0.78rem; margin-top: 10px; display: none; }
 
 /* ── LAYOUT ── */
 #app { display: none; flex-direction: column; min-height: 100vh; }
@@ -141,53 +109,46 @@ body::after {
 /* ── TOPBAR ── */
 .topbar {
   display: flex; align-items: center; gap: 16px;
-  background: var(--bg2); border-bottom: 2px solid var(--border);
-  border-bottom-color: var(--accent);
-  padding: 0 20px; height: 54px; position: sticky; top: 0; z-index: 100;
-  box-shadow: 0 2px 30px rgba(230,57,70,0.12);
-}
-.topbar::after {
-  content: ''; position: absolute; bottom: -3px; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, var(--accent), transparent 60%);
-  pointer-events: none;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  padding: 0 20px; height: 52px; position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 .topbar-logo {
-  font-family: var(--font-display); font-size: 1.1rem; color: var(--accent);
-  font-weight: 700; letter-spacing: 3px; white-space: nowrap;
-  text-shadow: 0 0 16px rgba(230,57,70,0.4);
+  font-family: var(--font-sans); font-size: 0.95rem; color: var(--text);
+  font-weight: 700; letter-spacing: 0.3px; white-space: nowrap;
 }
+.topbar-logo span { color: var(--accent); }
 .topbar-divider { width: 1px; height: 20px; background: var(--border); }
 
 .nav-tabs { display: flex; gap: 2px; flex: 1; }
 .nav-tab {
   display: flex; align-items: center; gap: 7px;
-  padding: 6px 16px; border-radius: 0; cursor: pointer;
-  font-size: 0.82rem; color: var(--text2); border: none; background: none;
+  padding: 6px 14px; border-radius: var(--radius); cursor: pointer;
+  font-size: 0.84rem; color: var(--text2); border: none; background: none;
   transition: all 0.15s; font-family: var(--font-sans); white-space: nowrap;
-  letter-spacing: 0.5px; font-weight: 500; text-transform: uppercase;
-  border-bottom: 2px solid transparent; margin-bottom: -2px;
+  font-weight: 500;
 }
-.nav-tab:hover { color: var(--text); background: rgba(230,57,70,0.05); }
-.nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(230,57,70,0.05); }
+.nav-tab:hover { background: var(--bg3); color: var(--text); }
+.nav-tab.active { background: var(--bg3); color: var(--accent); font-weight: 600; }
 .nav-tab svg { width: 14px; height: 14px; }
 
 .topbar-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
 .user-badge {
   display: flex; align-items: center; gap: 8px;
-  background: var(--bg3); border: 1px solid var(--border2);
-  border-radius: 0; padding: 4px 12px 4px 4px;
-  font-size: 0.78rem; color: var(--text2); font-family: var(--font-mono);
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 20px; padding: 4px 12px 4px 4px;
+  font-size: 0.78rem; color: var(--text2);
 }
 .user-avatar {
-  width: 26px; height: 26px; border-radius: 0;
+  width: 26px; height: 26px; border-radius: 50%;
   background: var(--accent); color: #fff;
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-display); font-size: 0.65rem; font-weight: 700;
+  font-family: var(--font-sans); font-size: 0.68rem; font-weight: 700;
 }
 .btn-logout {
-  background: none; border: 1px solid var(--border2); border-radius: 0;
-  color: var(--text3); font-size: 0.72rem; padding: 4px 10px; cursor: pointer;
-  transition: all 0.15s; font-family: var(--font-mono); letter-spacing: 1px;
+  background: none; border: 1px solid var(--border); border-radius: var(--radius);
+  color: var(--text3); font-size: 0.75rem; padding: 4px 10px; cursor: pointer;
+  transition: all 0.15s; font-family: var(--font-sans);
 }
 .btn-logout:hover { border-color: var(--accent); color: var(--accent); }
 
@@ -201,75 +162,68 @@ body::after {
 }
 .section-title {
   font-family: var(--font-mono); font-size: 0.68rem;
-  color: var(--accent); letter-spacing: 3px; text-transform: uppercase;
-  opacity: 0.7;
+  color: var(--text3); letter-spacing: 2px; text-transform: uppercase;
 }
 
 /* ── CATEGORY PILLS ── */
 .cat-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
 .cat-pill {
-  padding: 5px 16px; border-radius: 0; font-size: 0.72rem;
-  font-family: var(--font-mono); cursor: pointer; border: 1px solid transparent;
-  transition: all 0.15s; letter-spacing: 1px; text-transform: uppercase;
+  padding: 5px 14px; border-radius: 20px; font-size: 0.76rem;
+  font-family: var(--font-sans); font-weight: 500; cursor: pointer; border: 1px solid transparent;
+  transition: all 0.15s;
 }
 .cat-pill[data-cat="alle"] { border-color: var(--border2); color: var(--text2); }
-.cat-pill[data-cat="alle"].active { background: var(--text2); color: #000; border-color: var(--text2); }
+.cat-pill[data-cat="alle"].active { background: var(--bg4); color: var(--text); border-color: var(--border3); }
 .cat-pill[data-cat="Erhverv"] { border-color: var(--erhverv); color: var(--erhverv); }
-.cat-pill[data-cat="Erhverv"].active { background: var(--erhverv); color: #fff; box-shadow: 0 0 12px rgba(230,57,70,0.3); }
+.cat-pill[data-cat="Erhverv"].active { background: var(--erhverv); color: #fff; }
 .cat-pill[data-cat="Eftersalg"] { border-color: var(--eftersalg); color: var(--eftersalg); }
-.cat-pill[data-cat="Eftersalg"].active { background: var(--eftersalg); color: #000; }
+.cat-pill[data-cat="Eftersalg"].active { background: var(--eftersalg); color: #fff; }
 .cat-pill[data-cat="DSO"] { border-color: var(--dso); color: var(--dso); }
-.cat-pill[data-cat="DSO"].active { background: var(--dso); color: #000; }
+.cat-pill[data-cat="DSO"].active { background: var(--dso); color: #fff; }
 
 /* ── STAT CARDS ── */
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
 .stat-card {
-  background: var(--bg2); border: 1px solid var(--border2);
-  border-left: 2px solid var(--accent); border-radius: 0; padding: 16px 20px;
-  position: relative; overflow: hidden;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 20px;
 }
-.stat-card::after {
-  content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 40%;
-  background: linear-gradient(90deg, transparent, rgba(230,57,70,0.03));
-  pointer-events: none;
-}
-.stat-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
-.stat-value { font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--text); }
+.stat-label { font-size: 0.7rem; color: var(--text3); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; font-weight: 500; }
+.stat-value { font-family: var(--font-mono); font-size: 1.9rem; font-weight: 600; color: var(--text); }
 .stat-value.red { color: var(--red); }
 .stat-value.yellow { color: var(--yellow); }
 .stat-value.green { color: var(--green); }
 
 /* ── TABLE ── */
 .table-wrap {
-  background: var(--bg2); border: 1px solid var(--border2);
-  border-top: 1px solid var(--accent); border-radius: 0; overflow: hidden;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
 }
 .table-toolbar {
   display: flex; align-items: center; gap: 12px;
   padding: 12px 16px; border-bottom: 1px solid var(--border);
-  flex-wrap: wrap; background: var(--bg3);
+  flex-wrap: wrap;
 }
 .search-input {
-  background: var(--bg3); border: 1px solid var(--border2);
-  border-radius: 0; color: var(--text); font-family: var(--font-mono);
-  font-size: 0.82rem; padding: 7px 12px; outline: none; width: 240px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text); font-family: var(--font-sans);
+  font-size: 0.84rem; padding: 7px 12px; outline: none; width: 240px;
   transition: border-color 0.2s;
 }
-.search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(230,57,70,0.2); }
+.search-input:focus { border-color: var(--accent); }
 .search-input::placeholder { color: var(--text3); }
 
 table { width: 100%; border-collapse: collapse; }
 thead th {
   text-align: left; padding: 9px 14px;
-  font-family: var(--font-mono); font-size: 0.62rem; color: var(--accent);
-  letter-spacing: 2px; text-transform: uppercase; opacity: 0.6;
+  font-size: 0.68rem; color: var(--text3); font-weight: 600;
+  letter-spacing: 0.5px; text-transform: uppercase;
   border-bottom: 1px solid var(--border); white-space: nowrap;
   background: var(--bg3);
 }
 tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
 tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: rgba(230,57,70,0.04); }
-tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans); }
+tbody tr:hover { background: var(--bg3); }
+tbody td { padding: 10px 14px; font-size: 0.86rem; }
 .mono { font-family: var(--font-mono); }
 
 /* status badges */
@@ -293,9 +247,9 @@ tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans)
 
 /* action btns in table */
 .btn-sm {
-  background: var(--bg3); border: 1px solid var(--border); border-radius: 4px;
-  color: var(--text2); font-size: 0.72rem; padding: 4px 9px; cursor: pointer;
-  transition: all 0.15s; font-family: var(--font-sans);
+  background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
+  color: var(--text2); font-size: 0.74rem; padding: 4px 10px; cursor: pointer;
+  transition: all 0.15s; font-family: var(--font-sans); font-weight: 500;
 }
 .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
 .btn-sm.danger:hover { border-color: var(--red); color: var(--red); }
@@ -307,12 +261,12 @@ tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans)
   font-size: 0.82rem; border: none; font-family: var(--font-sans);
   font-weight: 500; transition: all 0.15s; white-space: nowrap;
 }
-.btn-accent { background: var(--accent); color: #fff; border-radius: 0; letter-spacing: 1px; box-shadow: 0 0 12px rgba(230,57,70,0.25); }
-.btn-accent:hover { background: var(--accent2); box-shadow: 0 0 20px rgba(230,57,70,0.4); }
-.btn-ghost { background: transparent; border: 1px solid var(--border2); border-radius: 0; color: var(--text2); font-family: var(--font-mono); letter-spacing: 0.5px; }
-.btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: rgba(230,57,70,0.05); }
-.btn-green { background: var(--green); color: #000; border-radius: 0; letter-spacing: 1px; }
-.btn-green:hover { opacity: 0.85; }
+.btn-accent { background: var(--accent); color: #fff; border-radius: var(--radius); }
+.btn-accent:hover { background: var(--accent-light); }
+.btn-ghost { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text2); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-green { background: var(--green); color: #fff; border-radius: var(--radius); }
+.btn-green:hover { opacity: 0.9; }
 .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
 
 /* ── MODAL ── */
@@ -324,23 +278,22 @@ tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans)
 }
 .modal-overlay.open { display: flex; }
 .modal {
-  background: var(--bg2); border: 1px solid var(--border2);
-  border-top: 2px solid var(--accent);
-  border-radius: 0; padding: 28px 28px 24px;
-  width: 480px; max-width: 95vw; box-shadow: var(--shadow), 0 0 60px rgba(230,57,70,0.08);
+  background: var(--bg2); border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: var(--radius); padding: 28px 28px 24px;
+  width: 480px; max-width: 95vw; box-shadow: var(--shadow);
   max-height: 90vh; overflow-y: auto;
 }
-.modal-title { font-family: var(--font-display); font-size: 0.95rem; color: var(--accent); margin-bottom: 20px; letter-spacing: 2px; text-shadow: 0 0 12px rgba(230,57,70,0.3); }
+.modal-title { font-family: var(--font-sans); font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 20px; letter-spacing: 0.2px; }
 .form-row { margin-bottom: 14px; }
 .form-row label { font-size: 0.7rem; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 5px; }
 .form-row input, .form-row select, .form-row textarea {
-  width: 100%; background: var(--bg3); border: 1px solid var(--border2);
-  border-radius: 0; color: var(--text); font-family: var(--font-mono);
-  font-size: 0.85rem; padding: 9px 12px; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text); font-family: var(--font-sans);
+  font-size: 0.88rem; padding: 9px 12px; outline: none; transition: border-color 0.2s;
 }
 .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px rgba(230,57,70,0.3), inset 0 0 16px rgba(230,57,70,0.04);
 }
 .form-row select option { background: var(--bg2); }
 .form-row textarea { resize: vertical; min-height: 80px; }
@@ -349,21 +302,20 @@ tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans)
 
 /* ── SCANNER INPUT ── */
 .scanner-area {
-  background: var(--bg2); border: 1px solid var(--border2);
-  border-top: 2px solid var(--border3);
-  border-radius: 0; padding: 28px; text-align: center;
-  margin-bottom: 20px; transition: border-color 0.2s, box-shadow 0.2s;
+  background: var(--bg2); border: 2px dashed var(--border2);
+  border-radius: var(--radius); padding: 28px; text-align: center;
+  margin-bottom: 20px; transition: border-color 0.2s;
 }
-.scanner-area.ready { border-color: var(--accent); border-style: solid; box-shadow: 0 0 20px rgba(230,57,70,0.1); }
+.scanner-area.ready { border-color: var(--accent); border-style: solid; }
 .scanner-area.scanned { border-color: var(--green); animation: scanpulse 0.4s ease; }
 @keyframes scanpulse { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 24px rgba(0,230,118,0.3); } }
 .scanner-icon { font-size: 2.5rem; margin-bottom: 12px; }
 .scanner-hint { font-size: 0.8rem; color: var(--text3); margin-bottom: 16px; }
 #scanner-input {
   width: 100%; background: var(--bg3); border: 1px solid var(--accent);
-  border-radius: 0; color: var(--accent); font-family: var(--font-display);
-  font-size: 1.2rem; padding: 12px 16px; outline: none; text-align: center;
-  letter-spacing: 4px; box-shadow: 0 0 20px rgba(230,57,70,0.1);
+  border-radius: var(--radius); color: var(--text); font-family: var(--font-mono);
+  font-size: 1.1rem; padding: 12px 16px; outline: none; text-align: center;
+  letter-spacing: 2px;
 }
 
 /* ── REGISTER PAGE ── */
@@ -371,12 +323,11 @@ tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans)
 @media (max-width: 900px) { .register-layout { grid-template-columns: 1fr; } }
 
 .cart-panel {
-  background: var(--bg2); border: 1px solid var(--border2);
-  border-top: 2px solid var(--accent);
-  border-radius: 0; padding: 20px; position: sticky; top: 72px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; position: sticky; top: 68px;
   max-height: calc(100vh - 90px); overflow-y: auto;
 }
-.cart-title { font-family: var(--font-display); font-size: 0.75rem; color: var(--accent); letter-spacing: 3px; margin-bottom: 16px; opacity: 0.8; }
+.cart-title { font-size: 0.7rem; font-weight: 600; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px; }
 .cart-empty { color: var(--text3); font-size: 0.82rem; text-align: center; padding: 24px 0; }
 .cart-item {
   display: flex; align-items: center; gap: 10px;
@@ -424,16 +375,16 @@ tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans)
   display: flex; flex-direction: column; gap: 8px; pointer-events: none;
 }
 .toast-item {
-  background: var(--bg2); border: 1px solid var(--border2);
+  background: var(--bg2); border: 1px solid var(--border);
   border-left: 3px solid var(--accent);
-  border-radius: 0; padding: 12px 16px; font-family: var(--font-mono); font-size: 0.78rem;
+  border-radius: var(--radius); padding: 12px 16px; font-size: 0.82rem;
   display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow);
   animation: toastin 0.25s ease forwards;
-  min-width: 260px; letter-spacing: 0.5px;
+  min-width: 240px;
 }
 .toast-item.success { border-left-color: var(--green); }
 .toast-item.error { border-left-color: var(--accent); }
-.toast-item.info { border-left-color: var(--yellow); }
+.toast-item.info { border-left-color: var(--text2); }
 @keyframes toastin { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
 /* ── EMPTY STATE ── */
@@ -451,13 +402,20 @@ tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans)
 
 /* ── ALERT BANNER ── */
 .alert-banner {
-  background: rgba(230,57,70,0.06); border: 1px solid rgba(230,57,70,0.2);
-  border-left: 3px solid var(--accent);
-  border-radius: 0; padding: 12px 16px; margin-bottom: 12px;
+  background: rgba(179,28,44,0.08); border: 1px solid rgba(179,28,44,0.2);
+  border-radius: var(--radius); padding: 12px 16px; margin-bottom: 12px;
   display: flex; align-items: center; gap: 10px; font-size: 0.82rem;
-  font-family: var(--font-mono); letter-spacing: 0.3px;
 }
 .alert-banner svg { width: 16px; height: 16px; color: var(--accent); flex-shrink: 0; }
+
+/* ── IMPORT AREA ── */
+#import-area { transition: none; }
+#import-area.open { display: block !important; }
+.import-row-remove {
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; padding: 2px 6px; transition: color 0.15s; font-size: 1rem;
+}
+.import-row-remove:hover { color: var(--accent); }
 
 /* ── ITEM CARDS (Registrer) ── */
 .cards-grid {
@@ -467,15 +425,14 @@ tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans)
   margin-top: 12px;
 }
 .item-card {
-  background: var(--bg2); border: 1px solid var(--border2);
-  border-top: 1px solid var(--border3);
-  border-radius: 0; overflow: hidden; cursor: pointer;
-  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; cursor: pointer;
+  transition: border-color 0.15s, transform 0.12s, box-shadow 0.15s;
   display: flex; flex-direction: column;
 }
 .item-card:hover {
   border-color: var(--accent); transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px var(--accent);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
 }
 .item-card.out-of-stock { opacity: 0.5; }
 .item-card-img {
@@ -552,7 +509,7 @@ tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans)
 
 <!-- LOADER -->
 <div id="loader">
-  <div class="logo-big">SK/LAGER</div>
+  <div class="logo-big">Søren Knudsen <span>A/S</span></div>
   <div class="logo-sub">NORLYS MATERIALESTYRING</div>
   <div class="bar"><div class="bar-fill"></div></div>
 </div>
@@ -560,7 +517,7 @@ tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans)
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-logo">SK/LAGER</div>
+    <div class="login-logo">Søren Knudsen <span>A/S</span></div>
     <div class="login-sub">SØREN KNUDSEN A/S</div>
     <div class="form-row">
       <label>Brugernavn</label>
@@ -575,11 +532,21 @@ tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans)
   </div>
 </div>
 
+<!-- LAGER-PC MEDARBEJDER VÆLGER -->
+<div id="picker-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:900;align-items:center;justify-content:center;flex-direction:column">
+  <div style="text-align:center;margin-bottom:32px">
+    <div style="font-family:var(--font-sans);font-size:1.3rem;font-weight:700;color:var(--text);margin-bottom:4px">Søren Knudsen <span style="color:var(--accent)">A/S</span></div>
+    <div style="font-family:var(--font-mono);font-size:0.68rem;color:var(--text3);letter-spacing:2px">LAGER — HVEM ER DU?</div>
+  </div>
+  <div id="picker-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;max-width:700px;width:90%;max-height:60vh;overflow-y:auto;padding:4px"></div>
+  <div style="margin-top:24px;font-size:0.75rem;color:var(--text3)">Vælg dit navn for at fortsætte</div>
+</div>
+
 <!-- APP -->
 <div id="app">
   <!-- TOPBAR -->
   <div class="topbar">
-    <div class="topbar-logo">SK∕LAGER</div>
+    <div class="topbar-logo">Søren Knudsen <span>A/S</span></div>
     <div class="topbar-divider"></div>
     <div class="nav-tabs">
       <button class="nav-tab active" onclick="showTab('dashboard')" data-tab="dashboard">
@@ -675,6 +642,24 @@ tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans)
         <span class="section-title">Registrer træk fra lager</span>
       </div>
 
+      <!-- Medarbejder badge (lager-PC: vises øverst, låst) -->
+      <div id="reg-employee-banner" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;margin-bottom:16px;display:none;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;color:#fff" id="reg-emp-avatar">?</div>
+        <div>
+          <div style="font-size:0.72rem;color:var(--text3);font-family:var(--font-mono);letter-spacing:1px">REGISTRERER SOM</div>
+          <div style="font-weight:600;font-size:0.95rem" id="reg-emp-name">–</div>
+        </div>
+        <button onclick="showPicker()" style="margin-left:auto;background:none;border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);font-size:0.75rem;padding:4px 10px;cursor:pointer;font-family:var(--font-sans)">Skift</button>
+      </div>
+
+      <!-- Medarbejder select (telefon/admin: vises normalt) -->
+      <div id="reg-employee-wrap" style="margin-bottom:16px">
+        <label style="font-size:0.72rem;font-weight:600;letter-spacing:0.5px;color:var(--text2);display:block;margin-bottom:5px">Medarbejder</label>
+        <select id="reg-employee" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-sans);font-size:0.88rem;padding:9px 12px;outline:none">
+          <option value="">Vælg medarbejder...</option>
+        </select>
+      </div>
+
       <div class="register-layout">
         <div>
           <!-- Scanner -->
@@ -684,28 +669,18 @@ tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans)
             <input type="text" id="scanner-input" placeholder="Scan eller tast varenr..." autocomplete="off">
           </div>
 
-          <!-- Medarbejder + Kategori valg -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-            <div class="form-row" style="margin:0">
-              <label>Medarbejder</label>
-              <select id="reg-employee" style="font-size:0.82rem;padding:8px 10px">
-                <option value="">Vælg medarbejder...</option>
-              </select>
+          <!-- Kategori pills -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+            <div class="cat-pills" id="reg-cat-pills" style="margin:0;flex:1">
+              <div class="cat-pill active" data-cat="alle" onclick="filterReg('alle')">Alle</div>
+              <div class="cat-pill" data-cat="Erhverv" onclick="filterReg('Erhverv')">Erhverv</div>
+              <div class="cat-pill" data-cat="Eftersalg" onclick="filterReg('Eftersalg')">Eftersalg</div>
+              <div class="cat-pill" data-cat="DSO" onclick="filterReg('DSO')">DSO</div>
             </div>
-            <div class="form-row" style="margin:0">
-              <label>Kategori</label>
-              <select id="reg-category" style="font-size:0.82rem;padding:8px 10px">
-                <option value="Erhverv">Erhverv</option>
-                <option value="Eftersalg">Eftersalg</option>
-                <option value="DSO">DSO</option>
-              </select>
-            </div>
+            <input class="search-input" type="text" placeholder="Søg vare..." id="reg-search" oninput="renderRegCards()" style="width:200px">
           </div>
 
-          <!-- Søgning + Kort -->
-          <div class="table-wrap" style="padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius)">
-            <input class="search-input" type="text" placeholder="Søg vare..." id="reg-search" oninput="renderRegCards()" style="width:100%">
-          </div>
+          <!-- Kort -->
           <div class="cards-grid" id="reg-cards"></div>
         </div>
 
@@ -796,11 +771,62 @@ tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans)
       <div class="section-header">
         <span class="section-title">Administration</span>
       </div>
+
+      <!-- IMPORT SEKTION -->
+      <div class="table-wrap" style="margin-bottom:20px">
+        <div class="table-toolbar">
+          <span style="font-size:0.75rem;color:var(--text3);font-family:var(--font-mono);letter-spacing:1px">MASSEIMPORT AF VARER</span>
+          <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+            <select id="import-cat" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-sans);font-size:0.82rem;padding:5px 10px;outline:none">
+              <option value="Erhverv">Erhverv</option>
+              <option value="Eftersalg">Eftersalg</option>
+              <option value="DSO">DSO</option>
+            </select>
+            <button class="btn btn-ghost" style="font-size:0.78rem;padding:6px 12px" onclick="document.getElementById('import-area').classList.toggle('open')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Importer fra Excel
+            </button>
+          </div>
+        </div>
+        <div id="import-area" style="display:none;padding:16px;border-top:1px solid var(--border)">
+          <p style="font-size:0.8rem;color:var(--text2);margin-bottom:10px">
+            Kopier kolonner fra Excel og indsæt nedenfor. Forventede kolonner (i rækkefølge):<br>
+            <span class="mono" style="color:var(--accent);font-size:0.75rem">Varenummer &nbsp;|&nbsp; Navn &nbsp;|&nbsp; Lagerbeholdning &nbsp;|&nbsp; Minimumslager &nbsp;|&nbsp; Enhed</span>
+          </p>
+          <p style="font-size:0.75rem;color:var(--text3);margin-bottom:10px">Kategori sættes automatisk til valget ovenfor. Enhed er valgfri (standard: stk)</p>
+          <textarea id="import-paste" placeholder="Indsæt data fra Excel her (Ctrl+V)..." style="width:100%;min-height:140px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-mono);font-size:0.8rem;padding:10px 12px;outline:none;resize:vertical" oninput="previewImport()"></textarea>
+          <div id="import-preview" style="margin-top:12px;display:none">
+            <div style="font-size:0.75rem;color:var(--text3);margin-bottom:8px;font-family:var(--font-mono)">FORHÅNDSVISNING (<span id="import-count">0</span> varer)</div>
+            <div style="overflow-x:auto;max-height:200px;overflow-y:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:0.8rem">
+                <thead><tr>
+                  <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Varenr.</th>
+                  <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Navn</th>
+                  <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Kat.</th>
+                  <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Lager</th>
+                  <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Min.</th>
+                  <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Enhed</th>
+                  <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)"></th>
+                </tr></thead>
+                <tbody id="import-tbody"></tbody>
+              </table>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+              <button class="btn btn-ghost" style="font-size:0.8rem" onclick="clearImport()">Ryd</button>
+              <button class="btn btn-accent" style="font-size:0.8rem" onclick="executeImport()" id="import-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13"><polyline points="20 6 9 17 4 12"/></svg>
+                Importer alle varer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="admin-grid">
         <!-- Brugere -->
         <div class="table-wrap">
           <div class="table-toolbar">
-            <span style="font-size:0.75rem;color:var(--text3)">BRUGERE</span>
+            <span style="font-size:0.75rem;color:var(--text3);font-family:var(--font-mono);letter-spacing:1px">BRUGERE</span>
             <button class="btn btn-accent" style="margin-left:auto;padding:6px 12px;font-size:0.78rem" onclick="openAddUser()">+ Tilføj bruger</button>
           </div>
           <table>
@@ -811,7 +837,7 @@ tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans)
         <!-- Log -->
         <div class="table-wrap">
           <div class="table-toolbar">
-            <span style="font-size:0.75rem;color:var(--text3)">SENESTE TRANSAKTIONER</span>
+            <span style="font-size:0.75rem;color:var(--text3);font-family:var(--font-mono);letter-spacing:1px">SENESTE TRANSAKTIONER</span>
           </div>
           <table>
             <thead><tr><th>Tid</th><th>Medarbejder</th><th>Vare</th><th>Antal</th><th>Kat.</th></tr></thead>
@@ -904,11 +930,16 @@ tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans)
 
 <!-- Tilføj bruger -->
 <div class="modal-overlay" id="modal-adduser">
-  <div class="modal" style="width:380px">
-    <div class="modal-title">+ NY BRUGER</div>
+  <div class="modal" style="width:400px">
+    <div class="modal-title" id="usermodal-title">+ NY BRUGER</div>
+    <input type="hidden" id="user-edit-row" value="">
     <div class="form-row"><label>Fuldt navn</label><input type="text" id="user-fullname" placeholder="Fornavn Efternavn"></div>
     <div class="form-row"><label>Brugernavn</label><input type="text" id="user-username" placeholder="fornavn.efternavn"></div>
-    <div class="form-row"><label>Adgangskode</label><input type="password" id="user-password" placeholder="••••••••"></div>
+    <div class="form-row">
+      <label id="user-pwd-label">Adgangskode</label>
+      <input type="password" id="user-password" placeholder="••••••••">
+      <div id="user-pwd-hint" style="font-size:0.72rem;color:var(--text3);margin-top:4px;display:none">Lad feltet stå tomt for at beholde eksisterende kodeord</div>
+    </div>
     <div class="form-row">
       <label>Rolle</label>
       <select id="user-role">
@@ -918,7 +949,7 @@ tbody td { padding: 10px 14px; font-size: 0.88rem; font-family: var(--font-sans)
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-adduser')">Annuller</button>
-      <button class="btn btn-accent" onclick="saveUser()">Opret bruger</button>
+      <button class="btn btn-accent" id="user-save-btn" onclick="saveUser()">Opret bruger</button>
     </div>
   </div>
 </div>
@@ -957,8 +988,10 @@ let state = {
   currentUser: null,
   dashFilter: 'alle',
   orderFilter: 'alle',
+  regFilter: 'alle',
   cart: [],
   qtyTarget: null,
+  isLagerPC: false,
 };
 
 // ═══════════════════════════════════════════════
@@ -1024,7 +1057,8 @@ async function doLogin() {
     if (stored !== password && stored !== inputHash) {
       err.textContent = 'Forkert adgangskode'; err.style.display = 'block'; return;
     }
-    state.currentUser = { name: match[0], username: match[1], role: match[3] || 'medarbejder', rowIndex: rows.indexOf(match) + 2 };
+    const role = (match[3]||'medarbejder').trim().toLowerCase();
+    state.currentUser = { name: match[0], username: match[1], role, rowIndex: rows.indexOf(match) + 2 };
     sessionStorage.setItem('sk_user', JSON.stringify(state.currentUser));
     document.getElementById('login-screen').classList.remove('active');
     showApp();
@@ -1053,7 +1087,59 @@ function showApp() {
     document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
   }
 
-  loadData();
+  // Lager-PC rolle: hop direkte til registrering, vis picker
+  if (u.role === 'lager') {
+    state.isLagerPC = true;
+    // Skjul navigation undtagen registrering
+    document.querySelectorAll('.nav-tab').forEach(t => {
+      if (t.dataset.tab !== 'register') t.style.display = 'none';
+    });
+    showTab('register');
+    loadData().then(() => showPicker());
+  } else {
+    state.isLagerPC = false;
+    // Telefon/admin: medarbejder er dem selv
+    document.getElementById('reg-employee-banner').style.display = 'none';
+    document.getElementById('reg-employee-wrap').style.display = 'block';
+    loadData();
+  }
+}
+
+function showPicker() {
+  const picker = document.getElementById('picker-screen');
+  picker.style.display = 'flex';
+  const grid = document.getElementById('picker-grid');
+  const employees = state.users.filter(u => u.rolle !== 'lager');
+  if (!employees.length) {
+    grid.innerHTML = '<div style="color:var(--text3);font-size:0.85rem;grid-column:1/-1;text-align:center">Ingen medarbejdere fundet</div>';
+    return;
+  }
+  grid.innerHTML = employees.map(u => {
+    const initials = u.navn.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    return `<button onclick="selectEmployee('${esc(u.navn)}')" style="
+      background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+      padding:20px 12px;cursor:pointer;transition:all 0.15s;text-align:center;
+      display:flex;flex-direction:column;align-items:center;gap:10px;
+    " onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="width:48px;height:48px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:#fff">${initials}</div>
+      <div style="font-size:0.85rem;font-weight:600;color:var(--text);line-height:1.3">${u.navn}</div>
+    </button>`;
+  }).join('');
+}
+
+function selectEmployee(navn) {
+  document.getElementById('picker-screen').style.display = 'none';
+  // Vis banner med valgt medarbejder
+  const banner = document.getElementById('reg-employee-banner');
+  banner.style.display = 'flex';
+  document.getElementById('reg-emp-name').textContent = navn;
+  const initials = navn.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('reg-emp-avatar').textContent = initials;
+  document.getElementById('reg-employee-wrap').style.display = 'none';
+  // Sæt værdien i det skjulte select
+  document.getElementById('reg-employee').value = navn;
+  // Fokusér scanner
+  setTimeout(()=>document.getElementById('scanner-input').focus(), 200);
 }
 
 // ═══════════════════════════════════════════════
@@ -1190,16 +1276,21 @@ function filterDash(cat) {
   renderDashTable();
 }
 
+function filterReg(cat) {
+  state.regFilter = cat;
+  document.querySelectorAll('#reg-cat-pills .cat-pill').forEach(p=>p.classList.toggle('active', p.dataset.cat===cat));
+  renderRegCards();
+}
+
 function renderRegCards() {
   const q = document.getElementById('reg-search').value.toLowerCase();
-  const cat = document.getElementById('reg-category').value;
   const items = state.items.filter(i=>{
-    if (i.kategori !== cat) return false;
+    if (state.regFilter !== 'alle' && i.kategori !== state.regFilter) return false;
     return !q || i.varenr.toLowerCase().includes(q) || i.navn.toLowerCase().includes(q);
   });
   const grid = document.getElementById('reg-cards');
   if (!items.length) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;padding:40px"><p>Ingen varer i ${cat}</p></div>`;
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;padding:40px"><p>Ingen varer fundet</p></div>`;
     return;
   }
   grid.innerHTML = items.map(item => {
@@ -1258,7 +1349,7 @@ function addToCartFromDetail() {
   toast(`${qty} × ${t.navn} tilføjet`, 'success');
 }
 
-document.getElementById('reg-category').addEventListener('change', renderRegCards);
+// reg-category handled by filterReg pills
 
 function renderOrderTable() {
   const q = document.getElementById('order-search').value.toLowerCase();
@@ -1296,9 +1387,12 @@ function renderUsersTable() {
   tbody.innerHTML = state.users.map(u=>`
     <tr>
       <td>${u.navn}</td>
-      <td class="mono" style="color:var(--text2)">${u.brugernavn}</td>
+      <td class="mono" style="color:var(--text2);font-size:0.82rem">${u.brugernavn}</td>
       <td><span class="badge ${u.rolle==='admin'?'badge-ok':'badge-low'}">${u.rolle}</span></td>
-      <td><button class="btn-sm danger" onclick="deleteUser(${u.rowIndex}, '${esc(u.navn)}')">Fjern</button></td>
+      <td style="display:flex;gap:6px;padding:8px 14px">
+        <button class="btn-sm" onclick="openEditUser(${u.rowIndex})">Rediger</button>
+        <button class="btn-sm danger" onclick="deleteUser(${u.rowIndex}, '${esc(u.navn)}')">Slet</button>
+      </td>
     </tr>
   `).join('');
 }
@@ -1321,15 +1415,19 @@ function populateEmployees() {
   const sel = document.getElementById('reg-employee');
   const cur = sel.value;
   sel.innerHTML = '<option value="">Vælg medarbejder...</option>';
-  state.users.forEach(u => {
+  state.users.filter(u=>u.rolle!=='lager').forEach(u => {
     const o = document.createElement('option');
     o.value = u.navn; o.textContent = u.navn;
     if (u.navn === cur) o.selected = true;
     sel.appendChild(o);
   });
-  // Pre-select current user
-  if (!cur && state.currentUser) {
-    sel.value = state.currentUser.name || '';
+  // Telefon: pre-select den indloggede bruger
+  if (!state.isLagerPC && state.currentUser && state.currentUser.role !== 'lager') {
+    if (!cur) sel.value = state.currentUser.name || '';
+    // Og lås feltet for medarbejder-rolle
+    if (state.currentUser.role === 'medarbejder') {
+      sel.disabled = true;
+    }
   }
 }
 
@@ -1415,9 +1513,12 @@ function adjustCart(i, delta) {
 function removeCart(i) { state.cart.splice(i,1); renderCart(); }
 
 async function submitCart() {
-  const emp = document.getElementById('reg-employee').value;
-  const cat = document.getElementById('reg-category').value;
-  if (!emp) { toast('Vælg medarbejder!', 'error'); return; }
+  const empBanner = document.getElementById('reg-emp-name').textContent;
+  const empSelect = document.getElementById('reg-employee').value;
+  const emp = state.isLagerPC ? empBanner : empSelect;
+  const catGuess = state.cart.length ? (state.items.find(i=>i.varenr===state.cart[0].varenr)?.kategori||'Ukendt') : 'Ukendt';
+  const cat = state.regFilter !== 'alle' ? state.regFilter : catGuess;
+  if (!emp || emp === '–') { toast(state.isLagerPC ? 'Vælg medarbejder først' : 'Vælg medarbejder!', 'error'); return; }
   if (!state.cart.length) return;
 
   const btn = document.getElementById('cart-submit-btn');
@@ -1754,30 +1855,160 @@ async function saveStock() {
 // ═══════════════════════════════════════════════
 // USER CRUD
 // ═══════════════════════════════════════════════
-function openAddUser() { document.getElementById('modal-adduser').classList.add('open'); }
+function openAddUser() {
+  document.getElementById('usermodal-title').textContent = '+ NY BRUGER';
+  document.getElementById('user-save-btn').textContent = 'Opret bruger';
+  document.getElementById('user-edit-row').value = '';
+  document.getElementById('user-pwd-hint').style.display = 'none';
+  ['user-fullname','user-username','user-password'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('user-role').value = 'medarbejder';
+  document.getElementById('modal-adduser').classList.add('open');
+}
+
+function openEditUser(rowIndex) {
+  const u = state.users.find(u=>u.rowIndex===rowIndex);
+  if (!u) return;
+  document.getElementById('usermodal-title').textContent = 'REDIGER BRUGER';
+  document.getElementById('user-save-btn').textContent = 'Gem ændringer';
+  document.getElementById('user-edit-row').value = rowIndex;
+  document.getElementById('user-fullname').value = u.navn;
+  document.getElementById('user-username').value = u.brugernavn;
+  document.getElementById('user-password').value = '';
+  document.getElementById('user-pwd-hint').style.display = 'block';
+  document.getElementById('user-role').value = u.rolle;
+  document.getElementById('modal-adduser').classList.add('open');
+}
 
 async function saveUser() {
   const navn = document.getElementById('user-fullname').value.trim();
   const brugernavn = document.getElementById('user-username').value.trim().toLowerCase();
   const pwd = document.getElementById('user-password').value;
   const rolle = document.getElementById('user-role').value;
-  if (!navn||!brugernavn||!pwd) { toast('Udfyld alle felter','error'); return; }
-  const hash = hashPass(pwd);
+  const editRow = document.getElementById('user-edit-row').value;
+
+  if (!navn||!brugernavn) { toast('Udfyld navn og brugernavn','error'); return; }
+  if (!editRow && !pwd) { toast('Kodeord mangler','error'); return; }
+
+  const btn = document.getElementById('user-save-btn');
+  btn.disabled=true; btn.textContent='Gemmer...';
+
   try {
-    await webhookPost({ action: 'appendRow', sheet: SHEETS.brugere, row: [navn, brugernavn, hash, rolle] });
+    if (editRow) {
+      const r = parseInt(editRow);
+      const ops = [
+        webhookPost({ action:'updateCell', sheet:SHEETS.brugere, row:r, col:1, value:navn }),
+        webhookPost({ action:'updateCell', sheet:SHEETS.brugere, row:r, col:2, value:brugernavn }),
+        webhookPost({ action:'updateCell', sheet:SHEETS.brugere, row:r, col:4, value:rolle }),
+      ];
+      if (pwd) ops.push(webhookPost({ action:'updateCell', sheet:SHEETS.brugere, row:r, col:3, value:hashPass(pwd) }));
+      await Promise.all(ops);
+      toast(`${navn} opdateret!`, 'success');
+    } else {
+      const hash = hashPass(pwd);
+      await webhookPost({ action:'appendRow', sheet:SHEETS.brugere, row:[navn, brugernavn, hash, rolle] });
+      toast(`${navn} oprettet!`, 'success');
+    }
     closeModal('modal-adduser');
     await loadData();
-    toast(`${navn} oprettet!`, 'success');
-  } catch(e) { toast('Fejl ved oprettelse','error'); }
+  } catch(e) { toast('Fejl ved gemning','error'); }
+  finally { btn.disabled=false; btn.textContent = editRow?'Gem ændringer':'Opret bruger'; }
 }
 
 async function deleteUser(rowIndex, navn) {
-  if (!confirm(`Slet ${navn}?`)) return;
+  if (!confirm(`Er du sikker på du vil slette "${navn}"?`)) return;
   try {
     await webhookPost({ action: 'deleteRow', sheet: SHEETS.brugere, row: rowIndex });
     await loadData();
-    toast(`${navn} fjernet`, 'info');
+    toast(`${navn} slettet`, 'info');
   } catch(e) { toast('Fejl','error'); }
+}
+
+// ═══════════════════════════════════════════════
+// MASSEIMPORT
+// ═══════════════════════════════════════════════
+let importRows = [];
+
+function previewImport() {
+  const raw = document.getElementById('import-paste').value.trim();
+  const cat = document.getElementById('import-cat').value;
+  if (!raw) { document.getElementById('import-preview').style.display='none'; importRows=[]; return; }
+
+  // Parse TSV (tab-separated from Excel)
+  const lines = raw.split('\n').filter(l=>l.trim());
+  importRows = lines.map(line => {
+    const cols = line.split('\t').map(c=>c.trim().replace(/^"+|"+$/g,''));
+    return {
+      varenr:  cols[0] || '',
+      navn:    cols[1] || '',
+      lager:   parseFloat(cols[2]) || 0,
+      min:     parseFloat(cols[3]) || 0,
+      enhed:   cols[4] || 'stk',
+      kategori: cat,
+      imgId:   ''
+    };
+  }).filter(r => r.varenr && r.navn);
+
+  document.getElementById('import-count').textContent = importRows.length;
+  const tbody = document.getElementById('import-tbody');
+
+  if (!importRows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:12px;color:var(--text3);text-align:center;font-size:0.8rem">Ingen gyldige rækker fundet – tjek at kolonner er i orden</td></tr>';
+    document.getElementById('import-preview').style.display='block';
+    return;
+  }
+
+  tbody.innerHTML = importRows.map((r,i) => `
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:6px 10px;font-family:var(--font-mono);font-size:0.78rem">${r.varenr}</td>
+      <td style="padding:6px 10px;font-size:0.82rem">${r.navn}</td>
+      <td style="padding:6px 10px"><span class="cat-tag cat-tag-${r.kategori}">${r.kategori}</span></td>
+      <td style="padding:6px 10px;font-family:var(--font-mono);font-size:0.78rem">${r.lager}</td>
+      <td style="padding:6px 10px;font-family:var(--font-mono);font-size:0.78rem">${r.min}</td>
+      <td style="padding:6px 10px;font-size:0.78rem;color:var(--text2)">${r.enhed}</td>
+      <td style="padding:6px 10px"><button class="import-row-remove" onclick="removeImportRow(${i})" title="Fjern denne række">✕</button></td>
+    </tr>
+  `).join('');
+  document.getElementById('import-preview').style.display='block';
+}
+
+function removeImportRow(i) {
+  importRows.splice(i,1);
+  document.getElementById('import-count').textContent = importRows.length;
+  const tbody = document.getElementById('import-tbody');
+  tbody.querySelectorAll('tr')[i]?.remove();
+  // re-index remove buttons
+  tbody.querySelectorAll('.import-row-remove').forEach((btn,idx) => {
+    btn.setAttribute('onclick', `removeImportRow(${idx})`);
+  });
+  if (!importRows.length) document.getElementById('import-preview').style.display='none';
+}
+
+function clearImport() {
+  document.getElementById('import-paste').value='';
+  document.getElementById('import-preview').style.display='none';
+  importRows=[];
+}
+
+async function executeImport() {
+  if (!importRows.length) { toast('Ingen varer at importere','error'); return; }
+  const btn = document.getElementById('import-btn');
+  btn.disabled=true; btn.textContent=`Importerer ${importRows.length} varer...`;
+  let ok=0, fail=0;
+  for (const r of importRows) {
+    try {
+      await webhookPost({ action:'appendRow', sheet:SHEETS.varer,
+        row:[r.varenr, r.navn, r.kategori, r.lager, r.min, r.enhed, '', ''] });
+      ok++;
+    } catch(e) { fail++; }
+    // Small delay to avoid hammering
+    await new Promise(res=>setTimeout(res,120));
+  }
+  btn.disabled=false;
+  btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13"><polyline points="20 6 9 17 4 12"/></svg> Importer alle varer';
+  clearImport();
+  await loadData();
+  if (fail===0) toast(`✓ ${ok} varer importeret!`, 'success');
+  else toast(`${ok} importeret, ${fail} fejlede`, 'error');
 }
 
 // ═══════════════════════════════════════════════
