@@ -945,6 +945,7 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
       <select id="user-role">
         <option value="medarbejder">Medarbejder</option>
         <option value="admin">Admin / Superbruger</option>
+        <option value="lager">Lager-PC (medarbejdervælger ved login)</option>
       </select>
     </div>
     <div class="modal-actions">
@@ -1160,9 +1161,9 @@ async function loadData() {
     const vData = await fetchSheet(SHEETS.varer);
     state.items = vData.slice(1).filter(r => r[0]).map((r,i) => ({
       rowIndex: i + 2,
-      varenr: r[0]||'', navn: r[1]||'', kategori: r[2]||'',
-      lager: parseFloat(r[3])||0, min: parseFloat(r[4])||0,
-      enhed: r[5]||'stk', note: r[6]||'', imgId: r[7]||''
+      varenr: String(r[0]||'').trim().replace(/\.0$/, ''), navn: String(r[1]||'').trim(), kategori: String(r[2]||'').trim(),
+      lager: parseFloat(String(r[3]||'0').replace(',','.'))||0, min: parseFloat(String(r[4]||'0').replace(',','.'))||0,
+      enhed: String(r[5]||'stk').trim() || 'stk', note: String(r[6]||'').trim(), imgId: String(r[7]||'').trim()
     }));
   } catch(e) { state.items = []; }
 
@@ -1290,7 +1291,13 @@ function renderRegCards() {
   });
   const grid = document.getElementById('reg-cards');
   if (!items.length) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;padding:40px"><p>Ingen varer fundet</p></div>`;
+    const debugInfo = state.items.length === 0
+      ? 'Sheet ikke loadet – åbn konsollen (F12) for detaljer'
+      : `Filter: "${state.regFilter}", søgning: "${q}" – ${state.items.length} varer i alt`;
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;padding:40px">
+      <p>Ingen varer fundet</p>
+      <p style="font-size:0.72rem;color:var(--text3);margin-top:8px;font-family:var(--font-mono)">${debugInfo}</p>
+    </div>`;
     return;
   }
   grid.innerHTML = items.map(item => {
