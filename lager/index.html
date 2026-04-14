@@ -1093,22 +1093,24 @@ function showApp() {
   document.getElementById('user-avatar').textContent = u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
   document.getElementById('app').classList.add('active');
 
-  // Admin tab
-  if (u.role === 'admin') {
-    document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
-  }
+  // Reset ALLE nav-tabs til synlige først
+  document.querySelectorAll('.nav-tab').forEach(t => t.style.display = '');
+  // Skjul altid admin-tab som udgangspunkt
+  document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
 
-  // Lager-PC rolle: hop direkte til registrering, vis picker
   if (u.role === 'lager') {
+    // Lager-PC: kun Registrer, medarbejder-vælger
     state.isLagerPC = true;
     document.querySelectorAll('.nav-tab').forEach(t => {
       if (t.dataset.tab !== 'register') t.style.display = 'none';
     });
+    document.getElementById('reg-employee-banner').style.display = 'none';
+    document.getElementById('reg-employee-wrap').style.display = 'none';
     showTab('register');
     loadData().then(() => showPicker());
 
   } else if (u.role === 'medarbejder') {
-    // Medarbejder: kun Overblik + Registrer, låst til sig selv
+    // Medarbejder: Overblik + Registrer kun
     state.isLagerPC = false;
     document.querySelectorAll('.nav-tab').forEach(t => {
       if (t.dataset.tab === 'admin' || t.dataset.tab === 'order') t.style.display = 'none';
@@ -1118,8 +1120,9 @@ function showApp() {
     loadData();
 
   } else {
-    // Admin: fuld adgang
+    // Admin: fuld adgang til alt
     state.isLagerPC = false;
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
     document.getElementById('reg-employee-banner').style.display = 'none';
     document.getElementById('reg-employee-wrap').style.display = 'block';
     loadData();
