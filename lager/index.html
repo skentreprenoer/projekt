@@ -1287,7 +1287,7 @@ function renderDashTable() {
   if (!items.length) { tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><p>Ingen varer fundet</p></div></td></tr>`; return; }
   tbody.innerHTML = items.map(item => {
     const imgHtml = item.imgId
-      ? `<img src="https://drive.google.com/uc?export=view&id=${item.imgId}" style="width:44px;height:44px;object-fit:contain;border-radius:4px;background:var(--bg3)">`
+      ? `<img src="https://lh3.googleusercontent.com/d/${item.imgId}" style="width:44px;height:44px;object-fit:contain;border-radius:4px;background:var(--bg3)">`
       : `<div style="width:44px;height:44px;border-radius:4px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:1.2rem">📦</div>`;
     return `<tr>
       <td>${imgHtml}</td>
@@ -1339,7 +1339,7 @@ function renderRegCards() {
     const s = getStatus(item);
     const stockColor = s==='out'?'var(--red)':s==='low'?'var(--yellow)':'var(--green)';
     const imgHtml = item.imgId
-      ? `<img class="item-card-img" src="https://drive.google.com/uc?export=view&id=${item.imgId}" loading="lazy" alt="${esc(item.navn)}">`
+      ? `<img class="item-card-img" src="https://lh3.googleusercontent.com/d/${item.imgId}" loading="lazy" alt="${esc(item.navn)}">`
       : `<div class="item-card-img-placeholder">📦</div>`;
     return `<div class="item-card${s==='out'?' out-of-stock':''}" onclick="openItemDetail('${esc(item.varenr)}')">
       ${imgHtml}
@@ -1362,7 +1362,7 @@ function openItemDetail(varenr) {
   // Image
   const imgWrap = document.getElementById('detail-img-wrap');
   imgWrap.innerHTML = item.imgId
-    ? `<img class="item-detail-img" src="https://drive.google.com/uc?export=view&id=${item.imgId}" alt="${esc(item.navn)}">`
+    ? `<img class="item-detail-img" src="https://lh3.googleusercontent.com/d/${item.imgId}" alt="${esc(item.navn)}">`
     : `<div class="item-detail-placeholder">📦</div>`;
   document.getElementById('detail-title').textContent = item.navn;
   const s = getStatus(item);
@@ -1791,7 +1791,7 @@ function openEditItem(rowIndex) {
   const preview = document.getElementById('item-img-preview');
   document.getElementById('item-img-file').value = '';
   if (item.imgId) {
-    preview.src = `https://drive.google.com/uc?export=view&id=${item.imgId}`;
+    preview.src = `https://lh3.googleusercontent.com/d/${item.imgId}`;
     preview.style.display = 'block';
     area.classList.add('has-image');
     document.getElementById('img-upload-placeholder').style.display = 'none';
