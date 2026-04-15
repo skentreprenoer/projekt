@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SK Lager – Norlys Materialestyring</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.21.3/zxing.min.js"></script>
 <style>
 :root {
   --bg: #1a1a1a;
@@ -299,6 +300,55 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
 .form-row textarea { resize: vertical; min-height: 80px; }
 .form-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+/* ── KAMERA SCANNER MODAL ── */
+#camera-modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.92); z-index: 600;
+  flex-direction: column; align-items: center; justify-content: center;
+}
+#camera-modal-overlay.open { display: flex; }
+#camera-video-wrap {
+  position: relative; width: min(380px, 95vw);
+}
+#camera-video {
+  width: 100%; border-radius: var(--radius);
+  display: block; background: #000;
+}
+.camera-crosshair {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.camera-crosshair::before {
+  content: '';
+  width: 65%; height: 30%;
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.45);
+}
+.camera-scan-line {
+  position: absolute; left: 17.5%; right: 17.5%;
+  height: 2px; background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: scanline 1.8s ease-in-out infinite;
+}
+@keyframes scanline {
+  0%   { top: 36%; }
+  50%  { top: 62%; }
+  100% { top: 36%; }
+}
+#camera-result-badge {
+  margin-top: 16px; font-family: var(--font-mono);
+  font-size: 0.9rem; color: var(--green); letter-spacing: 1px;
+  min-height: 24px; text-align: center;
+}
+#camera-close-btn {
+  margin-top: 16px; background: none; border: 1px solid var(--border2);
+  border-radius: var(--radius); color: var(--text2); font-family: var(--font-sans);
+  font-size: 0.85rem; padding: 10px 28px; cursor: pointer; transition: all 0.15s;
+}
+#camera-close-btn:hover { border-color: var(--accent); color: var(--accent); }
 
 /* ── SCANNER INPUT ── */
 .scanner-area {
@@ -687,9 +737,14 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
           <!-- Scanner -->
           <div class="scanner-area" id="scanner-area">
             <div class="scanner-icon">⎋</div>
-            <div class="scanner-hint">Scan stregkode eller søg nedenfor</div>
+            <div class="scanner-hint">USB-scanner eller tast varenr – eller brug kamera på mobil</div>
             <input type="text" id="scanner-input" placeholder="Scan eller tast varenr..." autocomplete="off">
           </div>
+          <!-- Kamera-knap (vises kun på mobil/touch) -->
+          <button id="camera-scan-btn" class="btn btn-ghost" style="width:100%;margin-bottom:14px;font-size:0.9rem;padding:12px;display:none" onclick="openCameraScanner()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Scan stregkode med kamera
+          </button>
 
           <!-- Kategori pills -->
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
@@ -901,21 +956,30 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
     <input type="hidden" id="item-existing-img" value="">
     <div class="form-row">
       <label>Produktbillede</label>
+      <!-- Galleri-fil input -->
+      <input type="file" id="item-img-file" accept="image/*" onchange="previewImg(this)" style="display:none">
+      <!-- Kamera-input (capture=environment = bagkamera) -->
+      <input type="file" id="item-img-camera" accept="image/*" capture="environment" onchange="previewImg(this)" style="display:none">
       <div class="img-upload-area" id="img-upload-area">
-        <input type="file" id="item-img-file" accept="image/*" onchange="previewImg(this)" style="display:none">
         <div class="img-upload-icon" id="img-upload-placeholder">📷</div>
-        <div class="img-upload-hint" id="img-upload-hint-text">Klik for at vælge billede</div>
-        <img id="item-img-preview" src="" alt="" style="display:none;width:100%;max-height:160px;object-fit:contain">
-        <button class="img-remove-btn" onclick="removeImg(event)">✕ Fjern billede</button>
+        <div class="img-upload-hint" id="img-upload-hint-text">Vælg billede nedenfor</div>
+        <img id="item-img-preview" src="" alt="" style="display:none;width:100%;max-height:180px;object-fit:contain;border-radius:4px">
+        <button class="img-remove-btn" onclick="removeImg(event)">✕ Fjern</button>
       </div>
       <div style="display:flex;gap:8px;margin-top:8px">
-        <button type="button" class="btn btn-ghost" style="font-size:0.78rem;padding:6px 12px;flex:1" onclick="document.getElementById('item-img-file').click()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-          <span id="img-btn-label">Vælg billede</span>
+        <!-- Tag billede med kamera (mobil) -->
+        <button type="button" class="btn btn-ghost" style="font-size:0.82rem;padding:8px 14px;flex:1" onclick="document.getElementById('item-img-camera').click()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Tag billede
         </button>
-        <button type="button" class="btn btn-ghost" style="font-size:0.78rem;padding:6px 12px;color:var(--red);border-color:var(--border)" id="img-delete-btn" onclick="removeImg(event)" style="display:none">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-          Slet billede
+        <!-- Vælg fra galleri -->
+        <button type="button" class="btn btn-ghost" style="font-size:0.82rem;padding:8px 14px;flex:1" onclick="document.getElementById('item-img-file').click()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span id="img-btn-label">Galleri</span>
+        </button>
+        <!-- Slet billede -->
+        <button type="button" class="btn btn-ghost" style="font-size:0.82rem;padding:8px 12px;color:var(--red);border-color:var(--border);display:none" id="img-delete-btn" onclick="removeImg(event)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
         </button>
       </div>
     </div>
@@ -1018,6 +1082,18 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
       <button class="btn btn-accent" onclick="addToCartConfirm()">Tilføj til kurv</button>
     </div>
   </div>
+</div>
+
+<!-- KAMERA SCANNER MODAL -->
+<div id="camera-modal-overlay">
+  <div id="camera-video-wrap">
+    <video id="camera-video" autoplay playsinline muted></video>
+    <div class="camera-crosshair">
+      <div class="camera-scan-line"></div>
+    </div>
+  </div>
+  <div id="camera-result-badge">Hold stregkoden inden for rammen</div>
+  <button id="camera-close-btn" onclick="closeCameraScanner()">✕ Luk kamera</button>
 </div>
 
 <!-- TOAST -->
@@ -1797,7 +1873,7 @@ function previewImg(input) {
     document.getElementById('img-upload-placeholder').style.display = 'none';
     document.getElementById('img-upload-hint-text').style.display = 'none';
     document.getElementById('img-upload-area').classList.add('has-image');
-    document.getElementById('img-btn-label').textContent = 'Skift billede';
+    document.getElementById('img-btn-label').textContent = 'Galleri ✓';
     document.getElementById('img-delete-btn').style.display = 'flex';
   };
   reader.readAsDataURL(file);
@@ -1809,10 +1885,11 @@ function removeImg(e) {
   preview.style.display = 'none';
   preview.src = '';
   document.getElementById('item-img-file').value = '';
+  document.getElementById('item-img-camera').value = '';
   document.getElementById('item-existing-img').value = '';
   document.getElementById('img-upload-placeholder').style.display = 'block';
   document.getElementById('img-upload-hint-text').style.display = 'block';
-  document.getElementById('img-btn-label').textContent = 'Vælg billede';
+  document.getElementById('img-btn-label').textContent = 'Galleri';
   document.getElementById('img-delete-btn').style.display = 'none';
 }
 async function uploadImgToDrive(file) {
@@ -1855,6 +1932,7 @@ function openAddItem() {
   document.getElementById('item-min').value=5;
   document.getElementById('item-cat').value='Erhverv';
   removeImg({stopPropagation:()=>{}});
+  document.getElementById('item-img-camera').value = '';
   document.getElementById('modal-additem').classList.add('open');
 }
 
@@ -1912,7 +1990,7 @@ async function saveItem() {
   const btn = document.getElementById('additem-save-btn');
   btn.textContent = 'Gemmer...'; btn.disabled = true;
 
-  const imgFile = document.getElementById('item-img-file').files[0];
+  const imgFile = document.getElementById('item-img-camera').files[0] || document.getElementById('item-img-file').files[0];
   const preview = document.getElementById('item-img-preview');
   const imgRemoved = preview.style.display === 'none' || !preview.src || preview.src === window.location.href;
   let imgId = imgRemoved && !imgFile ? '' : existingImg;
@@ -2182,6 +2260,80 @@ async function webhookPost(payload) {
     body: JSON.stringify(payload)
   });
   return res;
+}
+
+// ═══════════════════════════════════════════════
+// KAMERA BARCODE SCANNER
+// ═══════════════════════════════════════════════
+let cameraStream = null;
+let cameraReader = null;
+
+// Vis kamera-knap kun på touch-enheder
+window.addEventListener('load', () => {
+  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    const btn = document.getElementById('camera-scan-btn');
+    if (btn) btn.style.display = 'flex';
+  }
+}, { once: false });
+
+async function openCameraScanner() {
+  const overlay = document.getElementById('camera-modal-overlay');
+  const video = document.getElementById('camera-video');
+  const badge = document.getElementById('camera-result-badge');
+  badge.textContent = 'Starter kamera...';
+  badge.style.color = 'var(--text2)';
+  overlay.classList.add('open');
+
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+    video.srcObject = cameraStream;
+    await video.play();
+    badge.textContent = 'Hold stregkoden inden for rammen';
+
+    // ZXing scanner
+    if (typeof ZXing !== 'undefined') {
+      const hints = new Map();
+      const formats = [
+        ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8,
+        ZXing.BarcodeFormat.CODE_128, ZXing.BarcodeFormat.CODE_39,
+        ZXing.BarcodeFormat.QR_CODE, ZXing.BarcodeFormat.DATA_MATRIX,
+        ZXing.BarcodeFormat.ITF, ZXing.BarcodeFormat.UPC_A, ZXing.BarcodeFormat.UPC_E
+      ];
+      hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
+      cameraReader = new ZXing.BrowserMultiFormatReader(hints);
+      cameraReader.decodeFromVideoElement(video, (result, err) => {
+        if (result) {
+          const code = result.getText();
+          badge.textContent = '✓ ' + code;
+          badge.style.color = 'var(--green)';
+          // Vibrer hvis muligt
+          if (navigator.vibrate) navigator.vibrate(100);
+          setTimeout(() => {
+            closeCameraScanner();
+            handleScan(code);
+          }, 600);
+        }
+      });
+    } else {
+      // Fallback: manuel input hvis ZXing ikke loader
+      badge.textContent = 'Tast varenr og tryk OK';
+      badge.style.color = 'var(--yellow)';
+    }
+  } catch (err) {
+    badge.textContent = 'Kamera ikke tilgængeligt – ' + err.message;
+    badge.style.color = 'var(--red)';
+  }
+}
+
+function closeCameraScanner() {
+  document.getElementById('camera-modal-overlay').classList.remove('open');
+  if (cameraReader) { try { cameraReader.reset(); } catch(e) {} cameraReader = null; }
+  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+  document.getElementById('camera-video').srcObject = null;
+  document.getElementById('camera-result-badge').textContent = 'Hold stregkoden inden for rammen';
+  document.getElementById('camera-result-badge').style.color = 'var(--text2)';
 }
 
 // ═══════════════════════════════════════════════
