@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="da">
 <head>
 <meta charset="UTF-8">
@@ -573,10 +574,12 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
   .cat-pill { padding: 4px 10px; font-size: 0.72rem; }
 }
 </style>
+
 </head>
 <body>
 
 <!-- LOADER -->
+
 <div id="loader">
   <div class="logo-big">Søren Knudsen <span>A/S</span></div>
   <div class="logo-sub">NORLYS MATERIALESTYRING</div>
@@ -584,6 +587,7 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
 </div>
 
 <!-- LOGIN -->
+
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">Søren Knudsen <span>A/S</span></div>
@@ -602,6 +606,7 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
 </div>
 
 <!-- LAGER-PC MEDARBEJDER VÆLGER -->
+
 <div id="picker-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:900;align-items:center;justify-content:center;flex-direction:column">
   <div style="text-align:center;margin-bottom:32px">
     <div style="font-family:var(--font-sans);font-size:1.3rem;font-weight:700;color:var(--text);margin-bottom:4px">Søren Knudsen <span style="color:var(--accent)">A/S</span></div>
@@ -612,6 +617,7 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
 </div>
 
 <!-- APP -->
+
 <div id="app">
   <!-- TOPBAR -->
   <div class="topbar">
@@ -649,307 +655,312 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
   </div>
 
   <!-- MAIN -->
+
   <div class="main">
 
-    <!-- ══ DASHBOARD ══ -->
-    <div class="tab-content active" id="tab-dashboard">
-      <div class="section-header">
-        <span class="section-title">Lagerstatus</span>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-ghost" onclick="loadData()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-            Opdater
-          </button>
-          <button class="btn btn-accent" onclick="openAddItem()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-            Ny vare
-          </button>
+```
+<!-- ══ DASHBOARD ══ -->
+<div class="tab-content active" id="tab-dashboard">
+  <div class="section-header">
+    <span class="section-title">Lagerstatus</span>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" onclick="loadData()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        Opdater
+      </button>
+      <button class="btn btn-accent" onclick="openAddItem()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Ny vare
+      </button>
+    </div>
+  </div>
+
+  <div class="stat-grid" id="stat-grid">
+    <div class="stat-card"><div class="stat-label">Varer i alt</div><div class="stat-value" id="stat-total">–</div></div>
+    <div class="stat-card"><div class="stat-label">Kritisk lav</div><div class="stat-value red" id="stat-critical">–</div></div>
+    <div class="stat-card"><div class="stat-label">Advarsel</div><div class="stat-value yellow" id="stat-warning">–</div></div>
+    <div class="stat-card"><div class="stat-label">OK</div><div class="stat-value green" id="stat-ok">–</div></div>
+  </div>
+
+  <div id="alerts-area"></div>
+
+  <div class="cat-pills" id="dash-cat-pills">
+    <div class="cat-pill active" data-cat="alle" onclick="filterDash('alle')">Alle</div>
+    <div class="cat-pill" data-cat="Erhverv" onclick="filterDash('Erhverv')">Erhverv</div>
+    <div class="cat-pill" data-cat="Eftersalg" onclick="filterDash('Eftersalg')">Eftersalg</div>
+    <div class="cat-pill" data-cat="DSO" onclick="filterDash('DSO')">DSO</div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-toolbar">
+      <input class="search-input" type="text" placeholder="Søg varenr eller navn..." id="dash-search" oninput="renderDashTable()">
+      <span style="font-size:0.75rem;color:var(--text3);margin-left:auto" id="dash-count"></span>
+    </div>
+    <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:52px">Billede</th>
+          <th>Varenr.</th>
+          <th>Navn</th>
+          <th>Kategori</th>
+          <th>Lager</th>
+          <th>Min.</th>
+          <th>Status</th>
+          <th>Enhed</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="dash-tbody"></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REGISTRER ══ -->
+<div class="tab-content" id="tab-register">
+  <div class="section-header">
+    <span class="section-title">Registrer træk fra lager</span>
+  </div>
+
+  <!-- Medarbejder badge (lager-PC: vises øverst, låst) -->
+  <div id="reg-employee-banner" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;margin-bottom:16px;display:none;align-items:center;gap:10px">
+    <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;color:#fff" id="reg-emp-avatar">?</div>
+    <div>
+      <div style="font-size:0.72rem;color:var(--text3);font-family:var(--font-mono);letter-spacing:1px">REGISTRERER SOM</div>
+      <div style="font-weight:600;font-size:0.95rem" id="reg-emp-name">–</div>
+    </div>
+    <button onclick="showPicker()" style="margin-left:auto;background:none;border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);font-size:0.75rem;padding:4px 10px;cursor:pointer;font-family:var(--font-sans)">Skift</button>
+  </div>
+
+  <!-- Medarbejder select (telefon/admin: vises normalt) -->
+  <div id="reg-employee-wrap" style="margin-bottom:16px">
+    <label style="font-size:0.72rem;font-weight:600;letter-spacing:0.5px;color:var(--text2);display:block;margin-bottom:5px">Medarbejder</label>
+    <select id="reg-employee" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-sans);font-size:0.88rem;padding:9px 12px;outline:none">
+      <option value="">Vælg medarbejder...</option>
+    </select>
+  </div>
+
+  <div class="register-layout">
+    <div>
+      <!-- Scanner -->
+      <div class="scanner-area" id="scanner-area">
+        <div class="scanner-icon">⎋</div>
+        <div class="scanner-hint">USB-scanner eller tast varenr – eller brug kamera på mobil</div>
+        <input type="text" id="scanner-input" placeholder="Scan eller tast varenr..." autocomplete="off">
+      </div>
+      <!-- Kamera-knap (vises kun på mobil/touch) -->
+      <button id="camera-scan-btn" class="btn btn-ghost" style="width:100%;margin-bottom:14px;font-size:0.9rem;padding:12px;display:none" onclick="openCameraScanner()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Scan stregkode med kamera
+      </button>
+
+      <!-- Kategori pills -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <div class="cat-pills" id="reg-cat-pills" style="margin:0;flex:1">
+          <div class="cat-pill active" data-cat="alle" onclick="filterReg('alle')">Alle</div>
+          <div class="cat-pill" data-cat="Erhverv" onclick="filterReg('Erhverv')">Erhverv</div>
+          <div class="cat-pill" data-cat="Eftersalg" onclick="filterReg('Eftersalg')">Eftersalg</div>
+          <div class="cat-pill" data-cat="DSO" onclick="filterReg('DSO')">DSO</div>
         </div>
+        <input class="search-input" type="text" placeholder="Søg vare..." id="reg-search" oninput="renderRegCards()" style="width:200px">
       </div>
 
-      <div class="stat-grid" id="stat-grid">
-        <div class="stat-card"><div class="stat-label">Varer i alt</div><div class="stat-value" id="stat-total">–</div></div>
-        <div class="stat-card"><div class="stat-label">Kritisk lav</div><div class="stat-value red" id="stat-critical">–</div></div>
-        <div class="stat-card"><div class="stat-label">Advarsel</div><div class="stat-value yellow" id="stat-warning">–</div></div>
-        <div class="stat-card"><div class="stat-label">OK</div><div class="stat-value green" id="stat-ok">–</div></div>
-      </div>
-
-      <div id="alerts-area"></div>
-
-      <div class="cat-pills" id="dash-cat-pills">
-        <div class="cat-pill active" data-cat="alle" onclick="filterDash('alle')">Alle</div>
-        <div class="cat-pill" data-cat="Erhverv" onclick="filterDash('Erhverv')">Erhverv</div>
-        <div class="cat-pill" data-cat="Eftersalg" onclick="filterDash('Eftersalg')">Eftersalg</div>
-        <div class="cat-pill" data-cat="DSO" onclick="filterDash('DSO')">DSO</div>
-      </div>
-
-      <div class="table-wrap">
-        <div class="table-toolbar">
-          <input class="search-input" type="text" placeholder="Søg varenr eller navn..." id="dash-search" oninput="renderDashTable()">
-          <span style="font-size:0.75rem;color:var(--text3);margin-left:auto" id="dash-count"></span>
-        </div>
-        <div style="overflow-x:auto">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:52px">Billede</th>
-              <th>Varenr.</th>
-              <th>Navn</th>
-              <th>Kategori</th>
-              <th>Lager</th>
-              <th>Min.</th>
-              <th>Status</th>
-              <th>Enhed</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="dash-tbody"></tbody>
-        </table>
-        </div>
-      </div>
+      <!-- Kort -->
+      <div class="cards-grid" id="reg-cards"></div>
     </div>
 
-    <!-- ══ REGISTRER ══ -->
-    <div class="tab-content" id="tab-register">
-      <div class="section-header">
-        <span class="section-title">Registrer træk fra lager</span>
-      </div>
-
-      <!-- Medarbejder badge (lager-PC: vises øverst, låst) -->
-      <div id="reg-employee-banner" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;margin-bottom:16px;display:none;align-items:center;gap:10px">
-        <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;color:#fff" id="reg-emp-avatar">?</div>
-        <div>
-          <div style="font-size:0.72rem;color:var(--text3);font-family:var(--font-mono);letter-spacing:1px">REGISTRERER SOM</div>
-          <div style="font-weight:600;font-size:0.95rem" id="reg-emp-name">–</div>
+    <!-- Kurv -->
+    <div class="cart-panel">
+      <div class="cart-title">INDKØBSKURV</div>
+      <div id="cart-items"><div class="cart-empty">Ingen varer valgt endnu</div></div>
+      <div class="cart-total" id="cart-total" style="display:none">
+        <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text2)">
+          <span>Poster i alt</span>
+          <span id="cart-count">0</span>
         </div>
-        <button onclick="showPicker()" style="margin-left:auto;background:none;border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);font-size:0.75rem;padding:4px 10px;cursor:pointer;font-family:var(--font-sans)">Skift</button>
       </div>
+      <button class="btn btn-green cart-submit" onclick="submitCart()" id="cart-submit-btn" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
+        Registrer træk
+      </button>
+    </div>
+  </div>
+</div>
 
-      <!-- Medarbejder select (telefon/admin: vises normalt) -->
-      <div id="reg-employee-wrap" style="margin-bottom:16px">
-        <label style="font-size:0.72rem;font-weight:600;letter-spacing:0.5px;color:var(--text2);display:block;margin-bottom:5px">Medarbejder</label>
-        <select id="reg-employee" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-sans);font-size:0.88rem;padding:9px 12px;outline:none">
-          <option value="">Vælg medarbejder...</option>
+<!-- ══ BESTIL ══ -->
+<div class="tab-content" id="tab-order">
+  <div class="section-header">
+    <span class="section-title">Bestillingsmodul</span>
+  </div>
+
+  <div class="cat-pills" id="order-cat-pills">
+    <div class="cat-pill active" data-cat="alle" onclick="filterOrder('alle')">Alle</div>
+    <div class="cat-pill" data-cat="Erhverv" onclick="filterOrder('Erhverv')">Erhverv</div>
+    <div class="cat-pill" data-cat="Eftersalg" onclick="filterOrder('Eftersalg')">Eftersalg</div>
+    <div class="cat-pill" data-cat="DSO" onclick="filterOrder('DSO')">DSO</div>
+  </div>
+
+  <div class="table-wrap" style="margin-bottom:16px">
+    <div class="table-toolbar">
+      <input class="search-input" type="text" placeholder="Søg vare..." id="order-search" oninput="renderOrderTable()">
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="autoSelectLow()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/></svg>
+          Vælg lave lager auto
+        </button>
+        <button class="btn btn-accent" onclick="generateOrder()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Generer bestilling
+        </button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th><input type="checkbox" id="order-check-all" onchange="toggleAllOrder(this)"></th>
+          <th>Varenr.</th>
+          <th>Navn</th>
+          <th>Kategori</th>
+          <th>Lager</th>
+          <th>Min.</th>
+          <th>Status</th>
+          <th>Antal at bestille</th>
+        </tr>
+      </thead>
+      <tbody id="order-tbody"></tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="order-export-box" id="order-export-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <span class="section-title">BESTILLINGSTEKST</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="copyOrder()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Kopiér
+        </button>
+        <button class="btn btn-accent" onclick="exportExcel()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Excel
+        </button>
+      </div>
+    </div>
+    <textarea id="order-text" readonly></textarea>
+  </div>
+</div>
+
+<!-- ══ MINE REGISTRERINGER ══ -->
+<div class="tab-content" id="tab-myreg">
+  <div class="section-header" style="margin-bottom:8px">
+    <span class="section-title">Mine træk fra lager</span>
+  </div>
+  <div id="myreg-user-badge" style="display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:20px">
+    <div id="myreg-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.9rem">?</div>
+    <div>
+      <div style="font-size:0.7rem;color:var(--text3);letter-spacing:1px;font-family:var(--font-mono)">DINE REGISTRERINGER</div>
+      <div style="font-weight:600;font-size:1rem" id="myreg-name">–</div>
+    </div>
+    <div style="margin-left:auto;text-align:right">
+      <div style="font-size:0.7rem;color:var(--text3)">Seneste 50 træk</div>
+    </div>
+  </div>
+
+  <!-- Mobil-venlig liste -->
+  <div id="myreg-list" style="display:flex;flex-direction:column;gap:8px"></div>
+</div>
+
+<!-- ══ ADMIN ══ -->
+<div class="tab-content" id="tab-admin">
+  <div class="section-header">
+    <span class="section-title">Administration</span>
+  </div>
+
+  <!-- IMPORT SEKTION -->
+  <div class="table-wrap" style="margin-bottom:20px">
+    <div class="table-toolbar">
+      <span style="font-size:0.75rem;color:var(--text3);font-family:var(--font-mono);letter-spacing:1px">MASSEIMPORT AF VARER</span>
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+        <select id="import-cat" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-sans);font-size:0.82rem;padding:5px 10px;outline:none">
+          <option value="Erhverv">Erhverv</option>
+          <option value="Eftersalg">Eftersalg</option>
+          <option value="DSO">DSO</option>
         </select>
+        <button class="btn btn-ghost" style="font-size:0.78rem;padding:6px 12px" onclick="document.getElementById('import-area').classList.toggle('open')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Importer fra Excel
+        </button>
       </div>
-
-      <div class="register-layout">
-        <div>
-          <!-- Scanner -->
-          <div class="scanner-area" id="scanner-area">
-            <div class="scanner-icon">⎋</div>
-            <div class="scanner-hint">USB-scanner eller tast varenr – eller brug kamera på mobil</div>
-            <input type="text" id="scanner-input" placeholder="Scan eller tast varenr..." autocomplete="off">
-          </div>
-          <!-- Kamera-knap (vises kun på mobil/touch) -->
-          <button id="camera-scan-btn" class="btn btn-ghost" style="width:100%;margin-bottom:14px;font-size:0.9rem;padding:12px;display:none" onclick="openCameraScanner()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            Scan stregkode med kamera
-          </button>
-
-          <!-- Kategori pills -->
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-            <div class="cat-pills" id="reg-cat-pills" style="margin:0;flex:1">
-              <div class="cat-pill active" data-cat="alle" onclick="filterReg('alle')">Alle</div>
-              <div class="cat-pill" data-cat="Erhverv" onclick="filterReg('Erhverv')">Erhverv</div>
-              <div class="cat-pill" data-cat="Eftersalg" onclick="filterReg('Eftersalg')">Eftersalg</div>
-              <div class="cat-pill" data-cat="DSO" onclick="filterReg('DSO')">DSO</div>
-            </div>
-            <input class="search-input" type="text" placeholder="Søg vare..." id="reg-search" oninput="renderRegCards()" style="width:200px">
-          </div>
-
-          <!-- Kort -->
-          <div class="cards-grid" id="reg-cards"></div>
+    </div>
+    <div id="import-area" style="display:none;padding:16px;border-top:1px solid var(--border)">
+      <p style="font-size:0.8rem;color:var(--text2);margin-bottom:10px">
+        Kopier kolonner fra Excel og indsæt nedenfor. Forventede kolonner (i rækkefølge):<br>
+        <span class="mono" style="color:var(--accent);font-size:0.75rem">Varenummer &nbsp;|&nbsp; Navn &nbsp;|&nbsp; Lagerbeholdning &nbsp;|&nbsp; Minimumslager &nbsp;|&nbsp; Enhed</span>
+      </p>
+      <p style="font-size:0.75rem;color:var(--text3);margin-bottom:10px">Kategori sættes automatisk til valget ovenfor. Enhed er valgfri (standard: stk)</p>
+      <textarea id="import-paste" placeholder="Indsæt data fra Excel her (Ctrl+V)..." style="width:100%;min-height:140px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-mono);font-size:0.8rem;padding:10px 12px;outline:none;resize:vertical" oninput="previewImport()"></textarea>
+      <div id="import-preview" style="margin-top:12px;display:none">
+        <div style="font-size:0.75rem;color:var(--text3);margin-bottom:8px;font-family:var(--font-mono)">FORHÅNDSVISNING (<span id="import-count">0</span> varer)</div>
+        <div style="overflow-x:auto;max-height:200px;overflow-y:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:0.8rem">
+            <thead><tr>
+              <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Varenr.</th>
+              <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Navn</th>
+              <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Kat.</th>
+              <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Lager</th>
+              <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Min.</th>
+              <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Enhed</th>
+              <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)"></th>
+            </tr></thead>
+            <tbody id="import-tbody"></tbody>
+          </table>
         </div>
-
-        <!-- Kurv -->
-        <div class="cart-panel">
-          <div class="cart-title">INDKØBSKURV</div>
-          <div id="cart-items"><div class="cart-empty">Ingen varer valgt endnu</div></div>
-          <div class="cart-total" id="cart-total" style="display:none">
-            <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text2)">
-              <span>Poster i alt</span>
-              <span id="cart-count">0</span>
-            </div>
-          </div>
-          <button class="btn btn-green cart-submit" onclick="submitCart()" id="cart-submit-btn" style="display:none">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
-            Registrer træk
+        <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+          <button class="btn btn-ghost" style="font-size:0.8rem" onclick="clearImport()">Ryd</button>
+          <button class="btn btn-accent" style="font-size:0.8rem" onclick="executeImport()" id="import-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13"><polyline points="20 6 9 17 4 12"/></svg>
+            Importer alle varer
           </button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- ══ BESTIL ══ -->
-    <div class="tab-content" id="tab-order">
-      <div class="section-header">
-        <span class="section-title">Bestillingsmodul</span>
+  <div class="admin-grid">
+    <!-- Brugere -->
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <span style="font-size:0.75rem;color:var(--text3);font-family:var(--font-mono);letter-spacing:1px">BRUGERE</span>
+        <button class="btn btn-accent" style="margin-left:auto;padding:6px 12px;font-size:0.78rem" onclick="openAddUser()">+ Tilføj bruger</button>
       </div>
-
-      <div class="cat-pills" id="order-cat-pills">
-        <div class="cat-pill active" data-cat="alle" onclick="filterOrder('alle')">Alle</div>
-        <div class="cat-pill" data-cat="Erhverv" onclick="filterOrder('Erhverv')">Erhverv</div>
-        <div class="cat-pill" data-cat="Eftersalg" onclick="filterOrder('Eftersalg')">Eftersalg</div>
-        <div class="cat-pill" data-cat="DSO" onclick="filterOrder('DSO')">DSO</div>
-      </div>
-
-      <div class="table-wrap" style="margin-bottom:16px">
-        <div class="table-toolbar">
-          <input class="search-input" type="text" placeholder="Søg vare..." id="order-search" oninput="renderOrderTable()">
-          <div style="margin-left:auto;display:flex;gap:8px">
-            <button class="btn btn-ghost" onclick="autoSelectLow()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/></svg>
-              Vælg lave lager auto
-            </button>
-            <button class="btn btn-accent" onclick="generateOrder()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-              Generer bestilling
-            </button>
-          </div>
-        </div>
-        <div style="overflow-x:auto">
-        <table>
-          <thead>
-            <tr>
-              <th><input type="checkbox" id="order-check-all" onchange="toggleAllOrder(this)"></th>
-              <th>Varenr.</th>
-              <th>Navn</th>
-              <th>Kategori</th>
-              <th>Lager</th>
-              <th>Min.</th>
-              <th>Status</th>
-              <th>Antal at bestille</th>
-            </tr>
-          </thead>
-          <tbody id="order-tbody"></tbody>
-        </table>
-        </div>
-      </div>
-
-      <div class="order-export-box" id="order-export-box">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <span class="section-title">BESTILLINGSTEKST</span>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-ghost" onclick="copyOrder()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-              Kopiér
-            </button>
-            <button class="btn btn-accent" onclick="exportExcel()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-              Excel
-            </button>
-          </div>
-        </div>
-        <textarea id="order-text" readonly></textarea>
-      </div>
+      <table>
+        <thead><tr><th>Navn</th><th>Brugernavn</th><th>Rolle</th><th></th></tr></thead>
+        <tbody id="users-tbody"></tbody>
+      </table>
     </div>
-
-    <!-- ══ MINE REGISTRERINGER ══ -->
-    <div class="tab-content" id="tab-myreg">
-      <div class="section-header" style="margin-bottom:8px">
-        <span class="section-title">Mine træk fra lager</span>
+    <!-- Log -->
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <span style="font-size:0.75rem;color:var(--text3);font-family:var(--font-mono);letter-spacing:1px">SENESTE TRANSAKTIONER</span>
       </div>
-      <div id="myreg-user-badge" style="display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:20px">
-        <div id="myreg-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.9rem">?</div>
-        <div>
-          <div style="font-size:0.7rem;color:var(--text3);letter-spacing:1px;font-family:var(--font-mono)">DINE REGISTRERINGER</div>
-          <div style="font-weight:600;font-size:1rem" id="myreg-name">–</div>
-        </div>
-        <div style="margin-left:auto;text-align:right">
-          <div style="font-size:0.7rem;color:var(--text3)">Seneste 50 træk</div>
-        </div>
-      </div>
-
-      <!-- Mobil-venlig liste -->
-      <div id="myreg-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      <table>
+        <thead><tr><th>Tid</th><th>Medarbejder</th><th>Vare</th><th>Antal</th><th>Kat.</th></tr></thead>
+        <tbody id="log-tbody"></tbody>
+      </table>
     </div>
-
-    <!-- ══ ADMIN ══ -->
-    <div class="tab-content" id="tab-admin">
-      <div class="section-header">
-        <span class="section-title">Administration</span>
-      </div>
-
-      <!-- IMPORT SEKTION -->
-      <div class="table-wrap" style="margin-bottom:20px">
-        <div class="table-toolbar">
-          <span style="font-size:0.75rem;color:var(--text3);font-family:var(--font-mono);letter-spacing:1px">MASSEIMPORT AF VARER</span>
-          <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-            <select id="import-cat" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-sans);font-size:0.82rem;padding:5px 10px;outline:none">
-              <option value="Erhverv">Erhverv</option>
-              <option value="Eftersalg">Eftersalg</option>
-              <option value="DSO">DSO</option>
-            </select>
-            <button class="btn btn-ghost" style="font-size:0.78rem;padding:6px 12px" onclick="document.getElementById('import-area').classList.toggle('open')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-              Importer fra Excel
-            </button>
-          </div>
-        </div>
-        <div id="import-area" style="display:none;padding:16px;border-top:1px solid var(--border)">
-          <p style="font-size:0.8rem;color:var(--text2);margin-bottom:10px">
-            Kopier kolonner fra Excel og indsæt nedenfor. Forventede kolonner (i rækkefølge):<br>
-            <span class="mono" style="color:var(--accent);font-size:0.75rem">Varenummer &nbsp;|&nbsp; Navn &nbsp;|&nbsp; Lagerbeholdning &nbsp;|&nbsp; Minimumslager &nbsp;|&nbsp; Enhed</span>
-          </p>
-          <p style="font-size:0.75rem;color:var(--text3);margin-bottom:10px">Kategori sættes automatisk til valget ovenfor. Enhed er valgfri (standard: stk)</p>
-          <textarea id="import-paste" placeholder="Indsæt data fra Excel her (Ctrl+V)..." style="width:100%;min-height:140px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-mono);font-size:0.8rem;padding:10px 12px;outline:none;resize:vertical" oninput="previewImport()"></textarea>
-          <div id="import-preview" style="margin-top:12px;display:none">
-            <div style="font-size:0.75rem;color:var(--text3);margin-bottom:8px;font-family:var(--font-mono)">FORHÅNDSVISNING (<span id="import-count">0</span> varer)</div>
-            <div style="overflow-x:auto;max-height:200px;overflow-y:auto">
-              <table style="width:100%;border-collapse:collapse;font-size:0.8rem">
-                <thead><tr>
-                  <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Varenr.</th>
-                  <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Navn</th>
-                  <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Kat.</th>
-                  <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Lager</th>
-                  <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Min.</th>
-                  <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)">Enhed</th>
-                  <th style="text-align:left;padding:6px 10px;color:var(--text3);border-bottom:1px solid var(--border);font-size:0.68rem;font-weight:600;background:var(--bg3)"></th>
-                </tr></thead>
-                <tbody id="import-tbody"></tbody>
-              </table>
-            </div>
-            <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
-              <button class="btn btn-ghost" style="font-size:0.8rem" onclick="clearImport()">Ryd</button>
-              <button class="btn btn-accent" style="font-size:0.8rem" onclick="executeImport()" id="import-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13"><polyline points="20 6 9 17 4 12"/></svg>
-                Importer alle varer
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="admin-grid">
-        <!-- Brugere -->
-        <div class="table-wrap">
-          <div class="table-toolbar">
-            <span style="font-size:0.75rem;color:var(--text3);font-family:var(--font-mono);letter-spacing:1px">BRUGERE</span>
-            <button class="btn btn-accent" style="margin-left:auto;padding:6px 12px;font-size:0.78rem" onclick="openAddUser()">+ Tilføj bruger</button>
-          </div>
-          <table>
-            <thead><tr><th>Navn</th><th>Brugernavn</th><th>Rolle</th><th></th></tr></thead>
-            <tbody id="users-tbody"></tbody>
-          </table>
-        </div>
-        <!-- Log -->
-        <div class="table-wrap">
-          <div class="table-toolbar">
-            <span style="font-size:0.75rem;color:var(--text3);font-family:var(--font-mono);letter-spacing:1px">SENESTE TRANSAKTIONER</span>
-          </div>
-          <table>
-            <thead><tr><th>Tid</th><th>Medarbejder</th><th>Vare</th><th>Antal</th><th>Kat.</th></tr></thead>
-            <tbody id="log-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+  </div>
+</div>
+```
 
   </div><!-- /main -->
 </div><!-- /app -->
 
 <!-- ── MODALS ── -->
+
 <!-- Tilføj / Rediger vare -->
+
 <div class="modal-overlay" id="modal-additem">
   <div class="modal">
     <div class="modal-title" id="additem-title">+ NY VARE</div>
@@ -1010,6 +1021,7 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
 </div>
 
 <!-- Item detail (klik på kort i registrer) -->
+
 <div class="modal-overlay" id="modal-item-detail">
   <div class="modal" style="width:360px">
     <div id="detail-img-wrap"></div>
@@ -1031,6 +1043,7 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
 </div>
 
 <!-- Rediger lager (hurtig) -->
+
 <div class="modal-overlay" id="modal-editstock">
   <div class="modal" style="width:360px">
     <div class="modal-title">OPDATER LAGER</div>
@@ -1046,6 +1059,7 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
 </div>
 
 <!-- Tilføj bruger -->
+
 <div class="modal-overlay" id="modal-adduser">
   <div class="modal" style="width:400px">
     <div class="modal-title" id="usermodal-title">+ NY BRUGER</div>
@@ -1073,6 +1087,7 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
 </div>
 
 <!-- Mængde modal (klik på vare i reg) -->
+
 <div class="modal-overlay" id="modal-qty">
   <div class="modal" style="width:320px">
     <div class="modal-title" id="qty-modal-title">VÆLG ANTAL</div>
@@ -1086,6 +1101,7 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
 </div>
 
 <!-- KAMERA SCANNER MODAL -->
+
 <div id="camera-modal-overlay">
   <div id="camera-video-wrap">
     <video id="camera-video" autoplay playsinline muted></video>
@@ -1098,6 +1114,7 @@ tbody td { padding: 10px 14px; font-size: 0.86rem; }
 </div>
 
 <!-- TOAST -->
+
 <div id="toast"></div>
 
 <script>
@@ -2292,11 +2309,18 @@ async function openCameraScanner() {
     // ZXing scanner
     if (typeof ZXing !== 'undefined' && ZXing.BrowserMultiFormatReader) {
       cameraReader = new ZXing.BrowserMultiFormatReader();
-      const devices = await ZXing.BrowserMultiFormatReader.listVideoInputDevices();
-      const backCamera = devices.find(d =>
-        /back|rear|bag|environment/i.test(d.label)
-      );
-      const deviceId = backCamera ? backCamera.deviceId : (devices[devices.length-1]?.deviceId);
+
+      // Hent kameraenheder via MediaDevices API direkte
+      let deviceId = undefined;
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(d => d.kind === 'videoinput');
+        const backCamera = videoDevices.find(d => /back|rear|bag|environment/i.test(d.label));
+        deviceId = backCamera ? backCamera.deviceId : (videoDevices[videoDevices.length - 1]?.deviceId);
+      } catch(e) {
+        // Brug undefined = standard kamera
+      }
+
       badge.textContent = 'Hold stregkoden inden for rammen';
 
       cameraReader.decodeFromVideoDevice(deviceId, video, (result, err) => {
@@ -2360,5 +2384,6 @@ function toast(msg, type='info') {
 
 function esc(str) { return String(str).replace(/'/g,"\\'"); }
 </script>
+
 </body>
 </html>
