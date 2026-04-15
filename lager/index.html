@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SK Lager – Norlys Materialestyring</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.1/umd/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
+
 <style>
 :root {
   --bg: #1a1a1a;
@@ -2289,33 +2290,27 @@ async function openCameraScanner() {
     badge.textContent = 'Starter kamera...';
 
     // ZXing scanner
-    if (typeof ZXingBrowser !== 'undefined') {
-      cameraReader = new ZXingBrowser.BrowserMultiFormatReader();
-      // Find bagkamera
-      const devices = await ZXingBrowser.BrowserCodeReader.listVideoInputDevices();
-      const backCamera = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('bag') || d.label.toLowerCase().includes('rear') || d.label.toLowerCase().includes('environment'));
+    if (typeof ZXing !== 'undefined' && ZXing.BrowserMultiFormatReader) {
+      cameraReader = new ZXing.BrowserMultiFormatReader();
+      const devices = await ZXing.BrowserMultiFormatReader.listVideoInputDevices();
+      const backCamera = devices.find(d =>
+        /back|rear|bag|environment/i.test(d.label)
+      );
       const deviceId = backCamera ? backCamera.deviceId : (devices[devices.length-1]?.deviceId);
-      
       badge.textContent = 'Hold stregkoden inden for rammen';
-      cameraControls = await cameraReader.decodeFromVideoDevice(deviceId, video, (result, err) => {
+
+      cameraReader.decodeFromVideoDevice(deviceId, video, (result, err) => {
         if (result) {
           const code = result.getText();
           badge.textContent = '✓ ' + code;
           badge.style.color = 'var(--green)';
           if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-          setTimeout(() => {
-            closeCameraScanner();
-            handleScan(code);
-          }, 500);
+          setTimeout(() => { closeCameraScanner(); handleScan(code); }, 500);
         }
       });
     } else {
-      // Debug: vis hvad der er tilgængeligt
-      const available = Object.keys(window).filter(k => k.toLowerCase().includes('zxing')).join(', ') || 'ingenting';
-      badge.textContent = 'Scanner bibliotek mangler (fundet: ' + available + ') – genindlæs siden';
-      badge.style.color = 'var(--yellow)';
-      console.error('ZXingBrowser ikke fundet. Window keys med zxing:', available);
-      console.log('Alle window keys:', Object.keys(window).slice(0,50));
+      badge.textContent = 'Scanner ikke tilgængelig – tjek internetforbindelse';
+      badge.style.color = 'var(--red)';
     }
   } catch (err) {
     badge.textContent = 'Kamera ikke tilgængeligt – ' + err.message;
