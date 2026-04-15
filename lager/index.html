@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SK Lager – Norlys Materialestyring</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.21.3/zxing.min.js"></script>
+<script src="https://unpkg.com/@zxing/browser@latest/umd/index.min.js"></script>
 <style>
 :root {
   --bg: #1a1a1a;
@@ -2267,6 +2267,7 @@ async function webhookPost(payload) {
 // ═══════════════════════════════════════════════
 let cameraStream = null;
 let cameraReader = null;
+let cameraControls = null;
 
 // Vis kamera-knap kun på touch-enheder
 window.addEventListener('load', () => {
@@ -2285,40 +2286,31 @@ async function openCameraScanner() {
   overlay.classList.add('open');
 
   try {
-    cameraStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-    });
-    video.srcObject = cameraStream;
-    await video.play();
-    badge.textContent = 'Hold stregkoden inden for rammen';
+    badge.textContent = 'Starter kamera...';
 
     // ZXing scanner
-    if (typeof ZXing !== 'undefined') {
-      const hints = new Map();
-      const formats = [
-        ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8,
-        ZXing.BarcodeFormat.CODE_128, ZXing.BarcodeFormat.CODE_39,
-        ZXing.BarcodeFormat.QR_CODE, ZXing.BarcodeFormat.DATA_MATRIX,
-        ZXing.BarcodeFormat.ITF, ZXing.BarcodeFormat.UPC_A, ZXing.BarcodeFormat.UPC_E
-      ];
-      hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
-      cameraReader = new ZXing.BrowserMultiFormatReader(hints);
-      cameraReader.decodeFromVideoElement(video, (result, err) => {
+    if (typeof ZXingBrowser !== 'undefined') {
+      cameraReader = new ZXingBrowser.BrowserMultiFormatReader();
+      // Find bagkamera
+      const devices = await ZXingBrowser.BrowserCodeReader.listVideoInputDevices();
+      const backCamera = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('bag') || d.label.toLowerCase().includes('rear') || d.label.toLowerCase().includes('environment'));
+      const deviceId = backCamera ? backCamera.deviceId : (devices[devices.length-1]?.deviceId);
+      
+      badge.textContent = 'Hold stregkoden inden for rammen';
+      cameraControls = await cameraReader.decodeFromVideoDevice(deviceId, video, (result, err) => {
         if (result) {
           const code = result.getText();
           badge.textContent = '✓ ' + code;
           badge.style.color = 'var(--green)';
-          // Vibrer hvis muligt
-          if (navigator.vibrate) navigator.vibrate(100);
+          if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
           setTimeout(() => {
             closeCameraScanner();
             handleScan(code);
-          }, 600);
+          }, 500);
         }
       });
     } else {
-      // Fallback: manuel input hvis ZXing ikke loader
-      badge.textContent = 'Tast varenr og tryk OK';
+      badge.textContent = 'Scanner ikke tilgængelig – prøv at genindlæse siden';
       badge.style.color = 'var(--yellow)';
     }
   } catch (err) {
@@ -2329,9 +2321,11 @@ async function openCameraScanner() {
 
 function closeCameraScanner() {
   document.getElementById('camera-modal-overlay').classList.remove('open');
-  if (cameraReader) { try { cameraReader.reset(); } catch(e) {} cameraReader = null; }
-  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
-  document.getElementById('camera-video').srcObject = null;
+  try { if (cameraControls) { cameraControls.stop(); cameraControls = null; } } catch(e) {}
+  try { if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; } } catch(e) {}
+  cameraReader = null;
+  const vid = document.getElementById('camera-video');
+  if (vid) vid.srcObject = null;
   document.getElementById('camera-result-badge').textContent = 'Hold stregkoden inden for rammen';
   document.getElementById('camera-result-badge').style.color = 'var(--text2)';
 }
