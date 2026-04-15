@@ -322,6 +322,7 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
     <div class="nav-item" onclick="showPage('norlys')"><span class="dot" style="background:var(--amber)"></span>Norlys Opgaver<span class="nav-count" id="cnt-norlys">—</span></div>
     <div class="nav-item" onclick="showPage('bb')"><span class="dot" style="background:#a78bfa"></span>Bredbåndspulje<span class="nav-count" id="cnt-bb">—</span></div>
     <div class="nav-item" onclick="showPage('erhverv')"><span class="dot" style="background:var(--green)"></span>Erhvervskunder<span class="nav-count" id="cnt-erhverv">—</span></div>
+    <div class="nav-item" onclick="showPage('mes')"><span class="dot" style="background:#f472b6"></span>MES<span class="nav-count" id="cnt-mes">—</span></div>
     <div class="nav-section">Kode</div>
     <div class="nav-item" onclick="showPage('gridopt')"><span class="dot" style="background:var(--cyan)"></span>Gridoptimizer</div>
   </div>
@@ -451,6 +452,30 @@ tr.clickable:hover td{background:rgba(165,28,28,0.06);cursor:pointer}
     </div>
   </div>
 
+  <!-- MES -->
+  <div class="page" id="page-mes">
+    <div class="filter-bar" id="filter-mes"></div>
+    <div class="content">
+      <div class="stats-row" id="stats-mes"></div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">MES</div>
+          <div class="table-info" id="info-mes"></div>
+        </div>
+        <div id="loading-mes" class="loading-msg"><span class="spinner"></span>Henter data...</div>
+        <div id="err-mes" class="err-msg" style="display:none"></div>
+        <table id="table-mes" style="display:none">
+          <thead><tr>
+            <th>Sagsnr</th><th>Måned</th><th>Adresse</th><th>Projektleder</th><th>Deadline</th>
+            <th>Udleveret</th><th>LER/GT</th><th>GT slut</th><th>Status</th><th>Landmålt</th><th>Blæst</th><th>Link</th>
+          </tr></thead>
+          <tbody id="tbody-mes"></tbody>
+        </table>
+        <div class="no-results" id="nores-mes" style="display:none">Ingen resultater</div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- MODAL -->
@@ -498,7 +523,7 @@ function isValidFieldValue(v) {
 }
 
 const SHEET_ID = "1nAfna80c5NbT5mNhsXey84wu--DZVYct7NFRSRvTZr4";
-const GIDS = { dso2026:"231051019", norlys:"129649262", gridopt:"995508700", bb:"730701596", kontakter:"1115694378", erhverv:"275893518" };
+const GIDS = { dso2026:"231051019", norlys:"129649262", gridopt:"995508700", bb:"730701596", kontakter:"1115694378", erhverv:"275893518", mes:"1708750424" };
 const KUNDELISTE_LINKS = {
   sonny:  "https://acrobat.adobe.com/id/urn:aaid:sc:EU:7cc3270a-7739-4831-9242-fce30f490289",
   henrik: "https://acrobat.adobe.com/id/urn:aaid:sc:EU:cba13540-9de4-4c83-9a6f-50a9455e1732"
@@ -854,7 +879,7 @@ function showPage(id) {
     if ((n.getAttribute('onclick')||'').includes("'"+id+"'")) n.classList.add('active');
   });
   currentPage = id;
-  const titles={dashboard:'Dashboard',dso2026:'DSO 2026',norlys:'Norlys Opgaver',gridopt:'Norlys Gridoptimizer',bb:'Bredbåndspulje',erhverv:'Erhvervskunder'};
+  const titles={dashboard:'Dashboard',dso2026:'DSO 2026',norlys:'Norlys Opgaver',gridopt:'Norlys Gridoptimizer',bb:'Bredbåndspulje',erhverv:'Erhvervskunder',mes:'MES'};
   document.getElementById('topbar-title').textContent = titles[id]||id;
   const srch=document.getElementById('search');
   srch.style.display = id==='gridopt'?'none':'';
@@ -876,6 +901,7 @@ function renderCurrent() {
   else if (currentPage==='gridopt') renderGridopt();
   else if (currentPage==='bb') renderBB();
   else if (currentPage==='erhverv') renderErhverv();
+  else if (currentPage==='mes') renderMES();
 }
 
 function showTableReady(key) {
@@ -1130,6 +1156,57 @@ function renderErhverv() {
   }
 }
 
+// MES (same layout as Norlys: has Deadline column)
+function renderMES() {
+  const d=DATA.mes;
+  if(!d){showErr('mes','Kunne ikke hente data.');return;}
+  const allRaw=d.rows.filter(r=>isSagsnr(r[0]));
+  const all=allRaw.filter(r=>!isRowFærdig(r, true));
+  const fil=activeFilters.mes||'all';
+  let rows=all.filter(r=>fil==='all'||r[3]===fil);
+  rows=filterRows(rows);
+
+  const total=all.length;
+  const udl=all.filter(r=>r[5]&&r[5].trim()).length;
+  const land=all.filter(r=>isValidFieldValue(r[9])).length;
+  const blae=all.filter(r=>isValidFieldValue(r[10])).length;
+
+  document.getElementById('stats-mes').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Projekter</div><div class="stat-value">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Udleveret</div><div class="stat-value">${udl}</div><div class="stat-sub">af ${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Landmålt</div><div class="stat-value">${land}</div><div class="stat-sub">af ${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Blæst</div><div class="stat-value">${blae}</div><div class="stat-sub">af ${total}</div></div>`;
+
+  document.getElementById('info-mes').textContent=rows.length+' sager';
+  document.getElementById('cnt-mes').textContent=all.length;
+  showTableReady('mes');
+
+  const tbody=document.getElementById('tbody-mes'),nores=document.getElementById('nores-mes');
+  if(!rows.length){tbody.innerHTML='';nores.style.display='block';return;}
+  nores.style.display='none';
+  tbody.innerHTML=rows.map(r=>`<tr class="clickable" onclick="openModal('mes',${all.indexOf(r)})">
+    <td class="mono">${r[0]}</td><td>${r[1]||'—'}</td>
+    <td class="trunc">${r[2]||'—'}</td><td>${r[3]||'—'}</td>
+    <td>${r[4]||'—'}</td>
+    <td>${checkBadge(r[5])}</td>
+    <td>${lerBadge(r[6])}</td>
+    <td>${checkBadge(r[7])}</td>
+    <td>${statusBadge(r[8])}</td>
+    <td>${checkBadge(r[9])}</td>
+    <td>${checkBadge(r[10])}</td>
+    <td>${linkBtn(r[11])}</td>
+  </tr>`).join('');
+
+  const filterEl=document.getElementById('filter-mes');
+  if(!filterEl.dataset.built){
+    filterEl.dataset.built='1';
+    const pls=[...new Set(all.map(r=>r[3]).filter(Boolean))];
+    filterEl.innerHTML='<span class="filter-label">Filter:</span>'+
+      `<button class="filter-btn active" onclick="setFilter('mes','all',this)">Alle</button>`+
+      pls.map(p=>`<button class="filter-btn" onclick="setFilter('mes','${p}',this)">${p}</button>`).join('');
+  }
+}
+
 // ===== openModalBB — FIXED for Deadline column =====
 // Column mapping: 0=Sagsnr, 1=Måned, 2=Adresse, 3=Projektleder, 4=Deadline,
 //                 5=Udleveret, 6=LER/GT, 7=GT slut, 8=Status, 9=Landmålt, 10=Blæst, 11=Link
@@ -1243,7 +1320,7 @@ async function toggleDoneBB(idx, wrap) {
 function openModal(key, idx) {
   const d=DATA[key];
   if(!d) return;
-  const hasDeadline = key==='norlys' || key==='erhverv';
+  const hasDeadline = key==='norlys' || key==='erhverv' || key==='mes';
   const all=d.rows.filter(r=>isSagsnr(r[0])&&!isRowFærdig(r, hasDeadline));
   const r=all[idx];
   if(!r) return;
@@ -1259,7 +1336,7 @@ function openModal(key, idx) {
     link: hasDeadline ? 11 : 10
   };
 
-  const pageNames={dso2026:'DSO 2026',norlys:'Norlys',erhverv:'Erhvervskunder'};
+  const pageNames={dso2026:'DSO 2026',norlys:'Norlys',erhverv:'Erhvervskunder',mes:'MES'};
   const adresse = r[2]||'';
   document.getElementById('modal-title').textContent=adresse||'Ukendt adresse';
   document.getElementById('modal-sub').textContent=`Sagsnr. ${r[0]}  ·  ${pageNames[key]||key}`;
@@ -1331,7 +1408,7 @@ function openModal(key, idx) {
     }
   }
 
-  if(key==='dso2026' || key==='norlys' || key==='erhverv') {
+  if(key==='dso2026' || key==='norlys' || key==='erhverv' || key==='mes') {
     body+=`<div class="fieldwork-group"><div class="modal-section-title">Feltarbejde</div>`;
     
     const landmaaltVal = (r[COL.landmaalt]||'').trim();
@@ -1406,17 +1483,19 @@ function setFilter(key,val,btn){
 
 // DASHBOARD — FIXED: BB stats now use correct column indices
 function buildDashboard() {
-  const d26=DATA.dso2026, dn=DATA.norlys, dg=DATA.gridopt, dbb=DATA.bb, de=DATA.erhverv;
+  const d26=DATA.dso2026, dn=DATA.norlys, dg=DATA.gridopt, dbb=DATA.bb, de=DATA.erhverv, dm=DATA.mes;
   const all26=d26?d26.rows.filter(r=>isSagsnr(r[0])&&!isRowFærdig(r,false)):[];
   const alln=dn?dn.rows.filter(r=>isSagsnr(r[0])&&!isRowFærdig(r,true)):[];
   const allbb=dbb?dbb.rows.filter(r=>(r[2]||'').trim().length>2&&!isRowFærdig(r,true)):[];
   const alle=de?de.rows.filter(r=>isSagsnr(r[0])&&!isRowFærdig(r,true)):[];
+  const allm=dm?dm.rows.filter(r=>isSagsnr(r[0])&&!isRowFærdig(r,true)):[];
   const gridCount=dg?dg.rows.filter(r=>r[0]&&r[0].trim()&&r[0]!=='MEDARBEJDER').length:0;
 
   document.getElementById('cnt-dso2026').textContent=all26.length;
   document.getElementById('cnt-norlys').textContent=alln.length;
   const elBB=document.getElementById('cnt-bb'); if(elBB) elBB.textContent=allbb.length;
   const elE=document.getElementById('cnt-erhverv'); if(elE) elE.textContent=alle.length;
+  const elM=document.getElementById('cnt-mes'); if(elM) elM.textContent=allm.length;
 
   const dsoUdl=all26.filter(r=>r[4]&&r[4].trim()).length;
   const dsoLand=all26.filter(r=>isValidFieldValue(r[8])).length;
@@ -1435,9 +1514,14 @@ function buildDashboard() {
   const erhLand=alle.filter(r=>isValidFieldValue(r[9])).length;
   const erhBlae=alle.filter(r=>isValidFieldValue(r[10])).length;
 
-  const totalAll=all26.length+alln.length+allbb.length+alle.length;
-  const totalLand=dsoLand+norLand+bbLand+erhLand;
-  const totalBlae=dsoBlae+norBlae+bbBlae+erhBlae;
+  // MES stats (same layout as Norlys)
+  const mesUdl=allm.filter(r=>r[5]&&r[5].trim()).length;
+  const mesLand=allm.filter(r=>isValidFieldValue(r[9])).length;
+  const mesBlae=allm.filter(r=>isValidFieldValue(r[10])).length;
+
+  const totalAll=all26.length+alln.length+allbb.length+alle.length+allm.length;
+  const totalLand=dsoLand+norLand+bbLand+erhLand+mesLand;
+  const totalBlae=dsoBlae+norBlae+bbBlae+erhBlae+mesBlae;
 
   function pct(a,b){return b?Math.round(a/b*100):0;}
   function progBar(val,total,color){
@@ -1469,6 +1553,12 @@ function buildDashboard() {
       <div class="stat-value">${alle.length}</div>
       <div class="stat-sub">sager</div>
       ${progBar(erhLand,alle.length,'var(--green)')}
+    </div>
+    <div class="stat-card" style="cursor:pointer" onclick="showPage('mes')">
+      <div class="stat-label">MES</div>
+      <div class="stat-value">${allm.length}</div>
+      <div class="stat-sub">sager</div>
+      ${progBar(mesLand,allm.length,'#f472b6')}
     </div>`;
 
   const mc={};
@@ -1495,11 +1585,12 @@ function buildDashboard() {
         <div class="bar-track"><div class="bar-fill" style="width:${pct(totalBlae,totalAll)}%;background:var(--cyan)">${totalBlae}</div></div>
         <div class="bar-num">${pct(totalBlae,totalAll)}%</div>
       </div>
-      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;text-align:center">
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);gap:8px;text-align:center">
         <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:'JetBrains Mono'">${dsoLand}/${all26.length}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">DSO landmålt</div></div>
         <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:'JetBrains Mono'">${norLand}/${alln.length}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Norlys landmålt</div></div>
         <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:'JetBrains Mono'">${bbLand}/${allbb.length}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">BB landmålt</div></div>
         <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:'JetBrains Mono'">${erhLand}/${alle.length}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Erhverv landmålt</div></div>
+        <div><div style="font-size:18px;font-weight:700;color:#fff;font-family:'JetBrains Mono'">${mesLand}/${allm.length}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">MES landmålt</div></div>
       </div>
     </div>
     <div class="chart-card"><h3>DSO 2026 — pr. måned</h3>
@@ -1536,6 +1627,11 @@ function buildDashboard() {
         <div class="bar-label">Erhverv</div>
         <div class="bar-track"><div class="bar-fill" style="width:${pct(erhBlae,alle.length)}%;background:var(--green)">${erhBlae}</div></div>
         <div class="bar-num">${pct(erhBlae,alle.length)}%</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">MES</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct(mesBlae,allm.length)}%;background:#f472b6">${mesBlae}</div></div>
+        <div class="bar-num">${pct(mesBlae,allm.length)}%</div>
       </div>
     </div>`;
 }
@@ -1595,7 +1691,7 @@ async function loadWeather() {
 async function loadAll() {
   document.getElementById('sync-dot').classList.add('loading');
   document.getElementById('sync-status').textContent='Henter data...';
-  await Promise.all([fetchSheet('dso2026'),fetchSheet('norlys'),fetchSheet('gridopt'),fetchSheet('bb'),fetchSheet('erhverv'),loadDoneStates(),loadKontakter()]);
+  await Promise.all([fetchSheet('dso2026'),fetchSheet('norlys'),fetchSheet('gridopt'),fetchSheet('bb'),fetchSheet('erhverv'),fetchSheet('mes'),loadDoneStates(),loadKontakter()]);
   buildDashboard();
   renderCurrent();
   document.getElementById('sync-dot').classList.remove('loading');
