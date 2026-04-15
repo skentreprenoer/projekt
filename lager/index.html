@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SK Lager – Norlys Materialestyring</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/@zxing/browser@latest/umd/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.1/umd/index.min.js"></script>
 <style>
 :root {
   --bg: #1a1a1a;
@@ -2310,8 +2310,12 @@ async function openCameraScanner() {
         }
       });
     } else {
-      badge.textContent = 'Scanner ikke tilgængelig – prøv at genindlæse siden';
+      // Debug: vis hvad der er tilgængeligt
+      const available = Object.keys(window).filter(k => k.toLowerCase().includes('zxing')).join(', ') || 'ingenting';
+      badge.textContent = 'Scanner bibliotek mangler (fundet: ' + available + ') – genindlæs siden';
       badge.style.color = 'var(--yellow)';
+      console.error('ZXingBrowser ikke fundet. Window keys med zxing:', available);
+      console.log('Alle window keys:', Object.keys(window).slice(0,50));
     }
   } catch (err) {
     badge.textContent = 'Kamera ikke tilgængeligt – ' + err.message;
