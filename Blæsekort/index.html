@@ -216,6 +216,7 @@ body {
   background: var(--bg-card); border-radius: var(--radius);
   box-shadow: var(--shadow-lg); padding: 16px 20px;
   z-index: 600; display: none; min-width: 340px; max-width: 90vw;
+  max-height: 50vh; overflow-y: auto;
   border: 1px solid var(--border);
 }
 .route-panel.visible { display: block; }
@@ -510,7 +511,7 @@ body {
     </svg>
   </div>
   <div><div class="header-title">Minuba Blæst</div></div>
-  <div class="header-subtitle">SØREN KNUDSEN A/S</div>
+  <div class="header-subtitle">SØREN KNUDSEN A/S <span id="syncStatus" style="opacity:0.4;">☁</span></div>
 </div>
 
 <div class="app-container" id="appContainer">
@@ -842,6 +843,9 @@ async function loadData() {
       
       if (!sag && !adr) continue;
       if (stRaw.includes('tenna')) continue;
+      // Deduplicate: skip if same sagsnummer+adresse already exists
+      const dupeKey = `${sag}|${adr}`;
+      if (tasks.some(t => `${t.sagsnummer}|${t.adresse}` === dupeKey)) continue;
       let dl = null;
       if (dlRaw) { const p=dlRaw.split('/'); if (p.length===3) dl=new Date(p[2],p[1]-1,p[0]); }
       const st = stRaw.includes('er bl') ? 'er-blaest' : 'ikke-blaest';
@@ -1039,20 +1043,24 @@ _imgInput.addEventListener('change', (e) => {
   if (!file || !_imgTargetId) return;
   const reader = new FileReader();
   reader.onload = (ev) => {
-    // Resize to max 800px to keep localStorage manageable
+    const fullDataUrl = ev.target.result;
+    // Keep raw original in memory for this session's PDF exports
+    taskImagesHQ[_imgTargetId] = fullDataUrl;
+    
     const img = new Image();
     img.onload = () => {
-      const max = 800;
-      let w = img.width, h = img.height;
-      if (w > max) { h = h * max / w; w = max; }
-      if (h > max) { w = w * max / h; h = max; }
-      const c = document.createElement('canvas'); c.width = w; c.height = h;
-      c.getContext('2d').drawImage(img, 0, 0, w, h);
-      taskImages[_imgTargetId] = c.toDataURL('image/jpeg', 0.7);
-      try { localStorage.setItem('sk_task_images', JSON.stringify(taskImages)); } catch(e) { console.warn('localStorage full'); }
+      // Cloud/PDF quality: 1400px max, JPEG 85% — good for print, storable in cloud
+      const maxCloud = 1400;
+      let cw = img.width, ch = img.height;
+      if (cw > maxCloud) { ch = ch * maxCloud / cw; cw = maxCloud; }
+      if (ch > maxCloud) { cw = cw * maxCloud / ch; ch = maxCloud; }
+      const cc = document.createElement('canvas'); cc.width = cw; cc.height = ch;
+      cc.getContext('2d').drawImage(img, 0, 0, cw, ch);
+      taskImages[_imgTargetId] = cc.toDataURL('image/jpeg', 0.85);
+      cloudSaveImages();
       renderTaskList();
     };
-    img.src = ev.target.result;
+    img.src = fullDataUrl;
   };
   reader.readAsDataURL(file);
   _imgInput.value = '';
@@ -1065,7 +1073,8 @@ function triggerImageUpload(taskId) {
 
 function removeTaskImage(taskId) {
   delete taskImages[taskId];
-  localStorage.setItem('sk_task_images', JSON.stringify(taskImages));
+  delete taskImagesHQ[taskId];
+  cloudSaveImages();
   renderTaskList();
 }
 function switchTab(tab) {
@@ -1079,10 +1088,88 @@ function switchTab(tab) {
 
 // ── ROUTE BUILDER ──
 let buildMode = false;
-let buildStops = []; // array of task objects
+let buildStops = [];
 let savedRoutes = JSON.parse(localStorage.getItem('sk_saved_routes') || '[]');
 let taskImages = JSON.parse(localStorage.getItem('sk_task_images') || '{}');
+let taskImagesHQ = {};
 let activeRouteLineCustom = null;
+
+// ── CLOUD SYNC (JSONBin — fully automatic) ──
+// Uses ONE master bin with a fixed known ID. First PC creates it, ID gets hardcoded.
+// Master bin stores routes + images together — simple, no manual setup needed.
+const JSONBIN_BASE = 'https://api.jsonbin.io/v3/b';
+const JB_KEY = '$2a$10$hXnJVGftchLxBbz8cmCiBOWzjcG0O/SungAl8K7frAweIByRTnF4i';
+
+// Master bin ID — starts empty, gets set on first save, then hardcode it here for all PCs
+let MASTER_BIN_ID = localStorage.getItem('sk_master_bin_id') || '69e1f1c6aaba8821970b7e78';
+
+async function cloudInit() {
+  const ss = document.getElementById('syncStatus');
+  if (ss) ss.textContent = '⟳';
+  
+  if (!MASTER_BIN_ID) {
+    // First time ever: create the master bin
+    try {
+      const r = await fetch(JSONBIN_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Access-Key': JB_KEY, 'X-Bin-Name': 'sk-minuba-master' },
+        body: JSON.stringify({ routes: [], images: {} })
+      });
+      if (r.ok) {
+        const d = await r.json();
+        MASTER_BIN_ID = d.metadata.id;
+        localStorage.setItem('sk_master_bin_id', MASTER_BIN_ID);
+        console.log('☁ Master bin oprettet:', MASTER_BIN_ID);
+        console.log('📋 VIGTIGT: Kopier denne linje ind i koden så alle PCer deler data:');
+        console.log(`let MASTER_BIN_ID = localStorage.getItem('sk_master_bin_id') || '${MASTER_BIN_ID}';`);
+      }
+    } catch(e) { console.warn('Cloud init fail:', e); }
+    if (ss) ss.textContent = MASTER_BIN_ID ? '☁' : '⚠';
+    return;
+  }
+  
+  // Load from existing master bin
+  try {
+    const r = await fetch(`${JSONBIN_BASE}/${MASTER_BIN_ID}/latest`, { headers: { 'X-Access-Key': JB_KEY } });
+    if (r.ok) {
+      const d = await r.json();
+      if (d.record) {
+        if (d.record.routes) savedRoutes = d.record.routes;
+        if (d.record.images) taskImages = d.record.images;
+        console.log(`☁ Loaded: ${savedRoutes.length} ruter, ${Object.keys(taskImages).length} billeder`);
+      }
+    }
+  } catch(e) { console.warn('Cloud load fail:', e); }
+  
+  document.getElementById('routeTabCount').textContent = savedRoutes.length;
+  renderTaskList();
+  if (ss) ss.textContent = '☁';
+}
+
+async function cloudSave() {
+  // Always save locally as fallback
+  localStorage.setItem('sk_saved_routes', JSON.stringify(savedRoutes));
+  localStorage.setItem('sk_task_images', JSON.stringify(taskImages));
+  
+  if (!MASTER_BIN_ID) return;
+  const ss = document.getElementById('syncStatus');
+  if (ss) ss.textContent = '⟳';
+  try {
+    await fetch(`${JSONBIN_BASE}/${MASTER_BIN_ID}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Access-Key': JB_KEY },
+      body: JSON.stringify({ routes: savedRoutes, images: taskImages })
+    });
+    if (ss) ss.textContent = '☁';
+  } catch(e) {
+    console.warn('Cloud save fail:', e);
+    if (ss) ss.textContent = '⚠';
+  }
+}
+
+// Aliases for backwards compatibility
+function cloudSaveRoutes() { cloudSave(); }
+function cloudSaveImages() { cloudSave(); }
 
 function startRouteBuild() {
   buildMode = true;
@@ -1162,7 +1249,7 @@ function confirmSaveRoute() {
     stops: buildStops.map(t => ({ id: t.id, sagsnummer: t.sagsnummer, adresse: t.adresse, lat: t.coords.lat, lng: t.coords.lng, deadlineRaw: t.deadlineRaw }))
   };
   savedRoutes.push(route);
-  localStorage.setItem('sk_saved_routes', JSON.stringify(savedRoutes));
+  cloudSaveRoutes();
   closeRbSave();
   cancelRouteBuild();
   switchTab('routes');
@@ -1222,7 +1309,7 @@ function openSavedRouteInMaps(routeId) {
 
 function deleteSavedRoute(routeId) {
   savedRoutes = savedRoutes.filter(x => x.id !== routeId);
-  localStorage.setItem('sk_saved_routes', JSON.stringify(savedRoutes));
+  cloudSaveRoutes();
   if (activeRouteLineCustom) { map.removeLayer(activeRouteLineCustom); activeRouteLineCustom = null; }
   renderSavedRoutes();
 }
@@ -1242,8 +1329,12 @@ function checkRouteSuggestion() {
     if (cl.length>=2) clusters.push(cl);
   }
   if (clusters.length) {
-    const best=clusters.sort((a,b)=>b.length-a.length)[0];
-    // Sort with nearest-neighbor: start from most urgent, then always pick closest next stop
+    let best=clusters.sort((a,b)=>b.length-a.length)[0];
+    // Limit auto-suggestion to max 8 most urgent stops
+    if (best.length > 8) {
+      best.sort((a,b)=>(a.deadline?a.deadline.getTime():Infinity)-(b.deadline?b.deadline.getTime():Infinity));
+      best = best.slice(0, 8);
+    }
     const ordered = optimizeRoute(best);
     showRoute(ordered);
   } else closeRoute();
@@ -1278,7 +1369,7 @@ function showRoute(tc) {
   for (let i=1;i<tc.length;i++) dists.push(haversine(tc[i-1].coords.lat,tc[i-1].coords.lng,tc[i].coords.lat,tc[i].coords.lng));
   const totalKm=dists.reduce((a,b)=>a+b,0);
   document.getElementById('routeExplanation').innerHTML =
-    `Disse <strong>${tc.length} opgaver</strong> ligger inden for <strong>20 km</strong> af hinanden (ca. ${totalKm.toFixed(0)} km total). Ruten starter ved den mest presserende og tager nærmeste stop næst.`;
+    `<strong>${tc.length} mest presserende</strong> opgaver inden for <strong>20 km</strong> (ca. ${totalKm.toFixed(0)} km). Opret en rute under "Mine Ruter" for alle stop.`;
   let h='';
   tc.forEach((t,i) => {
     const d=daysUntil(t.deadline), dc=deadlineClass(d), dl=deadlineLabel(d);
@@ -1365,14 +1456,6 @@ function exportRoutePDF(routeId) {
         </div>
         ${distToNext}
         
-        ${taskImages[s.id] ? `
-        <div style="margin-top:14px;">
-          <div style="font-size:12px;font-weight:700;margin-bottom:6px;">GridOptimizer</div>
-          <div style="border-radius:8px;overflow:hidden;border:1px solid #E2DDD7;">
-            <img src="${taskImages[s.id]}" style="width:100%;display:block;" />
-          </div>
-        </div>` : ''}
-        
         <div style="margin-top:16px;">
           <div style="font-size:12px;font-weight:700;margin-bottom:8px;">Noter</div>
           <div style="border-bottom:1px solid #E2DDD7;height:24px;"></div>
@@ -1383,9 +1466,27 @@ function exportRoutePDF(routeId) {
         
         <div style="position:absolute;bottom:12mm;left:16mm;right:16mm;display:flex;justify-content:space-between;font-size:9px;color:#6B6560;border-top:1px solid #9B1B1B;padding-top:6px;">
           <span>Søren Knudsen A/S — Minuba Blæst</span>
-          <span>Side ${i+2} / ${r.stops.length+1}</span>
+          <span>Stop ${i+1}: ${s.adresse}</span>
         </div>
-      </div>`;
+      </div>
+      ${(taskImagesHQ[s.id] || taskImages[s.id]) ? `
+      <div class="page" style="padding:12mm;display:flex;flex-direction:column;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid #9B1B1B;">
+          <div style="width:28px;height:28px;border-radius:50%;background:#9B1B1B;color:white;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div>
+          <div>
+            <div style="font-size:14px;font-weight:700;">${s.adresse}</div>
+            <div style="font-size:10px;color:#6B6560;">GridOptimizer · Sagsnr: ${s.sagsnummer||'-'}</div>
+          </div>
+          <div style="margin-left:auto;font-size:10px;color:#6B6560;">${r.name}</div>
+        </div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+          <img src="${taskImagesHQ[s.id] || taskImages[s.id]}" style="max-width:100%;max-height:calc(297mm - 50mm);object-fit:contain;border-radius:4px;" />
+        </div>
+        <div style="position:absolute;bottom:12mm;left:12mm;right:12mm;display:flex;justify-content:space-between;font-size:9px;color:#6B6560;border-top:1px solid #9B1B1B;padding-top:6px;">
+          <span>Søren Knudsen A/S — Minuba Blæst</span>
+          <span>GridOptimizer — ${s.adresse}</span>
+        </div>
+      </div>` : ''}`;
   });
   
   const mapsUrl = `https://www.google.com/maps/dir/${r.stops.map(s=>`${s.lat},${s.lng}`).join('/')}`;
@@ -1396,7 +1497,7 @@ function exportRoutePDF(routeId) {
 @page { size: A4; margin: 0; }
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif; color: #1A1A1A; background: white; }
-.page { width:210mm; min-height:297mm; padding:18mm 16mm 14mm; page-break-after:always; position:relative; }
+.page { width:210mm; height:297mm; padding:18mm 16mm 20mm; page-break-after:always; position:relative; overflow:hidden; }
 .page:last-child { page-break-after:auto; }
 @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } .no-print { display:none!important; } }
 .print-bar { position:fixed;top:0;left:0;right:0;background:#2D2D2D;padding:12px 20px;display:flex;align-items:center;gap:12px;z-index:999; }
@@ -1453,7 +1554,7 @@ function initMap() {
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:19}).addTo(map);
   markerGroup=L.layerGroup().addTo(map);
 }
-document.addEventListener('DOMContentLoaded',()=>{ initMap(); loadData(); setInterval(loadData,120000); document.getElementById('routeTabCount').textContent = savedRoutes.length; });
+document.addEventListener('DOMContentLoaded',()=>{ initMap(); loadData(); cloudInit(); setInterval(loadData,120000); document.getElementById('routeTabCount').textContent = savedRoutes.length; });
 </script>
 </body>
 </html>
