@@ -1470,21 +1470,15 @@ function exportRoutePDF(routeId) {
         </div>
       </div>
       ${(taskImagesHQ[s.id] || taskImages[s.id]) ? `
-      <div class="page" style="padding:12mm;display:flex;flex-direction:column;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid #9B1B1B;">
-          <div style="width:28px;height:28px;border-radius:50%;background:#9B1B1B;color:white;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div>
-          <div>
-            <div style="font-size:14px;font-weight:700;">${s.adresse}</div>
-            <div style="font-size:10px;color:#6B6560;">GridOptimizer · Sagsnr: ${s.sagsnummer||'-'}</div>
-          </div>
-          <div style="margin-left:auto;font-size:10px;color:#6B6560;">${r.name}</div>
+      <div class="page-ls">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding-bottom:6px;border-bottom:1.5px solid #9B1B1B;">
+          <div style="width:22px;height:22px;border-radius:50%;background:#9B1B1B;color:white;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div>
+          <div style="font-size:11px;font-weight:700;">${s.adresse}</div>
+          <div style="font-size:9px;color:#6B6560;">Sagsnr: ${s.sagsnummer||'-'}</div>
+          <div style="font-size:9px;color:#6B6560;margin-left:auto;">GridOptimizer · ${r.name}</div>
         </div>
-        <div style="flex:1;display:flex;align-items:center;justify-content:center;">
-          <img src="${taskImagesHQ[s.id] || taskImages[s.id]}" style="max-width:100%;max-height:calc(297mm - 50mm);object-fit:contain;border-radius:4px;" />
-        </div>
-        <div style="position:absolute;bottom:12mm;left:12mm;right:12mm;display:flex;justify-content:space-between;font-size:9px;color:#6B6560;border-top:1px solid #9B1B1B;padding-top:6px;">
-          <span>Søren Knudsen A/S — Minuba Blæst</span>
-          <span>GridOptimizer — ${s.adresse}</span>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden;">
+          <img src="${taskImagesHQ[s.id] || taskImages[s.id]}" style="max-width:100%;max-height:100%;object-fit:contain;" />
         </div>
       </div>` : ''}`;
   });
@@ -1495,51 +1489,66 @@ function exportRoutePDF(routeId) {
 <title>Rute: ${r.name}</title>
 <style>
 @page { size: A4; margin: 0; }
+@page landscape { size: A4 landscape; margin: 0; }
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif; color: #1A1A1A; background: white; }
-.page { width:210mm; height:297mm; padding:18mm 16mm 20mm; page-break-after:always; position:relative; overflow:hidden; }
-.page:last-child { page-break-after:auto; }
-@media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } .no-print { display:none!important; } }
+.page { width:210mm; min-height:297mm; padding:16mm 16mm 18mm; page-break-after:always; position:relative; }
+.page-ls { page:landscape; width:297mm; height:210mm; padding:8mm 10mm; page-break-after:always; display:flex; flex-direction:column; }
+@media print {
+  body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .no-print { display:none!important; }
+  .page-ls { size: landscape; }
+}
 .print-bar { position:fixed;top:0;left:0;right:0;background:#2D2D2D;padding:12px 20px;display:flex;align-items:center;gap:12px;z-index:999; }
 .print-bar button { padding:8px 20px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit; }
 .print-bar .bp { background:#9B1B1B;color:white; }
 .print-bar .bc { background:#3D3D3D;color:white; }
 .print-bar span { color:rgba(255,255,255,0.6);font-size:12px;margin-left:auto; }
+.stop-row { display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #E8E4E0;font-size:12px; }
+.stop-num { width:22px;height:22px;border-radius:50%;background:#9B1B1B;color:white;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.stop-addr { flex:1;font-weight:600; }
+.stop-dl { font-size:10px;color:#6B6560;text-align:right; }
+.stop-dist { font-size:10px;color:#6B6560;padding:1px 0 1px 32px; }
 </style></head><body>
 <div class="print-bar no-print">
   <button class="bp" onclick="window.print()">🖨️ Print / Gem som PDF</button>
   <button class="bc" onclick="window.close()">Luk</button>
-  <span>Vælg "Gem som PDF" i print-dialogen</span>
+  <span>Tip: Vælg "Gem som PDF" i print-dialogen · Sæt til A4 · Ingen marginer</span>
 </div>
-<div class="page" style="padding-top:40mm;">
-  <div style="background:#2D2D2D;padding:16px 24px;border-radius:10px;display:flex;align-items:center;gap:14px;margin-bottom:32px;">
-    <div style="width:40px;height:40px;background:#9B1B1B;border-radius:8px;display:flex;align-items:center;justify-content:center;">
-      <div style="width:22px;"><div style="height:3px;background:white;border-radius:1px;margin-bottom:2.5px;width:100%;"></div><div style="height:3px;background:white;border-radius:1px;margin-bottom:2.5px;width:60%;"></div><div style="height:3px;background:white;border-radius:1px;margin-bottom:2.5px;width:80%;"></div><div style="height:3px;background:white;border-radius:1px;width:50%;"></div></div>
+
+<!-- FORSIDE -->
+<div class="page" style="padding-top:30mm;">
+  <div style="background:#2D2D2D;padding:14px 20px;border-radius:8px;display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+    <div style="width:36px;height:36px;background:#9B1B1B;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+      <div style="width:20px;"><div style="height:2.5px;background:white;border-radius:1px;margin-bottom:2px;width:100%;"></div><div style="height:2.5px;background:white;border-radius:1px;margin-bottom:2px;width:60%;"></div><div style="height:2.5px;background:white;border-radius:1px;margin-bottom:2px;width:80%;"></div><div style="height:2.5px;background:white;border-radius:1px;width:50%;"></div></div>
     </div>
-    <div style="color:rgba(255,255,255,0.5);font-size:12px;">SØREN KNUDSEN A/S</div>
+    <div style="color:rgba(255,255,255,0.5);font-size:11px;letter-spacing:0.05em;">SØREN KNUDSEN A/S</div>
   </div>
-  <h1 style="font-size:32px;font-weight:800;letter-spacing:-0.03em;margin-bottom:8px;">${r.name}</h1>
-  <div style="font-size:14px;color:#6B6560;margin-bottom:28px;">Ruteplan · ${r.created} · ${r.stops.length} stop · ca. ${totalDist.toFixed(1)} km</div>
-  <div style="display:flex;gap:12px;margin-bottom:28px;">
-    <div style="background:#F5F2EE;padding:12px 18px;border-radius:8px;"><div style="font-size:22px;font-weight:800;color:#9B1B1B;">${r.stops.length}</div><div style="font-size:11px;color:#6B6560;">Stop</div></div>
-    <div style="background:#F5F2EE;padding:12px 18px;border-radius:8px;"><div style="font-size:22px;font-weight:800;color:#9B1B1B;">${totalDist.toFixed(1)}</div><div style="font-size:11px;color:#6B6560;">km total</div></div>
+  
+  <h1 style="font-size:28px;font-weight:800;letter-spacing:-0.03em;margin-bottom:4px;">${r.name}</h1>
+  <div style="font-size:13px;color:#6B6560;margin-bottom:20px;">Ruteplan · ${r.created} · ${r.stops.length} stop · ca. ${totalDist.toFixed(1)} km</div>
+  
+  <div style="display:flex;gap:10px;margin-bottom:20px;">
+    <div style="background:#F5F2EE;padding:10px 16px;border-radius:6px;"><div style="font-size:20px;font-weight:800;color:#9B1B1B;">${r.stops.length}</div><div style="font-size:10px;color:#6B6560;">Stop</div></div>
+    <div style="background:#F5F2EE;padding:10px 16px;border-radius:6px;"><div style="font-size:20px;font-weight:800;color:#9B1B1B;">${totalDist.toFixed(1)}</div><div style="font-size:10px;color:#6B6560;">km total</div></div>
+    <div style="background:#F5F2EE;padding:10px 16px;border-radius:6px;"><div style="font-size:20px;font-weight:800;color:#9B1B1B;">${r.created}</div><div style="font-size:10px;color:#6B6560;">Dato</div></div>
   </div>
+
   ${r.stops.map((s,i) => {
-    const dl = i < r.stops.length-1 ? `<div style="font-size:11px;color:#6B6560;padding:2px 0 2px 34px;">↓ ${dists[i].toFixed(1)} km</div>` : '';
-    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #E2DDD7;font-size:13px;">
-      <span style="width:24px;height:24px;border-radius:50%;background:#9B1B1B;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</span>
-      <span style="flex:1;font-weight:600;">${s.adresse}</span>
-      <span style="font-size:11px;color:#6B6560;">${s.deadlineRaw||''}</span>
-    </div>${dl}`;
+    const dl = i < r.stops.length-1 ? `<div class="stop-dist">↓ ${dists[i].toFixed(1)} km</div>` : '';
+    return `<div class="stop-row"><span class="stop-num">${i+1}</span><span class="stop-addr">${s.adresse}</span><span class="stop-dl">${s.deadlineRaw||''}</span></div>${dl}`;
   }).join('')}
-  <a href="${mapsUrl}" target="_blank" style="display:block;background:#9B1B1B;color:white;text-align:center;padding:12px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;margin-top:16px;">Åbn fuld rute i Google Maps →</a>
-  <div style="margin-top:20px;border-radius:10px;overflow:hidden;border:1px solid #E2DDD7;">
-    <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=${Math.min(...lngs)-0.04},${Math.min(...lats)-0.02},${Math.max(...lngs)+0.04},${Math.max(...lats)+0.02}&layer=mapnik" style="width:100%;height:200px;border:none;"></iframe>
+  
+  <div style="margin-top:14px;padding:10px 16px;background:#F5F2EE;border-radius:6px;font-size:11px;color:#6B6560;">
+    Google Maps: <a href="${mapsUrl}" target="_blank" style="color:#9B1B1B;word-break:break-all;">${mapsUrl}</a>
   </div>
-  <div style="position:absolute;bottom:12mm;left:16mm;right:16mm;display:flex;justify-content:space-between;font-size:9px;color:#6B6560;border-top:1px solid #9B1B1B;padding-top:6px;">
-    <span>Søren Knudsen A/S — Minuba Blæst</span><span>Side 1 / ${r.stops.length+1}</span>
+  
+  <div style="position:absolute;bottom:14mm;left:16mm;right:16mm;display:flex;justify-content:space-between;font-size:8px;color:#6B6560;border-top:1px solid #9B1B1B;padding-top:5px;">
+    <span>Søren Knudsen A/S — Minuba Blæst</span><span>${r.name} · Forside</span>
   </div>
 </div>
+
+<!-- STOP-SIDER -->
 ${stopPages}
 </body></html>`;
   
