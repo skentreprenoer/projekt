@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>SK Timestamp Kamera</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; background: #000; font-family: -apple-system, system-ui, sans-serif; color: #fff; }
+
+  .app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+
+  .topbar {
+    background: #111; padding: 10px 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid #222;
+  }
+  .topbar h1 { font-size: 15px; font-weight: 600; letter-spacing: .3px; }
+  .topbar .count { font-size: 12px; color: #888; }
+
+  .camera-wrap {
+    flex: 1; position: relative; background: #000;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  #video, #canvas-preview {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  #canvas-preview { display: none; }
+
+  /* Lille diskret overlay nederst venstre */
+  .stamp-overlay {
+    position: absolute; bottom: 12px; left: 12px;
+    background: rgba(0,0,0,0.55);
+    padding: 6px 9px; border-radius: 4px;
+    font-size: 10.5px; line-height: 1.35;
+    font-family: ui-monospace, Menlo, monospace;
+    backdrop-filter: blur(4px);
+    max-width: 70%;
+    pointer-events: none;
+  }
+  .stamp-overlay .line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stamp-overlay .accent { color: #ffb84d; }
+
+  .controls {
+    background: #111; padding: 14px;
+    display: flex; align-items: center; justify-content: space-around;
+    gap: 12px; border-top: 1px solid #222;
+  }
+  .shutter {
+    width: 68px; height: 68px; border-radius: 50%;
+    background: #fff; border: 4px solid #333;
+    cursor: pointer; transition: transform 0.1s;
+    box-shadow: 0 0 0 3px #fff inset, 0 0 0 5px #111 inset;
+  }
+  .shutter:active { transform: scale(0.93); }
+
+  .side-btn {
+    background: #1f1f1f; border: 1px solid #2e2e2e; color: #fff;
+    padding: 12px 14px; border-radius: 10px; font-size: 13px;
+    cursor: pointer; flex: 1; max-width: 110px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .side-btn .icon { font-size: 18px; }
+  .side-btn:disabled { opacity: 0.4; }
+
+  /* Galleri-strip */
+  .gallery {
+    background: #0a0a0a; padding: 8px 10px;
+    display: flex; gap: 6px; overflow-x: auto;
+    min-height: 62px; max-height: 62px;
+  }
+  .gallery:empty::before {
+    content: "Ingen billeder endnu — tryk på udløseren";
+    color: #555; font-size: 12px; align-self: center;
+    margin: 0 auto;
+  }
+  .thumb {
+    position: relative; flex: 0 0 auto;
+    width: 46px; height: 46px; border-radius: 4px;
+    overflow: hidden; border: 1px solid #333;
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .thumb .x {
+    position: absolute; top: -2px; right: -2px;
+    background: #c33; color: #fff; border: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    font-size: 11px; line-height: 1; cursor: pointer;
+  }
+
+  /* Send-knap */
+  .send-bar {
+    background: #111; padding: 10px 14px 14px;
+    border-top: 1px solid #222;
+  }
+  .send-btn {
+    width: 100%; padding: 14px;
+    background: linear-gradient(180deg, #ff9933, #e67300);
+    color: #fff; border: none; border-radius: 10px;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+  }
+  .send-btn:disabled { background: #333; color: #777; }
+
+  /* Modal */
+  .modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    display: none; align-items: center; justify-content: center;
+    padding: 20px; z-index: 100;
+  }
+  .modal.show { display: flex; }
+  .modal-card {
+    background: #1a1a1a; border-radius: 12px;
+    padding: 20px; max-width: 380px; width: 100%;
+    border: 1px solid #2a2a2a;
+  }
+  .modal-card h2 { font-size: 16px; margin-bottom: 12px; }
+  .modal-card p { font-size: 13px; color: #bbb; line-height: 1.5; margin-bottom: 14px; }
+  .modal-card .box {
+    background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 6px;
+    padding: 10px; font-family: ui-monospace, monospace; font-size: 12px;
+    margin-bottom: 8px; color: #ddd;
+  }
+  .modal-card .box .label { color: #888; font-size: 10px; text-transform: uppercase; margin-bottom: 2px; }
+  .modal-card .actions { display: flex; gap: 8px; margin-top: 14px; }
+  .modal-card button {
+    flex: 1; padding: 11px; border-radius: 8px; border: none;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .btn-cancel { background: #333; color: #fff; }
+  .btn-confirm { background: #ff9933; color: #fff; }
+
+  .toast {
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+    background: #1a1a1a; border: 1px solid #2a2a2a;
+    padding: 10px 16px; border-radius: 8px; font-size: 13px;
+    opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="topbar">
+    <h1>📸 SK Timestamp Kamera</h1>
+    <span class="count" id="count">0 billeder</span>
+  </div>
+
+  <div class="camera-wrap">
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="canvas-preview"></canvas>
+
+    <div class="stamp-overlay" id="overlay">
+      <div class="line accent" id="stamp-addr">Henter adresse…</div>
+      <div class="line" id="stamp-date">—</div>
+      <div class="line" id="stamp-coords">—</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="side-btn" id="flip-btn">
+      <span class="icon">🔄</span>
+      <span>Skift</span>
+    </button>
+    <div class="shutter" id="shutter"></div>
+    <button class="side-btn" id="refresh-btn">
+      <span class="icon">📍</span>
+      <span>Position</span>
+    </button>
+  </div>
+
+  <div class="gallery" id="gallery"></div>
+
+  <div class="send-bar">
+    <button class="send-btn" id="send-btn" disabled>Send til postkasser</button>
+  </div>
+</div>
+
+<!-- Send-modal -->
+<div class="modal" id="modal">
+  <div class="modal-card">
+    <h2>Bekræft afsendelse</h2>
+    <p>Der sendes <b><span id="num-photos">0</span> billeder</b> til to faste modtagere:</p>
+
+    <div class="box">
+      <div class="label">Sæt 1 — UDEN klokkeslæt</div>
+      <div>arkiv@sk-entreprenoer.dk</div>
+    </div>
+    <div class="box">
+      <div class="label">Sæt 2 — MED klokkeslæt</div>
+      <div>drift@sk-entreprenoer.dk</div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-cancel" id="cancel-btn">Annullér</button>
+      <button class="btn-confirm" id="confirm-btn">Send nu</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<canvas id="capture-canvas" style="display:none;"></canvas>
+
+<script>
+// ====== KONFIGURATION — ret postkasserne her ======
+const POSTKASSE_UDEN_KL = "arkiv@sk-entreprenoer.dk";
+const POSTKASSE_MED_KL  = "drift@sk-entreprenoer.dk";
+// ===================================================
+
+const video = document.getElementById('video');
+const captureCanvas = document.getElementById('capture-canvas');
+const overlay = document.getElementById('overlay');
+const stampAddr = document.getElementById('stamp-addr');
+const stampDate = document.getElementById('stamp-date');
+const stampCoords = document.getElementById('stamp-coords');
+const gallery = document.getElementById('gallery');
+const countEl = document.getElementById('count');
+const sendBtn = document.getElementById('send-btn');
+const modal = document.getElementById('modal');
+
+let photos = []; // {dataUrl, addr, date, coords, time}
+let currentStream = null;
+let facingMode = "environment";
+let lastPosition = null;
+let lastAddress = "Adresse ikke fundet";
+
+// ---- Kamera ----
+async function startCamera() {
+  if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+  try {
+    currentStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: facingMode },
+      audio: false
+    });
+    video.srcObject = currentStream;
+  } catch (e) {
+    toast("Kan ikke åbne kamera: " + e.message);
+  }
+}
+
+document.getElementById('flip-btn').onclick = () => {
+  facingMode = facingMode === "environment" ? "user" : "environment";
+  startCamera();
+};
+
+// ---- Geolocation + DAWA reverse geocoding ----
+async function refreshLocation() {
+  if (!navigator.geolocation) {
+    stampAddr.textContent = "Geolokation ikke understøttet";
+    return;
+  }
+  stampAddr.textContent = "Henter position…";
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    lastPosition = pos.coords;
+    const lat = pos.coords.latitude.toFixed(6);
+    const lon = pos.coords.longitude.toFixed(6);
+    stampCoords.textContent = `${lat}, ${lon}`;
+
+    // DAWA reverse geocoding (Danmark)
+    try {
+      const r = await fetch(`https://api.dataforsyningen.dk/adgangsadresser/reverse?x=${pos.coords.longitude}&y=${pos.coords.latitude}&struktur=mini`);
+      if (r.ok) {
+        const a = await r.json();
+        lastAddress = `${a.vejnavn || ''} ${a.husnr || ''}, ${a.postnr || ''} ${a.postnrnavn || ''}`.trim();
+        stampAddr.textContent = lastAddress;
+      } else {
+        stampAddr.textContent = "Adresse ikke fundet";
+      }
+    } catch (e) {
+      stampAddr.textContent = "Adresse ikke fundet";
+    }
+  }, (err) => {
+    stampAddr.textContent = "Position afvist";
+    stampCoords.textContent = "—";
+  }, { enableHighAccuracy: true, timeout: 10000 });
+}
+
+document.getElementById('refresh-btn').onclick = refreshLocation;
+
+// ---- Dato (uden klokkeslæt) ----
+function formatDate(d = new Date()) {
+  return d.toLocaleDateString('da-DK', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+function formatTime(d = new Date()) {
+  return d.toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit' });
+}
+function updateDateDisplay() {
+  stampDate.textContent = formatDate();
+}
+updateDateDisplay();
+setInterval(updateDateDisplay, 60000);
+
+// ---- Tag billede ----
+document.getElementById('shutter').onclick = () => {
+  const w = video.videoWidth;
+  const h = video.videoHeight;
+  if (!w) { toast("Kamera ikke klar"); return; }
+
+  captureCanvas.width = w;
+  captureCanvas.height = h;
+  const ctx = captureCanvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, w, h);
+
+  // Tegn diskret stempel nederst venstre
+  const padding = Math.max(12, w * 0.012);
+  const fontSize = Math.max(14, w * 0.018);
+  ctx.font = `${fontSize}px ui-monospace, Menlo, monospace`;
+  const lines = [
+    lastAddress,
+    formatDate(),
+    lastPosition ? `${lastPosition.latitude.toFixed(6)}, ${lastPosition.longitude.toFixed(6)}` : "—"
+  ];
+  // Mål bredeste linje
+  let maxW = 0;
+  lines.forEach(l => { const m = ctx.measureText(l).width; if (m > maxW) maxW = m; });
+  const boxH = lines.length * (fontSize * 1.35) + padding;
+  const boxW = maxW + padding * 1.5;
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.fillRect(padding, h - boxH - padding, boxW, boxH);
+  ctx.fillStyle = '#ffb84d';
+  ctx.fillText(lines[0], padding + padding * 0.5, h - boxH - padding + fontSize + 2);
+  ctx.fillStyle = '#fff';
+  ctx.fillText(lines[1], padding + padding * 0.5, h - boxH - padding + fontSize * 2.35 + 2);
+  ctx.fillText(lines[2], padding + padding * 0.5, h - boxH - padding + fontSize * 3.7 + 2);
+
+  const dataUrl = captureCanvas.toDataURL('image/jpeg', 0.85);
+  const now = new Date();
+  photos.push({
+    dataUrl,
+    addr: lastAddress,
+    date: formatDate(now),
+    time: formatTime(now),
+    coords: lastPosition ? `${lastPosition.latitude.toFixed(6)}, ${lastPosition.longitude.toFixed(6)}` : "—"
+  });
+
+  renderGallery();
+
+  // Lille blink
+  video.style.opacity = 0.4;
+  setTimeout(() => video.style.opacity = 1, 90);
+};
+
+function renderGallery() {
+  gallery.innerHTML = '';
+  photos.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'thumb';
+    div.innerHTML = `<img src="${p.dataUrl}"><button class="x" data-i="${i}">×</button>`;
+    gallery.appendChild(div);
+  });
+  gallery.querySelectorAll('.x').forEach(b => {
+    b.onclick = (e) => {
+      const i = parseInt(e.target.dataset.i);
+      photos.splice(i, 1);
+      renderGallery();
+    };
+  });
+  countEl.textContent = `${photos.length} billede${photos.length === 1 ? '' : 'r'}`;
+  sendBtn.disabled = photos.length === 0;
+}
+
+// ---- Send ----
+sendBtn.onclick = () => {
+  document.getElementById('num-photos').textContent = photos.length;
+  modal.classList.add('show');
+};
+document.getElementById('cancel-btn').onclick = () => modal.classList.remove('show');
+
+document.getElementById('confirm-btn').onclick = async () => {
+  modal.classList.remove('show');
+  toast("Forbereder afsendelse…");
+
+  // Sæt 1: uden klokkeslæt
+  const body1 = photos.map((p, i) =>
+    `Billede ${i+1}:\n` +
+    `  Adresse: ${p.addr}\n` +
+    `  Dato: ${p.date}\n` +
+    `  Koordinater: ${p.coords}\n`
+  ).join('\n');
+
+  // Sæt 2: med klokkeslæt
+  const body2 = photos.map((p, i) =>
+    `Billede ${i+1}:\n` +
+    `  Adresse: ${p.addr}\n` +
+    `  Dato: ${p.date} kl. ${p.time}\n` +
+    `  Koordinater: ${p.coords}\n`
+  ).join('\n');
+
+  const subject = `Registrering ${photos[0].date} — ${photos[0].addr}`;
+
+  // I en rigtig app sendes filerne via et backend-endpoint / Apps Script.
+  // Her åbnes mailto med metadata-info og selve billederne er i overlay på JPG.
+  // Bemærk: mailto kan ikke vedhæfte filer — i produktion: POST til en Apps Script
+  // der videresender begge sæt med vedhæftede billeder.
+
+  const mail1 = `mailto:${POSTKASSE_UDEN_KL}?subject=${encodeURIComponent('[UDEN KL] ' + subject)}&body=${encodeURIComponent(body1)}`;
+  const mail2 = `mailto:${POSTKASSE_MED_KL}?subject=${encodeURIComponent('[MED KL] ' + subject)}&body=${encodeURIComponent(body2)}`;
+
+  window.location.href = mail1;
+  setTimeout(() => { window.open(mail2, '_blank'); }, 1200);
+
+  toast("Mails åbnet — billeder skal vedhæftes manuelt i prototypen");
+};
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ---- Init ----
+startCamera();
+refreshLocation();
+</script>
+</body>
+</html>
