@@ -1,0 +1,1 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,76966,e=>{"use strict";let r=e=>e.normalize("NFKD").replace(/[^\w.\- ]+/g,"_").replace(/\s+/g,"_").slice(0,100);e.s(["STORAGE_BUCKET",0,"fiberstyring","safeName",0,r,"sourceKey",0,e=>`kilder/${r(e)}`])}]);
