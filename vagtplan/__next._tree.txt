@@ -1,4 +1,4 @@
 :HL["/projekt/vagtplan/_next/static/chunks/2d15umuqbkzzj.css","style"]
 :HC["/",""]
 1:[["children",{"s":"__PAGE__","h":160}]]
-0:{"b":"o2ftQQc2h2Eqg5QLBwUiK","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
+0:{"b":"aAEWt2qBbLG1aib64fJ5Y","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
