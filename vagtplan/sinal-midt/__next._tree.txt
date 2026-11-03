@@ -1,5 +1,5 @@
-:HL["/projekt/vagtplan/_next/static/chunks/2cz92_kmzcffb.css","style"]
+:HL["/projekt/vagtplan/_next/static/chunks/25wagf_j_zdcq.css","style"]
 :HC["/",""]
 2:[["children",{"s":"__PAGE__","h":160}]]
 1:[["children",{"s":"sinal-midt","h":96,"c":"$Q2"}]]
-0:{"b":"e-ejnilmprCOK2q5MyEb4","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
+0:{"b":"FjRFl084BU_sGb3llhE1t","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
