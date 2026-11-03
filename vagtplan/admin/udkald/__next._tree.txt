@@ -1,7 +1,7 @@
-:HL["/projekt/vagtplan/_next/static/chunks/2d15umuqbkzzj.css","style"]
+:HL["/projekt/vagtplan/_next/static/chunks/2cz92_kmzcffb.css","style"]
 :HC["/",""]
 4:[["children",{"s":"__PAGE__","h":160}]]
 3:[["children",{"s":"udkald","h":96,"c":"$Q4"}]]
 2:[["children",{"s":"(panel)","h":96,"c":"$Q3"}]]
 1:[["children",{"s":"admin","h":96,"c":"$Q2"}]]
-0:{"b":"aAEWt2qBbLG1aib64fJ5Y","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
+0:{"b":"e-ejnilmprCOK2q5MyEb4","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
